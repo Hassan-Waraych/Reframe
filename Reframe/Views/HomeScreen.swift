@@ -86,6 +86,7 @@ struct HomeScreen: View {
                                 RoundedRectangle(cornerRadius: 12)
                                     .stroke(themeManager.colors.border, lineWidth: 1)
                             )
+                            .scrollContentBackground(.hidden)
                     }
                     
                     Button(action: {
@@ -108,16 +109,19 @@ struct HomeScreen: View {
                         .padding(.vertical, 16)
                         .background(
                             LinearGradient(
-                                gradient: Gradient(colors: [
+                                gradient: Gradient(colors: selectedOption == "Reframe" ? [
                                     themeManager.colors.primary,
                                     themeManager.colors.primaryDark
+                                ] : [
+                                    themeManager.colors.secondary,
+                                    Color(hex: "7B4B8E")
                                 ]),
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
                         )
                         .cornerRadius(12)
-                        .shadow(color: themeManager.colors.primary.opacity(0.3), radius: 8, x: 0, y: 4)
+                        .shadow(color: (selectedOption == "Reframe" ? themeManager.colors.primary : themeManager.colors.secondary).opacity(0.3), radius: 8, x: 0, y: 4)
                     }
                     .disabled(inputText.isEmpty)
                     .opacity(inputText.isEmpty ? 0.6 : 1)

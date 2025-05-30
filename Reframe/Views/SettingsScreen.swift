@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsScreen: View {
     @EnvironmentObject var themeManager: ThemeManager
     @Binding var selectedTab: Int
+    @Environment(\.dismiss) private var dismiss
     @State private var showDevSettings = false
     @State private var selectedSection: String? = nil
     
@@ -12,7 +13,11 @@ struct SettingsScreen: View {
                 // Header
                 HStack {
                     Button(action: {
-                        selectedTab = 0
+                        if selectedTab == 3 {
+                            selectedTab = 0
+                        } else {
+                            dismiss()
+                        }
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 24, weight: .semibold))

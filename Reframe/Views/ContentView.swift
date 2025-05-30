@@ -44,6 +44,11 @@ struct ContentView: View {
         }
         .accentColor(themeManager.colors.primary)
         .environmentObject(themeManager)
+        .onAppear {
+            UITabBar.appearance().unselectedItemTintColor = UIColor(themeManager.colors.textLight.opacity(0.7))
+            UITabBar.appearance().backgroundColor = .clear
+            UITabBar.appearance().isTranslucent = true
+        }
     }
 }
 
