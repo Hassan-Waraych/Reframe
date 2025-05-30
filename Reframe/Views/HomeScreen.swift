@@ -16,158 +16,145 @@ struct HomeScreen: View {
     ]
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // Header
+        VStack(spacing: 24) {
+            // Header with greeting
+            Text(greeting())
+                .font(.custom("Quicksand-Bold", size: 32))
+                .foregroundColor(themeManager.colors.text)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal)
+            
+            // Quote Card with enhanced animation
+            QuoteCard(quote: currentQuote, isAnimating: $isAnimating)
+                .padding(.horizontal)
+                .transition(.scale.combined(with: .opacity))
+            
+            // Option Buttons with enhanced styling
+            HStack(spacing: 16) {
+                OptionButton(
+                    title: "Reframe",
+                    icon: "arrow.triangle.2.circlepath",
+                    isSelected: selectedOption == "Reframe",
+                    action: { selectOption("Reframe") }
+                )
+                
+                OptionButton(
+                    title: "Reflect",
+                    icon: "book.fill",
+                    isSelected: selectedOption == "Reflect",
+                    action: { selectOption("Reflect") }
+                )
+            }
+            .padding(.horizontal)
+            
+            // Input Section with enhanced styling
+            VStack(alignment: .leading, spacing: 12) {
+                Text("What's on your mind?")
+                    .font(.custom("Quicksand-SemiBold", size: 20))
+                    .foregroundColor(themeManager.colors.text)
+                
+                ZStack(alignment: .topLeading) {
+                    if inputText.isEmpty {
+                        Text("Type your thoughts here...")
+                            .font(.custom("Nunito-Regular", size: 16))
+                            .foregroundColor(themeManager.colors.textLight)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                    }
+                    
+                    TextEditor(text: $inputText)
+                        .font(.custom("Nunito-Regular", size: 16))
+                        .foregroundColor(themeManager.colors.text)
+                        .frame(height: 100)
+                        .padding(4)
+                        .background(themeManager.colors.surface)
+                        .cornerRadius(16)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(themeManager.colors.border, lineWidth: 1)
+                        )
+                        .scrollContentBackground(.hidden)
+                }
+                
+                Button(action: {
+                    withAnimation(.spring()) {
+                        showQuote = true
+                        currentQuote = quotes.randomElement() ?? quotes[0]
+                        inputText = ""
+                    }
+                }) {
+                    HStack {
+                        Text("Submit")
+                            .font(.custom("Nunito-SemiBold", size: 18))
+                        
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 18, weight: .semibold))
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        LinearGradient(
+                            gradient: Gradient(colors: selectedOption == "Reframe" ? [
+                                themeManager.colors.primary,
+                                themeManager.colors.primaryDark
+                            ] : [
+                                themeManager.colors.secondary,
+                                Color(hex: "7B4B8E")
+                            ]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(16)
+                    .shadow(color: (selectedOption == "Reframe" ? themeManager.colors.primary : themeManager.colors.secondary).opacity(0.3), radius: 12, x: 0, y: 6)
+                }
+                .disabled(inputText.isEmpty)
+                .opacity(inputText.isEmpty ? 0.6 : 1)
+            }
+            .padding(.horizontal)
+            
+            // Progress Section with enhanced styling
+            VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text("Reframe")
-                        .font(.custom("Quicksand-Bold", size: 28))
+                    Text("Reflections Used")
+                        .font(.custom("Quicksand-SemiBold", size: 16))
                         .foregroundColor(themeManager.colors.text)
                     
                     Spacer()
                     
-                    NavigationLink(destination: SettingsScreen(selectedTab: $selectedTab)) {
-                        Image(systemName: "gearshape.fill")
-                            .font(.system(size: 24, weight: .semibold))
-                            .foregroundColor(themeManager.colors.primary)
-                            .frame(width: 48, height: 48)
-                            .background(themeManager.colors.surface)
-                            .clipShape(Circle())
-                            .shadow(color: themeManager.colors.primary.opacity(0.1), radius: 8, x: 0, y: 4)
-                    }
+                    Text("3/5")
+                        .font(.custom("Nunito-Medium", size: 16))
+                        .foregroundColor(themeManager.colors.textLight)
                 }
-                .padding(.horizontal)
                 
-                // Quote Card
-                QuoteCard(quote: currentQuote, isAnimating: $isAnimating)
-                    .padding(.horizontal)
-                
-                // Option Buttons
-                HStack(spacing: 16) {
-                    OptionButton(
-                        title: "Reframe",
-                        icon: "arrow.triangle.2.circlepath",
-                        isSelected: selectedOption == "Reframe",
-                        action: { selectOption("Reframe") }
-                    )
-                    
-                    OptionButton(
-                        title: "Reflect",
-                        icon: "book.fill",
-                        isSelected: selectedOption == "Reflect",
-                        action: { selectOption("Reflect") }
-                    )
-                }
-                .padding(.horizontal)
-                
-                // Input Section
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("What's on your mind?")
-                        .font(.custom("Quicksand-SemiBold", size: 18))
-                        .foregroundColor(themeManager.colors.text)
-                    
-                    ZStack(alignment: .topLeading) {
-                        if inputText.isEmpty {
-                            Text("Type your thoughts here...")
-                                .font(.custom("Nunito-Regular", size: 16))
-                                .foregroundColor(themeManager.colors.textLight)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 12)
-                        }
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(themeManager.colors.surface)
+                            .frame(height: 12)
                         
-                        TextEditor(text: $inputText)
-                            .font(.custom("Nunito-Regular", size: 16))
-                            .foregroundColor(themeManager.colors.text)
-                            .frame(minHeight: 120)
-                            .padding(4)
-                            .background(themeManager.colors.surface)
-                            .cornerRadius(12)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(themeManager.colors.border, lineWidth: 1)
-                            )
-                            .scrollContentBackground(.hidden)
-                    }
-                    
-                    Button(action: {
-                        // Handle submission
-                        withAnimation {
-                            showQuote = true
-                            currentQuote = quotes.randomElement() ?? quotes[0]
-                            inputText = ""
-                        }
-                    }) {
-                        HStack {
-                            Text("Submit")
-                                .font(.custom("Nunito-SemiBold", size: 16))
-                            
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 16, weight: .semibold))
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(
-                            LinearGradient(
-                                gradient: Gradient(colors: selectedOption == "Reframe" ? [
-                                    themeManager.colors.primary,
-                                    themeManager.colors.primaryDark
-                                ] : [
-                                    themeManager.colors.secondary,
-                                    Color(hex: "7B4B8E")
-                                ]),
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .cornerRadius(12)
-                        .shadow(color: (selectedOption == "Reframe" ? themeManager.colors.primary : themeManager.colors.secondary).opacity(0.3), radius: 8, x: 0, y: 4)
-                    }
-                    .disabled(inputText.isEmpty)
-                    .opacity(inputText.isEmpty ? 0.6 : 1)
-                }
-                .padding(.horizontal)
-                
-                // Progress Section
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Text("Reflections Used")
-                            .font(.custom("Quicksand-SemiBold", size: 16))
-                            .foregroundColor(themeManager.colors.text)
-                        
-                        Spacer()
-                        
-                        Text("3/5")
-                            .font(.custom("Nunito-Medium", size: 16))
-                            .foregroundColor(themeManager.colors.textLight)
-                    }
-                    
-                    GeometryReader { geometry in
-                        ZStack(alignment: .leading) {
-                            RoundedRectangle(cornerRadius: 6)
-                                .fill(themeManager.colors.surface)
-                                .frame(height: 12)
-                            
-                            RoundedRectangle(cornerRadius: 6)
-                                .fill(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [
-                                            themeManager.colors.primary,
-                                            themeManager.colors.primaryDark
-                                        ]),
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        themeManager.colors.primary,
+                                        themeManager.colors.primaryDark
+                                    ]),
+                                    startPoint: .leading,
+                                    endPoint: .trailing
                                 )
-                                .frame(width: geometry.size.width * 0.6, height: 12)
-                        }
+                            )
+                            .frame(width: geometry.size.width * 0.6, height: 12)
                     }
-                    .frame(height: 12)
                 }
-                .padding(.horizontal)
+                .frame(height: 12)
             }
-            .padding(.vertical)
+            .padding(.horizontal)
+            
+            Spacer()
         }
+        .padding(.vertical, 24)
         .background(themeManager.colors.background)
         .navigationBarHidden(true)
     }
@@ -209,12 +196,13 @@ struct QuoteCard: View {
                 .font(.custom("Nunito-Regular", size: 16))
                 .foregroundColor(themeManager.colors.textLight)
                 .multilineTextAlignment(.leading)
+                .lineSpacing(4)
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(themeManager.colors.surface)
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
+        .cornerRadius(20)
+        .shadow(color: Color.black.opacity(0.08), radius: 15, x: 0, y: 8)
         .opacity(isAnimating ? 1 : 0)
         .offset(y: isAnimating ? 0 : 20)
         .onAppear {
@@ -256,14 +244,14 @@ struct OptionButton: View {
         Button(action: action) {
             HStack {
                 Image(systemName: icon)
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: 22, weight: .semibold))
                 
                 Text(title)
-                    .font(.custom("Nunito-SemiBold", size: 16))
+                    .font(.custom("Nunito-SemiBold", size: 18))
             }
             .foregroundColor(isSelected ? .white : themeManager.colors.text)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
+            .padding(.vertical, 18)
             .background(
                 LinearGradient(
                     gradient: Gradient(colors: gradientColors),
@@ -271,11 +259,11 @@ struct OptionButton: View {
                     endPoint: .trailing
                 )
             )
-            .cornerRadius(12)
+            .cornerRadius(16)
             .shadow(color: isSelected ? (title == "Reframe" ? themeManager.colors.primary : themeManager.colors.secondary).opacity(0.3) : Color.black.opacity(0.05),
-                   radius: isSelected ? 8 : 4,
+                   radius: isSelected ? 12 : 4,
                    x: 0,
-                   y: isSelected ? 4 : 2)
+                   y: isSelected ? 6 : 2)
         }
     }
 }

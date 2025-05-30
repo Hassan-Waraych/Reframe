@@ -6,38 +6,33 @@ struct JournalScreen: View {
     
     var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
-                // Header
-                HStack {
-                    Text("Journal")
-                        .font(.custom("Quicksand-Bold", size: 28))
+            VStack(spacing: 32) {
+                // Header with greeting
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Your Journal")
+                        .font(.custom("Quicksand-Regular", size: 20))
+                        .foregroundColor(themeManager.colors.textLight)
+                    
+                    Text("Reflections")
+                        .font(.custom("Quicksand-Bold", size: 36))
                         .foregroundColor(themeManager.colors.text)
-                    
-                    Spacer()
-                    
-                    Button(action: {
-                        selectedTab = 0
-                    }) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 24, weight: .semibold))
-                            .foregroundColor(themeManager.colors.primary)
-                            .frame(width: 48, height: 48)
-                            .background(themeManager.colors.surface)
-                            .clipShape(Circle())
-                            .shadow(color: themeManager.colors.primary.opacity(0.1), radius: 8, x: 0, y: 4)
-                    }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal)
                 
                 // Journal Entries
-                LazyVStack(spacing: 16) {
+                LazyVStack(spacing: 20) {
                     ForEach(sampleEntries) { entry in
                         JournalEntryCard(entry: entry)
+                            .transition(.asymmetric(
+                                insertion: .scale.combined(with: .opacity),
+                                removal: .opacity
+                            ))
                     }
                 }
                 .padding(.horizontal)
             }
-            .padding(.vertical)
+            .padding(.vertical, 32)
         }
         .background(themeManager.colors.background)
         .navigationBarHidden(true)
@@ -76,61 +71,87 @@ struct JournalEntryCard: View {
     let entry: JournalEntry
     @EnvironmentObject var themeManager: ThemeManager
     @State private var isExpanded = false
+    @State private var dragOffset: CGFloat = 0
+    @State private var isHovered = false
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text(entry.title)
-                        .font(.custom("Quicksand-SemiBold", size: 18))
+                        .font(.custom("Quicksand-SemiBold", size: 20))
                         .foregroundColor(themeManager.colors.text)
                     
                     Text(entry.date, style: .date)
-                        .font(.custom("Nunito-Regular", size: 14))
+                        .font(.custom("Nunito-Regular", size: 15))
                         .foregroundColor(themeManager.colors.textLight)
                 }
                 
                 Spacer()
                 
                 Image(systemName: entry.mood.icon)
-                    .font(.system(size: 24))
+                    .font(.system(size: 28))
                     .foregroundColor(entry.mood.color)
+                    .scaleEffect(entry.mood.iconScale)
+                    .animation(entry.mood.iconAnimation, value: entry.mood)
             }
             
             if isExpanded {
-                VStack(alignment: .leading, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 6) {
                         Text("Original Thought")
-                            .font(.custom("Quicksand-SemiBold", size: 16))
+                            .font(.custom("Quicksand-SemiBold", size: 18))
                             .foregroundColor(themeManager.colors.primary)
                         
                         Text(entry.originalThought)
-                            .font(.custom("Nunito-Regular", size: 16))
+                            .font(.custom("Nunito-Regular", size: 17))
                             .foregroundColor(themeManager.colors.text)
+                            .lineSpacing(4)
                     }
                     
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: 6) {
                         Text("Reframe")
-                            .font(.custom("Quicksand-SemiBold", size: 16))
+                            .font(.custom("Quicksand-SemiBold", size: 18))
                             .foregroundColor(themeManager.colors.secondary)
                         
                         Text(entry.reframe)
-                            .font(.custom("Nunito-Regular", size: 16))
+                            .font(.custom("Nunito-Regular", size: 17))
                             .foregroundColor(themeManager.colors.text)
+                            .lineSpacing(4)
                     }
                 }
                 .padding(.top, 8)
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
-        .padding(16)
+        .padding(20)
         .background(themeManager.colors.surface)
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
+        .cornerRadius(20)
+        .shadow(color: Color.black.opacity(isHovered ? 0.12 : 0.06), radius: isHovered ? 20 : 12, x: 0, y: isHovered ? 10 : 6)
+        .scaleEffect(isHovered ? 1.02 : 1.0)
+        .offset(x: dragOffset)
+        .gesture(
+            DragGesture()
+                .onChanged { value in
+                    dragOffset = value.translation.width
+                }
+                .onEnded { value in
+                    withAnimation(.spring()) {
+                        dragOffset = 0
+                    }
+                }
+        )
         .onTapGesture {
             withAnimation(.spring()) {
                 isExpanded.toggle()
             }
         }
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                isHovered = hovering
+            }
+        }
+        .transition(.scale.combined(with: .opacity))
     }
 }
 

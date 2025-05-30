@@ -1,7 +1,16 @@
 import SwiftUI
 
 class ThemeManager: ObservableObject {
-    @Published var isDark: Bool = false
+    @Published var isDark: Bool {
+        didSet {
+            UserDefaults.standard.set(isDark, forKey: "isDarkMode")
+        }
+    }
+    
+    init() {
+        // Load the saved theme preference, default to false if not set
+        self.isDark = UserDefaults.standard.bool(forKey: "isDarkMode")
+    }
     
     var colors: ThemeColors {
         isDark ? .dark : .light
