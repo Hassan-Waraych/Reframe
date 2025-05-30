@@ -1,13 +1,16 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var themeManager = ThemeManager()
+    @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var authService: AuthService
     @StateObject private var coordinator = OnboardingCoordinator()
     @State private var selectedTab = 0
     
     var body: some View {
         Group {
-            if coordinator.hasCompletedOnboarding {
+            if !coordinator.hasCompletedOnboarding {
+                OnboardingView()
+            } else {
                 TabView(selection: $selectedTab) {
                     NavigationStack {
                         HomeScreen(selectedTab: $selectedTab)
@@ -46,8 +49,6 @@ struct ContentView: View {
                     .tag(3)
                 }
                 .accentColor(themeManager.colors.primary)
-            } else {
-                OnboardingView()
             }
         }
         .environmentObject(themeManager)
@@ -62,4 +63,6 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environmentObject(ThemeManager())
+        .environmentObject(AuthService.shared)
 } 

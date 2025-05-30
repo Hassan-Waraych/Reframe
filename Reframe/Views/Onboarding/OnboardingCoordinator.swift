@@ -52,11 +52,17 @@ class OnboardingCoordinator: ObservableObject {
         hasCompletedOnboarding = true
         UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
     }
+    
+    func handleGuestMode() {
+        // Skip to first thought for guest users
+        currentStep = .firstThought
+    }
 }
 
 struct OnboardingView: View {
     @EnvironmentObject var coordinator: OnboardingCoordinator
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var authService: AuthService
     
     var body: some View {
         ZStack {
@@ -95,4 +101,5 @@ struct OnboardingView: View {
     OnboardingView()
         .environmentObject(ThemeManager())
         .environmentObject(OnboardingCoordinator())
+        .environmentObject(AuthService.shared)
 } 

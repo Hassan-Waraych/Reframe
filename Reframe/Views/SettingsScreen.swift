@@ -2,10 +2,12 @@ import SwiftUI
 
 struct SettingsScreen: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var authService: AuthService
     @Binding var selectedTab: Int
     @Environment(\.dismiss) private var dismiss
     @State private var showDevSettings = false
-    @State private var selectedSection: String? = nil
+    @State private var showSignInSheet = false
+    @State private var showAccountOptions = false
     
     var body: some View {
         ScrollView {
@@ -38,42 +40,56 @@ struct SettingsScreen: View {
                 
                 // Account Section
                 VStack {
-                    HStack(spacing: 16) {
-                        AsyncImage(url: URL(string: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop")) { image in
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                        } placeholder: {
-                            Color.gray.opacity(0.2)
+                    Button(action: {
+                        if authService.isAuthenticated {
+                            showAccountOptions = true
+                        } else {
+                            showSignInSheet = true
                         }
-                        .frame(width: 70, height: 70)
-                        .clipShape(Circle())
-                        .overlay(
-                            Circle()
-                                .stroke(themeManager.colors.primary, lineWidth: 2)
-                        )
-                        .shadow(color: themeManager.colors.primary.opacity(0.2), radius: 8, x: 0, y: 4)
-                        
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("John Doe")
-                                .font(.custom("Quicksand-SemiBold", size: 20))
-                                .foregroundColor(themeManager.colors.text)
+                    }) {
+                        HStack(spacing: 16) {
+                            AsyncImage(url: URL(string: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop")) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                            } placeholder: {
+                                Color.gray.opacity(0.2)
+                            }
+                            .frame(width: 70, height: 70)
+                            .clipShape(Circle())
+                            .overlay(
+                                Circle()
+                                    .stroke(themeManager.colors.primary, lineWidth: 2)
+                            )
+                            .shadow(color: themeManager.colors.primary.opacity(0.2), radius: 8, x: 0, y: 4)
                             
-                            Text("john.doe@example.com")
-                                .font(.custom("Nunito-Regular", size: 16))
+                            VStack(alignment: .leading, spacing: 4) {
+                                if authService.isAuthenticated {
+                                    Text(authService.getUserEmail() ?? "User")
+                                        .font(.custom("Quicksand-SemiBold", size: 20))
+                                        .foregroundColor(themeManager.colors.text)
+                                } else {
+                                    Text("Sign In")
+                                        .font(.custom("Quicksand-SemiBold", size: 20))
+                                        .foregroundColor(themeManager.colors.primary)
+                                }
+                                
+                                Text(authService.isAuthenticated ? "Tap to manage account" : "Create an account or sign in")
+                                    .font(.custom("Nunito-Regular", size: 16))
+                                    .foregroundColor(themeManager.colors.textLight)
+                            }
+                            
+                            Spacer()
+                            
+                            Image(systemName: "chevron.right")
                                 .foregroundColor(themeManager.colors.textLight)
+                                .font(.system(size: 14, weight: .semibold))
                         }
-                        
-                        Spacer()
-                        
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(themeManager.colors.textLight)
-                            .font(.system(size: 14, weight: .semibold))
+                        .padding(20)
+                        .background(themeManager.colors.surface)
+                        .cornerRadius(16)
+                        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
                     }
-                    .padding(20)
-                    .background(themeManager.colors.surface)
-                    .cornerRadius(16)
-                    .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
                 }
                 .padding(.horizontal)
                 
@@ -190,6 +206,21 @@ struct SettingsScreen: View {
         .sheet(isPresented: $showDevSettings) {
             DevSettingsScreen()
         }
+        .sheet(isPresented: $showSignInSheet) {
+            SignUpScreen(isFromSettings: true)
+                .environmentObject(themeManager)
+                .environmentObject(authService)
+        }
+        .confirmationDialog("Account Options", isPresented: $showAccountOptions) {
+            Button("Sign Out", role: .destructive) {
+                do {
+                    try authService.signOut()
+                } catch {
+                    // Error is handled by the authService
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
     }
 }
 
@@ -228,4 +259,5 @@ struct SupportButton: View {
 #Preview {
     SettingsScreen(selectedTab: .constant(3))
         .environmentObject(ThemeManager())
+        .environmentObject(AuthService.shared)
 } 

@@ -2,23 +2,49 @@ import SwiftUI
 
 struct SignUpScreen: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var authService: AuthService
     @EnvironmentObject var coordinator: OnboardingCoordinator
+    @Environment(\.dismiss) private var dismiss
+    
+    let isFromSettings: Bool
+    
     @State private var email = ""
     @State private var password = ""
-    @State private var isLoading = false
     @State private var isAnimating = false
-    @State private var errorMessage: String?
+    @State private var isLoginMode = false
+    
+    init(isFromSettings: Bool = false) {
+        self.isFromSettings = isFromSettings
+    }
     
     var body: some View {
         ScrollView {
             VStack(spacing: 32) {
                 // Header
+                HStack {
+                    if isFromSettings {
+                        Button(action: {
+                            dismiss()
+                        }) {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundColor(themeManager.colors.text)
+                                .frame(width: 40, height: 40)
+                                .background(themeManager.colors.surface)
+                                .clipShape(Circle())
+                        }
+                    }
+                    
+                    Spacer()
+                }
+                .padding(.horizontal)
+                
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Create your account")
+                    Text(isLoginMode ? "Welcome back" : "Create your account")
                         .font(.custom("Quicksand-Bold", size: 28))
                         .foregroundColor(themeManager.colors.text)
                     
-                    Text("Start your journey to better mental clarity")
+                    Text(isLoginMode ? "Sign in to continue your journey" : "Start your journey to better mental clarity")
                         .font(.custom("Nunito-Regular", size: 16))
                         .foregroundColor(themeManager.colors.textLight)
                 }
@@ -38,7 +64,7 @@ struct SignUpScreen: View {
                             .textContentType(.emailAddress)
                             .keyboardType(.emailAddress)
                             .autocapitalization(.none)
-                            .disabled(isLoading)
+                            .disabled(authService.isLoading)
                     }
                     .padding(16)
                     .background(themeManager.colors.surface)
@@ -53,14 +79,14 @@ struct SignUpScreen: View {
                         SecureField("Password", text: $password)
                             .font(.custom("Nunito-Regular", size: 16))
                             .foregroundColor(themeManager.colors.text)
-                            .textContentType(.newPassword)
-                            .disabled(isLoading)
+                            .textContentType(isLoginMode ? .password : .newPassword)
+                            .disabled(authService.isLoading)
                     }
                     .padding(16)
                     .background(themeManager.colors.surface)
                     .cornerRadius(12)
                     
-                    if let error = errorMessage {
+                    if let error = authService.errorMessage {
                         Text(error)
                             .font(.custom("Nunito-Regular", size: 14))
                             .foregroundColor(.red)
@@ -68,28 +94,45 @@ struct SignUpScreen: View {
                             .padding(.horizontal, 4)
                     }
                     
-                    // Create Account Button
-                    Button(action: handleSignUp) {
-                        Text(isLoading ? "Creating Account..." : "Create Account")
-                            .font(.custom("Nunito-SemiBold", size: 18))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 56)
-                            .background(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        themeManager.colors.primary,
-                                        themeManager.colors.primaryDark
-                                    ]),
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .cornerRadius(16)
-                            .shadow(color: themeManager.colors.primary.opacity(0.3), radius: 12, x: 0, y: 6)
+                    // Action Button
+                    Button(action: handleAuthAction) {
+                        if authService.isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        } else {
+                            Text(isLoginMode ? "Sign In" : "Create Account")
+                                .font(.custom("Nunito-SemiBold", size: 18))
+                                .foregroundColor(.white)
+                        }
                     }
-                    .disabled(isLoading || email.isEmpty || password.isEmpty)
-                    .opacity((isLoading || email.isEmpty || password.isEmpty) ? 0.5 : 1)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 56)
+                    .background(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                themeManager.colors.primary,
+                                themeManager.colors.primaryDark
+                            ]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(16)
+                    .shadow(color: themeManager.colors.primary.opacity(0.3), radius: 12, x: 0, y: 6)
+                    .disabled(authService.isLoading || email.isEmpty || password.isEmpty)
+                    .opacity((authService.isLoading || email.isEmpty || password.isEmpty) ? 0.5 : 1)
+                    
+                    // Toggle between Sign Up and Login
+                    Button(action: {
+                        withAnimation {
+                            isLoginMode.toggle()
+                            authService.errorMessage = nil
+                        }
+                    }) {
+                        Text(isLoginMode ? "Don't have an account? Sign Up" : "Already have an account? Sign In")
+                            .font(.custom("Nunito-Medium", size: 16))
+                            .foregroundColor(themeManager.colors.primary)
+                    }
                     
                     // Divider
                     HStack {
@@ -143,15 +186,17 @@ struct SignUpScreen: View {
                         }
                     }
                     
-                    // Guest Mode Button
-                    Button(action: {
-                        coordinator.next()
-                    }) {
-                        Text("Continue as Guest")
-                            .font(.custom("Nunito-Medium", size: 16))
-                            .foregroundColor(themeManager.colors.textLight)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 56)
+                    if !isFromSettings {
+                        // Guest Mode Button
+                        Button(action: {
+                            coordinator.handleGuestMode()
+                        }) {
+                            Text("Continue as Guest")
+                                .font(.custom("Nunito-Medium", size: 16))
+                                .foregroundColor(themeManager.colors.textLight)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 56)
+                        }
                     }
                 }
             }
@@ -167,23 +212,54 @@ struct SignUpScreen: View {
         }
     }
     
-    private func handleSignUp() {
-        isLoading = true
-        errorMessage = nil
-        
-        // Simulate network delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            isLoading = false
-            coordinator.next()
+    private func handleAuthAction() {
+        Task {
+            do {
+                if isLoginMode {
+                    try await authService.signIn(email: email, password: password)
+                } else {
+                    try await authService.signUp(email: email, password: password)
+                }
+                
+                if isFromSettings {
+                    dismiss()
+                } else {
+                    coordinator.next()
+                }
+            } catch {
+                // Error is handled by the authService
+            }
         }
     }
     
     private func handleGoogleSignIn() {
-        coordinator.next()
+        Task {
+            do {
+                try await authService.signInWithGoogle()
+                if isFromSettings {
+                    dismiss()
+                } else {
+                    coordinator.next()
+                }
+            } catch {
+                // Error is handled by the authService
+            }
+        }
     }
     
     private func handleAppleSignIn() {
-        coordinator.next()
+        Task {
+            do {
+                try await authService.signInWithApple()
+                if isFromSettings {
+                    dismiss()
+                } else {
+                    coordinator.next()
+                }
+            } catch {
+                // Error is handled by the authService
+            }
+        }
     }
 }
 
@@ -191,4 +267,5 @@ struct SignUpScreen: View {
     SignUpScreen()
         .environmentObject(ThemeManager())
         .environmentObject(OnboardingCoordinator())
+        .environmentObject(AuthService.shared)
 } 
