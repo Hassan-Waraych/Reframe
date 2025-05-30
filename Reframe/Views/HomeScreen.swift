@@ -1,9 +1,14 @@
 import SwiftUI
 
+enum HomeOption {
+    case reframe
+    case reflect
+}
+
 struct HomeScreen: View {
     @EnvironmentObject var themeManager: ThemeManager
     @Binding var selectedTab: Int
-    @State private var selectedOption: String = "Reframe"
+    @State private var selectedMode: HomeOption = .reframe
     @State private var inputText: String = ""
     @State private var isAnimating = false
     @State private var showQuote = false
@@ -31,19 +36,25 @@ struct HomeScreen: View {
             
             // Option Buttons with enhanced styling
             HStack(spacing: 16) {
-                OptionButton(
+                HomeOptionButton(
                     title: "Reframe",
                     icon: "arrow.triangle.2.circlepath",
-                    isSelected: selectedOption == "Reframe",
-                    action: { selectOption("Reframe") }
-                )
+                    isSelected: selectedMode == .reframe
+                ) {
+                    withAnimation(.spring()) {
+                        selectedMode = .reframe
+                    }
+                }
                 
-                OptionButton(
+                HomeOptionButton(
                     title: "Reflect",
-                    icon: "book.fill",
-                    isSelected: selectedOption == "Reflect",
-                    action: { selectOption("Reflect") }
-                )
+                    icon: "brain.head.profile",
+                    isSelected: selectedMode == .reflect
+                ) {
+                    withAnimation(.spring()) {
+                        selectedMode = .reflect
+                    }
+                }
             }
             .padding(.horizontal)
             
@@ -95,7 +106,7 @@ struct HomeScreen: View {
                     .padding(.vertical, 16)
                     .background(
                         LinearGradient(
-                            gradient: Gradient(colors: selectedOption == "Reframe" ? [
+                            gradient: Gradient(colors: selectedMode == .reframe ? [
                                 themeManager.colors.primary,
                                 themeManager.colors.primaryDark
                             ] : [
@@ -107,7 +118,7 @@ struct HomeScreen: View {
                         )
                     )
                     .cornerRadius(16)
-                    .shadow(color: (selectedOption == "Reframe" ? themeManager.colors.primary : themeManager.colors.secondary).opacity(0.3), radius: 12, x: 0, y: 6)
+                    .shadow(color: (selectedMode == .reframe ? themeManager.colors.primary : themeManager.colors.secondary).opacity(0.3), radius: 12, x: 0, y: 6)
                 }
                 .disabled(inputText.isEmpty)
                 .opacity(inputText.isEmpty ? 0.6 : 1)
@@ -167,12 +178,6 @@ struct HomeScreen: View {
         default: return "Good Evening"
         }
     }
-    
-    private func selectOption(_ option: String) {
-        withAnimation(.spring()) {
-            selectedOption = option
-        }
-    }
 }
 
 struct QuoteCard: View {
@@ -209,61 +214,6 @@ struct QuoteCard: View {
             withAnimation(.easeOut(duration: 0.5)) {
                 isAnimating = true
             }
-        }
-    }
-}
-
-struct OptionButton: View {
-    let title: String
-    let icon: String
-    let isSelected: Bool
-    let action: () -> Void
-    @EnvironmentObject var themeManager: ThemeManager
-    
-    var gradientColors: [Color] {
-        if title == "Reframe" {
-            return isSelected ? [
-                themeManager.colors.primary,
-                themeManager.colors.primaryDark
-            ] : [
-                themeManager.colors.surface,
-                themeManager.colors.surface
-            ]
-        } else {
-            return isSelected ? [
-                themeManager.colors.secondary,
-                Color(hex: "7B4B8E") // Darker purple
-            ] : [
-                themeManager.colors.surface,
-                themeManager.colors.surface
-            ]
-        }
-    }
-    
-    var body: some View {
-        Button(action: action) {
-            HStack {
-                Image(systemName: icon)
-                    .font(.system(size: 22, weight: .semibold))
-                
-                Text(title)
-                    .font(.custom("Nunito-SemiBold", size: 18))
-            }
-            .foregroundColor(isSelected ? .white : themeManager.colors.text)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 18)
-            .background(
-                LinearGradient(
-                    gradient: Gradient(colors: gradientColors),
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-            )
-            .cornerRadius(16)
-            .shadow(color: isSelected ? (title == "Reframe" ? themeManager.colors.primary : themeManager.colors.secondary).opacity(0.3) : Color.black.opacity(0.05),
-                   radius: isSelected ? 12 : 4,
-                   x: 0,
-                   y: isSelected ? 6 : 2)
         }
     }
 }

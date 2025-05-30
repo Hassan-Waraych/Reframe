@@ -5,6 +5,7 @@ struct DevSettingsScreen: View {
     @Environment(\.dismiss) private var dismiss
     @State private var loading = false
     @State private var testResults: TestResults?
+    @State private var showOnboardingResetAlert = false
     
     struct TestResults {
         let connection: Bool
@@ -78,10 +79,39 @@ struct DevSettingsScreen: View {
                     .disabled(loading)
                 }
                 .padding(.horizontal)
+                
+                // Onboarding Reset Section
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Onboarding")
+                        .font(.system(size: themeManager.typography.fontSize.h3, weight: .bold))
+                        .foregroundColor(themeManager.colors.text)
+                    
+                    Button(action: {
+                        showOnboardingResetAlert = true
+                    }) {
+                        Text("Reset Onboarding")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 48)
+                            .background(themeManager.colors.secondary)
+                            .cornerRadius(12)
+                    }
+                }
+                .padding(.horizontal)
             }
             .padding(.vertical)
         }
         .background(themeManager.colors.background)
+        .alert("Reset Onboarding", isPresented: $showOnboardingResetAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Reset", role: .destructive) {
+                // TODO: Reset onboarding state
+                UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
+            }
+        } message: {
+            Text("This will reset the onboarding experience. You'll need to go through the onboarding flow again.")
+        }
     }
     
     private func runTests() {
@@ -100,4 +130,9 @@ struct DevSettingsScreen: View {
             loading = false
         }
     }
+}
+
+#Preview {
+    DevSettingsScreen()
+        .environmentObject(ThemeManager())
 } 
