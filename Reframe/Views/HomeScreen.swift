@@ -89,7 +89,6 @@ struct HomeScreen: View {
                 }
                 
                 Button(action: {
-                    print("Debug: Submit button pressed")
                     Task {
                         await viewModel.createReframe()
                         withAnimation(.spring()) {

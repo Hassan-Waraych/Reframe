@@ -19,7 +19,6 @@ class ReframeService: ObservableObject {
     
     private func setupAuthStateListener() {
         Auth.auth().addStateDidChangeListener { [weak self] _, user in
-            print("Debug: Auth state changed in ReframeService - User: \(user?.uid ?? "nil")")
             if user != nil {
                 self?.setupReframeCountListener()
             } else {
@@ -39,7 +38,6 @@ class ReframeService: ObservableObject {
         cleanupReframeListener()
         
         guard let userId = Auth.auth().currentUser?.uid else {
-            print("Debug: No authenticated user for reframe count")
             return
         }
         
@@ -48,20 +46,16 @@ class ReframeService: ObservableObject {
         let today = calendar.startOfDay(for: Date())
         let todayTimestamp = Timestamp(date: today)
         
-        print("Debug: Setting up reframe count listener for user: \(userId)")
-        
         reframeListener = db.collection("reframes")
             .whereField("userId", isEqualTo: userId)
             .whereField("timestamp", isGreaterThanOrEqualTo: todayTimestamp)
             .addSnapshotListener { [weak self] snapshot, error in
                 if let error = error {
-                    print("Debug: Error fetching reframes: \(error.localizedDescription)")
                     self?.errorMessage = error.localizedDescription
                     return
                 }
                 
                 let count = snapshot?.documents.count ?? 0
-                print("Debug: Number of documents found: \(count)")
                 
                 DispatchQueue.main.async {
                     self?.dailyReframeCount = count
@@ -102,9 +96,7 @@ class ReframeService: ObservableObject {
         
         do {
             let docRef = try await db.collection("reframes").addDocument(from: reframe)
-            print("Debug: Successfully created reframe with ID: \(docRef.documentID)")
         } catch {
-            print("Debug: Error creating reframe: \(error)")
             throw error
         }
     }

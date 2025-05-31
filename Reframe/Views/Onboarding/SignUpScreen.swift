@@ -232,7 +232,6 @@ struct SignUpScreen: View {
                     coordinator.completeOnboarding()
                 }
             } catch {
-                print("Debug: Auth error: \(error.localizedDescription)")
                 // Error is handled by the authService
             }
         }
@@ -248,7 +247,6 @@ struct SignUpScreen: View {
                     coordinator.completeOnboarding()
                 }
             } catch {
-                print("Debug: Google sign in error: \(error.localizedDescription)")
                 // Error is handled by the authService
             }
         }
@@ -264,7 +262,6 @@ struct SignUpScreen: View {
                     coordinator.completeOnboarding()
                 }
             } catch {
-                print("Debug: Apple sign in error: \(error.localizedDescription)")
                 // Error is handled by the authService
             }
         }

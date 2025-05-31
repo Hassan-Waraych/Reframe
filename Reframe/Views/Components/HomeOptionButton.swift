@@ -61,7 +61,7 @@ struct HomeOptionButton: View {
         icon: "arrow.triangle.2.circlepath",
         isSelected: true
     ) {
-        print("Button tapped")
+        // Button action
     }
     .environmentObject(ThemeManager())
 } 

@@ -39,7 +39,7 @@ struct OnboardingOptionButton: View {
         isSelected: true,
         color: .blue
     ) {
-        print("Button tapped")
+        // Button action
     }
     .environmentObject(ThemeManager())
 } 

@@ -6,28 +6,10 @@ struct ReframeScreen: View {
     @State private var showDeleteConfirmation = false
     @State private var reframeToDelete: Reframe?
     
-    init() {
-        print("Debug: ReframeScreen initialized")
-    }
     
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                // Test Button
-                Button(action: {
-                    print("Debug: Test button pressed in view")
-                    viewModel.testButton()
-                }) {
-                    Text("Test Button")
-                        .font(.custom("Nunito-SemiBold", size: 16))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 44)
-                        .background(Color.red)
-                        .cornerRadius(8)
-                }
-                .padding(.horizontal)
-                
                 // Header
                 HStack {
                     Text("Reframe")
@@ -51,12 +33,10 @@ struct ReframeScreen: View {
                         .lineLimit(3...6)
                         .disabled(!viewModel.canCreateReframe)
                         .onChange(of: viewModel.originalThought) { newValue in
-                            print("Debug: Text field changed to: \(newValue)")
                         }
                     
                     // Simple Button Implementation
                     Button {
-                        print("Debug: Reframe button pressed in view")
                         Task {
                             await viewModel.createReframe()
                         }

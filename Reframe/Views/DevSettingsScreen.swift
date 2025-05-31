@@ -147,7 +147,7 @@ struct DevSettingsScreen: View {
                 do {
                     try AuthService.shared.signOut()
                 } catch {
-                    print("Error signing out: \(error)")
+                    // Error is handled by the authService
                 }
                 
                 // Clear all reframes
@@ -155,7 +155,7 @@ struct DevSettingsScreen: View {
                     do {
                         try await ReframeService.shared.clearAllReframes()
                     } catch {
-                        print("Error clearing reframes: \(error)")
+                        // Error is handled by the reframeService
                     }
                 }
             }
@@ -177,7 +177,7 @@ struct DevSettingsScreen: View {
                     do {
                         try await ReframeService.shared.clearAllReframes()
                     } catch {
-                        print("Error clearing reframes: \(error)")
+                        // Error is handled by the reframeService
                     }
                 }
             }
