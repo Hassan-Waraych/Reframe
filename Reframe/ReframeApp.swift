@@ -14,8 +14,10 @@ struct ReframeApp: App {
     @StateObject private var authService = AuthService.shared
     
     init() {
-        // Initialize Firebase
-        FirebaseApp.configure()
+        // Initialize Firebase only once
+        if FirebaseApp.app() == nil {
+            FirebaseApp.configure()
+        }
     }
     
     var body: some Scene {

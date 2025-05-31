@@ -16,10 +16,13 @@ class AuthService: ObservableObject {
     }
     
     private func setupAuthStateListener() {
+        print("Debug: Setting up auth state listener")
         Auth.auth().addStateDidChangeListener { [weak self] _, user in
+            print("Debug: Auth state changed - User: \(user?.uid ?? "nil")")
             DispatchQueue.main.async {
                 self?.currentUser = user
                 self?.isAuthenticated = user != nil
+                print("Debug: Authentication state updated - isAuthenticated: \(self?.isAuthenticated ?? false)")
             }
         }
     }
@@ -27,11 +30,13 @@ class AuthService: ObservableObject {
     // MARK: - Authentication Methods
     
     func signUp(email: String, password: String) async throws {
+        print("Debug: Attempting to sign up user: \(email)")
         isLoading = true
         errorMessage = nil
         
         do {
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
+            print("Debug: User signed up successfully")
             DispatchQueue.main.async {
                 self.currentUser = result.user
                 self.isAuthenticated = true
@@ -39,6 +44,7 @@ class AuthService: ObservableObject {
                 self.isLoading = false
             }
         } catch {
+            print("Debug: Sign up error: \(error.localizedDescription)")
             DispatchQueue.main.async {
                 self.errorMessage = error.localizedDescription
                 self.isLoading = false
@@ -48,11 +54,13 @@ class AuthService: ObservableObject {
     }
     
     func signIn(email: String, password: String) async throws {
+        print("Debug: Attempting to sign in user: \(email)")
         isLoading = true
         errorMessage = nil
         
         do {
             let result = try await Auth.auth().signIn(withEmail: email, password: password)
+            print("Debug: User signed in successfully")
             DispatchQueue.main.async {
                 self.currentUser = result.user
                 self.isAuthenticated = true
@@ -60,6 +68,7 @@ class AuthService: ObservableObject {
                 self.isLoading = false
             }
         } catch {
+            print("Debug: Sign in error: \(error.localizedDescription)")
             DispatchQueue.main.async {
                 self.errorMessage = error.localizedDescription
                 self.isLoading = false

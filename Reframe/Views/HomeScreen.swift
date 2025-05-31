@@ -8,8 +8,8 @@ enum HomeOption {
 struct HomeScreen: View {
     @EnvironmentObject var themeManager: ThemeManager
     @Binding var selectedTab: Int
+    @StateObject private var viewModel = ReframeViewModel()
     @State private var selectedMode: HomeOption = .reframe
-    @State private var inputText: String = ""
     @State private var isAnimating = false
     @State private var showQuote = false
     @State private var currentQuote = "Your daily dose of wisdom will appear here..."
@@ -65,7 +65,7 @@ struct HomeScreen: View {
                     .foregroundColor(themeManager.colors.text)
                 
                 ZStack(alignment: .topLeading) {
-                    if inputText.isEmpty {
+                    if viewModel.originalThought.isEmpty {
                         Text("Type your thoughts here...")
                             .font(.custom("Nunito-Regular", size: 16))
                             .foregroundColor(themeManager.colors.textLight)
@@ -73,7 +73,7 @@ struct HomeScreen: View {
                             .padding(.vertical, 12)
                     }
                     
-                    TextEditor(text: $inputText)
+                    TextEditor(text: $viewModel.originalThought)
                         .font(.custom("Nunito-Regular", size: 16))
                         .foregroundColor(themeManager.colors.text)
                         .frame(height: 100)
@@ -85,13 +85,17 @@ struct HomeScreen: View {
                                 .stroke(themeManager.colors.border, lineWidth: 1)
                         )
                         .scrollContentBackground(.hidden)
+                        .disabled(!viewModel.canCreateReframe)
                 }
                 
                 Button(action: {
-                    withAnimation(.spring()) {
-                        showQuote = true
-                        currentQuote = quotes.randomElement() ?? quotes[0]
-                        inputText = ""
+                    print("Debug: Submit button pressed")
+                    Task {
+                        await viewModel.createReframe()
+                        withAnimation(.spring()) {
+                            showQuote = true
+                            currentQuote = quotes.randomElement() ?? quotes[0]
+                        }
                     }
                 }) {
                     HStack {
@@ -120,21 +124,21 @@ struct HomeScreen: View {
                     .cornerRadius(16)
                     .shadow(color: (selectedMode == .reframe ? themeManager.colors.primary : themeManager.colors.secondary).opacity(0.3), radius: 12, x: 0, y: 6)
                 }
-                .disabled(inputText.isEmpty)
-                .opacity(inputText.isEmpty ? 0.6 : 1)
+                .disabled(viewModel.isLoading || viewModel.originalThought.isEmpty || !viewModel.canCreateReframe)
+                .opacity((viewModel.isLoading || viewModel.originalThought.isEmpty || !viewModel.canCreateReframe) ? 0.6 : 1)
             }
             .padding(.horizontal)
             
             // Progress Section with enhanced styling
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text("Reflections Used")
+                    Text("Reframes Used")
                         .font(.custom("Quicksand-SemiBold", size: 16))
                         .foregroundColor(themeManager.colors.text)
                     
                     Spacer()
                     
-                    Text("3/5")
+                    Text("\(5 - viewModel.remainingReframes)/5")
                         .font(.custom("Nunito-Medium", size: 16))
                         .foregroundColor(themeManager.colors.textLight)
                 }
@@ -156,7 +160,7 @@ struct HomeScreen: View {
                                     endPoint: .trailing
                                 )
                             )
-                            .frame(width: geometry.size.width * 0.6, height: 12)
+                            .frame(width: geometry.size.width * CGFloat(5 - viewModel.remainingReframes) / 5, height: 12)
                     }
                 }
                 .frame(height: 12)
@@ -168,6 +172,14 @@ struct HomeScreen: View {
         .padding(.vertical, 24)
         .background(themeManager.colors.background)
         .navigationBarHidden(true)
+        .alert("Error", isPresented: $viewModel.showError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(viewModel.errorMessage ?? "An unknown error occurred")
+        }
+        .task {
+            await viewModel.loadReframes()
+        }
     }
     
     private func greeting() -> String {

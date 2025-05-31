@@ -6,6 +6,8 @@ struct DevSettingsScreen: View {
     @State private var loading = false
     @State private var testResults: TestResults?
     @State private var showOnboardingResetAlert = false
+    @State private var showReframeLimitResetAlert = false
+    @State private var showClearReframesAlert = false
     
     struct TestResults {
         let connection: Bool
@@ -99,6 +101,38 @@ struct DevSettingsScreen: View {
                     }
                 }
                 .padding(.horizontal)
+                
+                // Reframe Limit Reset Section
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Reframe Limits")
+                        .font(.system(size: themeManager.typography.fontSize.h3, weight: .bold))
+                        .foregroundColor(themeManager.colors.text)
+                    
+                    Button(action: {
+                        showReframeLimitResetAlert = true
+                    }) {
+                        Text("Reset Daily Reframe Limit")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 48)
+                            .background(themeManager.colors.secondary)
+                            .cornerRadius(12)
+                    }
+                    
+                    Button(action: {
+                        showClearReframesAlert = true
+                    }) {
+                        Text("Clear All Reframes")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 48)
+                            .background(themeManager.colors.error)
+                            .cornerRadius(12)
+                    }
+                }
+                .padding(.horizontal)
             }
             .padding(.vertical)
         }
@@ -106,11 +140,49 @@ struct DevSettingsScreen: View {
         .alert("Reset Onboarding", isPresented: $showOnboardingResetAlert) {
             Button("Cancel", role: .cancel) { }
             Button("Reset", role: .destructive) {
-                // TODO: Reset onboarding state
+                // Reset onboarding state
                 UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
+                
+                // Sign out the user
+                do {
+                    try AuthService.shared.signOut()
+                } catch {
+                    print("Error signing out: \(error)")
+                }
+                
+                // Clear all reframes
+                Task {
+                    do {
+                        try await ReframeService.shared.clearAllReframes()
+                    } catch {
+                        print("Error clearing reframes: \(error)")
+                    }
+                }
             }
         } message: {
-            Text("This will reset the onboarding experience. You'll need to go through the onboarding flow again.")
+            Text("This will reset the onboarding experience and sign you out. You'll need to go through the onboarding flow again.")
+        }
+        .alert("Reset Reframe Limit", isPresented: $showReframeLimitResetAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Reset", role: .destructive) {
+                ReframeService.shared.resetDailyCount()
+            }
+        } message: {
+            Text("This will reset your daily reframe limit. You'll be able to create 5 new reframes today.")
+        }
+        .alert("Clear All Reframes", isPresented: $showClearReframesAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Clear All", role: .destructive) {
+                Task {
+                    do {
+                        try await ReframeService.shared.clearAllReframes()
+                    } catch {
+                        print("Error clearing reframes: \(error)")
+                    }
+                }
+            }
+        } message: {
+            Text("This will permanently delete all your reframes. This action cannot be undone.")
         }
     }
     
