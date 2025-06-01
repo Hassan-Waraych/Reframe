@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 enum HomeOption {
     case reframe
@@ -304,132 +305,259 @@ struct CompactReframeView: View {
     }
 }
 
+struct IOSConfettiView: View {
+    let trigger: Bool
+    let colors: [Color]
+    let count: Int
+    @State private var confettiIDs: [UUID] = []
+    
+    var body: some View {
+        ZStack {
+            ForEach(confettiIDs, id: \.self) { id in
+                IOSConfettiParticle(color: colors.randomElement() ?? .red)
+            }
+        }
+        .allowsHitTesting(false)
+        .onChange(of: trigger) { newValue in
+            if newValue {
+                confettiIDs = (0..<count).map { _ in UUID() }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
+                    confettiIDs = []
+                }
+            }
+        }
+    }
+}
+
+struct IOSConfettiParticle: View {
+    let color: Color
+    @State private var x: CGFloat = .zero
+    @State private var y: CGFloat = -200
+    @State private var angle: Double = .zero
+    @State private var size: CGSize = .zero
+    
+    var body: some View {
+        Rectangle()
+            .fill(color)
+            .frame(width: size.width, height: size.height)
+            .cornerRadius(3)
+            .rotationEffect(.degrees(angle))
+            .position(x: x, y: y)
+            .onAppear {
+                let screenWidth = UIScreen.main.bounds.width
+                x = CGFloat.random(in: -10...screenWidth)
+                size = CGSize(width: CGFloat.random(in: 8...14), height: CGFloat.random(in: 16...22))
+                angle = Double.random(in: 0...360)
+                let fallDuration = Double.random(in: 1.3...1.8)
+                let delay = Double.random(in: 0...0.25)
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                    withAnimation(.linear(duration: fallDuration)) {
+                        y = UIScreen.main.bounds.height + 80
+                        angle += Double.random(in: 90...360)
+                    }
+                }
+            }
+    }
+}
+
 struct ReframeResultView: View {
     @EnvironmentObject var themeManager: ThemeManager
     let reframe: Reframe
     let viewModel: ReframeViewModel
     let onDismiss: () -> Void
     
+    @State private var animateIn = false
+    @State private var showConfetti = false
+    
+    var isPositive: Bool {
+        reframe.category == "Positive Reflection"
+    }
+    
     var body: some View {
-        VStack(spacing: 24) {
-            // Header
-            HStack {
-                Text("Your Reframe")
-                    .font(.custom("Quicksand-Bold", size: 24))
-                    .foregroundColor(themeManager.colors.text)
+        ZStack {
+            Color.black.opacity(0.4)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 14) {
+                // Header
+                HStack {
+                    Text("Your Reframe")
+                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                        .foregroundColor(themeManager.colors.text)
+                    Spacer()
+                    Button(action: onDismiss) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(themeManager.colors.textLight)
+                    }
+                }
+                .padding(.top, 8)
                 
-                Spacer()
+                // Confetti overlay
+                if isPositive {
+                    IOSConfettiView(trigger: showConfetti, colors: [themeManager.colors.primary, .yellow, .red, .blue, .green, .purple], count: 150)
+                        .frame(maxWidth: .infinity, maxHeight: 0)
+                }
                 
-                Button(action: onDismiss) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 24))
+                // Original Thought
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Original Thought")
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .foregroundColor(themeManager.colors.textLight)
-                }
-            }
-            
-            // Original Thought
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Original Thought")
-                    .font(.custom("Nunito-Regular", size: 14))
-                    .foregroundColor(themeManager.colors.textLight)
-                
-                Text(reframe.originalThought)
-                    .font(.custom("Nunito-Regular", size: 16))
-                    .foregroundColor(themeManager.colors.text)
-                    .padding(16)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(themeManager.colors.surface)
-                            .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
-                    )
-            }
-            
-            // Reframed Thought
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Reframe")
-                    .font(.custom("Nunito-Regular", size: 14))
-                    .foregroundColor(themeManager.colors.textLight)
-                
-                Text(reframe.reframedThought)
-                    .font(.custom("Nunito-Regular", size: 16))
-                    .foregroundColor(themeManager.colors.text)
-                    .padding(16)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(themeManager.colors.primary.opacity(0.1))
-                            .shadow(color: themeManager.colors.primary.opacity(0.1), radius: 8, x: 0, y: 4)
-                    )
-            }
-            
-            // Action Buttons
-            VStack(spacing: 12) {
-                Button {
-                    Task {
-                        await viewModel.markAsHelpful()
-                        onDismiss()
-                    }
-                } label: {
-                    HStack {
-                        Image(systemName: "heart.fill")
-                        Text("That Helped")
-                    }
-                    .font(.custom("Nunito-SemiBold", size: 16))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 44)
-                    .background(
-                        LinearGradient(
-                            gradient: Gradient(colors: [
-                                themeManager.colors.primary,
-                                themeManager.colors.primaryDark
-                            ]),
-                            startPoint: .leading,
-                            endPoint: .trailing
+                    Text(reframe.originalThought)
+                        .font(.system(size: 15, weight: .regular, design: .rounded))
+                        .foregroundColor(themeManager.colors.text)
+                        .padding(10)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color(.secondarySystemBackground))
                         )
+                }
+                .opacity(animateIn ? 1 : 0)
+                .offset(y: animateIn ? 0 : 10)
+                .animation(.easeOut(duration: 0.3).delay(0.08), value: animateIn)
+                
+                // Reframed Thought
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Reframe")
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundColor(themeManager.colors.primary)
+                    Text(reframe.reframedThought)
+                        .font(.system(size: 15, weight: .medium, design: .rounded))
+                        .foregroundColor(themeManager.colors.primary)
+                        .padding(12)
+                        .frame(maxWidth: .infinity, minHeight: 120, alignment: .leading)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(themeManager.colors.primary.opacity(0.07))
+                                .shadow(color: themeManager.colors.primary.opacity(0.08), radius: 6, x: 0, y: 2)
+                        )
+                }
+                .opacity(animateIn ? 1 : 0)
+                .offset(y: animateIn ? 0 : 15)
+                .animation(.easeOut(duration: 0.35).delay(0.13), value: animateIn)
+                
+                // Soft nudge for positive reflections
+                if reframe.category == "Positive Reflection" {
+                    VStack(spacing: 4) {
+                        Text("This is a positive thought! ✨")
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .foregroundColor(themeManager.colors.primary)
+                        Text("You can save your daily reframe limit by using the Reflect tab instead – it's perfect for capturing and celebrating these moments.")
+                            .font(.system(size: 13, weight: .regular, design: .rounded))
+                            .foregroundColor(themeManager.colors.textLight)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(.top, 2)
+                    .opacity(animateIn ? 1 : 0)
+                    .animation(.easeIn(duration: 0.3).delay(0.18), value: animateIn)
+                }
+                
+                // Friendly message for nonsense inputs
+                if reframe.category == "Nonsense" {
+                    VStack(spacing: 4) {
+                        Text("Hmm...")
+                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                            .foregroundColor(themeManager.colors.textLight)
+                        Text("I'm not quite sure how to reflect on that. Try sharing something that's been on your mind, or use the Reflect tab for positive moments!")
+                            .font(.system(size: 13, weight: .regular, design: .rounded))
+                            .foregroundColor(themeManager.colors.textLight)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(.top, 2)
+                    .opacity(animateIn ? 1 : 0)
+                    .animation(.easeIn(duration: 0.3).delay(0.18), value: animateIn)
+                }
+                
+                // Action Buttons
+                VStack(spacing: 10) {
+                    Button {
+                        Task {
+                            await viewModel.markAsHelpful()
+                            onDismiss()
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: "heart.fill")
+                            Text("That Helped")
+                        }
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 40)
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    themeManager.colors.primary,
+                                    themeManager.colors.primaryDark
+                                ]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .cornerRadius(10)
+                        .shadow(color: themeManager.colors.primary.opacity(0.13), radius: 5, x: 0, y: 2)
+                    }
+                    Button {
+                        // TODO: Implement journal logging
+                    } label: {
+                        HStack {
+                            Image(systemName: "book.fill")
+                            Text("Log to Journal")
+                        }
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundColor(themeManager.colors.primary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 40)
+                        .background(themeManager.colors.primary.opacity(0.09))
+                        .cornerRadius(10)
+                    }
+                    Button {
+                        onDismiss()
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                            Text("Try Another")
+                        }
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundColor(themeManager.colors.text)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 40)
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(10)
+                        .shadow(color: Color.black.opacity(0.03), radius: 1, x: 0, y: 1)
+                    }
+                }
+                .opacity(animateIn ? 1 : 0)
+                .offset(y: animateIn ? 0 : 10)
+                .animation(.easeOut(duration: 0.3).delay(0.22), value: animateIn)
+            }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 22)
+            .frame(width: 360)
+            .frame(minHeight: 420)
+            .background(
+                RoundedRectangle(cornerRadius: 28)
+                    .fill(Color(.systemBackground))
+                    .shadow(color: Color.black.opacity(0.18), radius: 24, x: 0, y: 10)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 28)
+                            .stroke(themeManager.colors.primary.opacity(0.10), lineWidth: 1)
                     )
-                    .cornerRadius(12)
-                }
-                
-                Button {
-                    // TODO: Implement journal logging
-                } label: {
-                    HStack {
-                        Image(systemName: "book.fill")
-                        Text("Log to Journal")
-                    }
-                    .font(.custom("Nunito-SemiBold", size: 16))
-                    .foregroundColor(themeManager.colors.primary)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 44)
-                    .background(themeManager.colors.primary.opacity(0.1))
-                    .cornerRadius(12)
-                }
-                
-                Button {
-                    onDismiss()
-                } label: {
-                    HStack {
-                        Image(systemName: "arrow.triangle.2.circlepath")
-                        Text("Try Another")
-                    }
-                    .font(.custom("Nunito-SemiBold", size: 16))
-                    .foregroundColor(themeManager.colors.text)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 44)
-                    .background(themeManager.colors.surface)
-                    .cornerRadius(12)
+            )
+        }
+        .transition(.move(edge: .bottom).combined(with: .opacity))
+        .onAppear {
+            withAnimation {
+                animateIn = true
+            }
+            if isPositive {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                    showConfetti = true
                 }
             }
         }
-        .padding(24)
-        .background(
-            RoundedRectangle(cornerRadius: 24)
-                .fill(themeManager.colors.background)
-                .shadow(color: Color.black.opacity(0.15), radius: 20, x: 0, y: 10)
-        )
-        .padding(.horizontal)
     }
 }
 

@@ -148,11 +148,17 @@ struct ReframeScreen: View {
                         }
                         
                         if viewModel.showReflectSuggestion {
-                            Text("This sounds like a reflection. You can log these anytime under Reflect ✨")
-                                .font(.custom("Nunito-Regular", size: 14))
-                                .foregroundColor(themeManager.colors.textLight)
-                                .multilineTextAlignment(.center)
-                                .padding(.top, 8)
+                            VStack(spacing: 8) {
+                                Text("This is a positive thought! 💫")
+                                    .font(.custom("Nunito-SemiBold", size: 14))
+                                    .foregroundColor(themeManager.colors.textLight)
+                                
+                                Text("You can save your daily reframe limit by using the Reflect tab instead - it's perfect for capturing and celebrating these moments.")
+                                    .font(.custom("Nunito-Regular", size: 14))
+                                    .foregroundColor(themeManager.colors.textLight)
+                                    .multilineTextAlignment(.center)
+                            }
+                            .padding(.top, 8)
                         }
                     }
                     .padding(.horizontal)
@@ -178,9 +184,19 @@ struct ReframeScreen: View {
                             .padding(.horizontal)
                         
                         ForEach(viewModel.reframes) { reframe in
-                            ReframeItemView(reframe: reframe) {
-                                reframeToDelete = reframe
-                                showDeleteConfirmation = true
+                            VStack(spacing: 12) {
+                                ReframeItemView(reframe: reframe) {
+                                    reframeToDelete = reframe
+                                    showDeleteConfirmation = true
+                                }
+                                
+                                if reframe.category == "Positive Reflection" {
+                                    Text("💫 This was saved as a positive reflection - you can use the Reflect tab for these!")
+                                        .font(.custom("Nunito-Regular", size: 12))
+                                        .foregroundColor(themeManager.colors.textLight)
+                                        .multilineTextAlignment(.center)
+                                        .padding(.horizontal, 8)
+                                }
                             }
                             .padding(.horizontal)
                         }

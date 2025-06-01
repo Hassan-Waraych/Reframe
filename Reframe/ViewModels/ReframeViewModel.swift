@@ -127,13 +127,15 @@ class ReframeViewModel: ObservableObject {
                 
             case .nonsense:
                 await MainActor.run {
-                    self.state = .error("I'm not quite sure how to reflect on that. Try sharing something that's been on your mind.")
-                    self.errorMessage = "I'm not quite sure how to reflect on that. Try sharing something that's been on your mind."
-                    self.showError = true
-                }
-                // Reset the state after a short delay
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
-                    self?.resetState()
+                    let nonsenseReframe = Reframe(
+                        userId: Auth.auth().currentUser?.uid ?? "nonsense",
+                        originalThought: originalThought,
+                        reframedThought: "I'm not quite sure how to reflect on that. Try sharing something that's been on your mind.",
+                        timestamp: Date(),
+                        category: "Nonsense"
+                    )
+                    self.currentReframe = nonsenseReframe
+                    self.state = .success
                 }
             }
             
