@@ -8,6 +8,7 @@ struct Reframe: Identifiable, Codable {
     let reframedThought: String
     let timestamp: Date
     let category: String?
+    var helped: Bool?
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -16,6 +17,7 @@ struct Reframe: Identifiable, Codable {
         case reframedThought
         case timestamp
         case category
+        case helped
     }
 }
 
@@ -28,6 +30,7 @@ extension Reframe {
         originalThought = try container.decode(String.self, forKey: .originalThought)
         reframedThought = try container.decode(String.self, forKey: .reframedThought)
         category = try container.decodeIfPresent(String.self, forKey: .category)
+        helped = try container.decodeIfPresent(Bool.self, forKey: .helped)
         
         // Handle Firestore Timestamp
         let timestamp = try container.decode(Timestamp.self, forKey: .timestamp)
@@ -41,6 +44,7 @@ extension Reframe {
         try container.encode(originalThought, forKey: .originalThought)
         try container.encode(reframedThought, forKey: .reframedThought)
         try container.encodeIfPresent(category, forKey: .category)
+        try container.encodeIfPresent(helped, forKey: .helped)
         try container.encode(Timestamp(date: timestamp), forKey: .timestamp)
     }
 } 

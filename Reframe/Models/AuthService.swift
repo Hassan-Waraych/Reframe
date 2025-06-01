@@ -12,6 +12,10 @@ class AuthService: ObservableObject {
     static let shared = AuthService()
     
     private init() {
+        // Ensure Firebase is initialized
+        if FirebaseApp.app() == nil {
+            FirebaseApp.configure()
+        }
         setupAuthStateListener()
     }
     

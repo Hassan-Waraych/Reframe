@@ -31,24 +31,25 @@ playground.xcworkspace
 # .swiftpm
 
 .build/
+.swiftpm/
+Package.resolved
 
 # CocoaPods
 #
 # We recommend against adding the Pods directory to your .gitignore. However
 # you should judge for yourself, the pros and cons are mentioned at:
 # https://guides.cocoapods.org/using/using-cocoapods.html#should-i-check-the-pods-directory-into-source-control
-#
-# Pods/
-#
+Pods/
+
 # Add this line if you want to avoid checking in source code from the Xcode workspace
-# *.xcworkspace
+*.xcworkspace
 
 # Carthage
 #
 # Add this line if you want to avoid checking in source code from Carthage dependencies.
 # Carthage/Checkouts
-
 Carthage/Build/
+Carthage/Checkouts
 
 # Accio dependency management
 Dependencies/
@@ -102,4 +103,30 @@ GoogleService-Info.plist
 .AppleDesktop
 Network Trash Folder
 Temporary Items
-.apdisk 
+.apdisk
+
+# Project specific
+Reframe.xcodeproj/
+Reframe/Info.plist
+Reframe/Secrets.swift
+Reframe/Config.swift
+Reframe/APIKeys.swift
+Reframe/Services/
+ReframeTests/
+
+# Build and derived data
+DerivedData/
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+
+# Other
+*.log
+*.swp
+*.swo 

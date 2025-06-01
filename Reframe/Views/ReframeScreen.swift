@@ -6,7 +6,6 @@ struct ReframeScreen: View {
     @State private var showDeleteConfirmation = false
     @State private var reframeToDelete: Reframe?
     
-    
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
@@ -31,28 +30,144 @@ struct ReframeScreen: View {
                         .background(themeManager.colors.surface)
                         .cornerRadius(12)
                         .lineLimit(3...6)
-                        .disabled(!viewModel.canCreateReframe)
-                        .onChange(of: viewModel.originalThought) { newValue in
-                        }
+                        .disabled(!viewModel.canCreateReframe || viewModel.state == .classifying || viewModel.state == .generating)
                     
-                    // Simple Button Implementation
+                    // Submit Button
                     Button {
                         Task {
                             await viewModel.createReframe()
                         }
                     } label: {
-                        Text("Reframe Thought")
-                            .font(.custom("Nunito-SemiBold", size: 16))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 56)
-                            .background(Color.blue)
-                            .cornerRadius(16)
+                        HStack {
+                            if case .classifying = viewModel.state {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                    .padding(.trailing, 8)
+                                Text("Analyzing...")
+                            } else if case .generating = viewModel.state {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                    .padding(.trailing, 8)
+                                Text("Generating...")
+                            } else {
+                                Text("Reframe Thought")
+                            }
+                        }
+                        .font(.custom("Nunito-SemiBold", size: 16))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 56)
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    themeManager.colors.primary,
+                                    themeManager.colors.primaryDark
+                                ]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .cornerRadius(16)
                     }
-                    .disabled(viewModel.isLoading || viewModel.originalThought.isEmpty || !viewModel.canCreateReframe)
-                    .opacity((viewModel.isLoading || viewModel.originalThought.isEmpty || !viewModel.canCreateReframe) ? 0.5 : 1)
+                    .disabled(
+                        viewModel.isLoading ||
+                        viewModel.originalThought.isEmpty ||
+                        !viewModel.canCreateReframe ||
+                        viewModel.state == .classifying ||
+                        viewModel.state == .generating
+                    )
                 }
                 .padding(.horizontal)
+                
+                // Current Reframe Section
+                if case .success = viewModel.state, let reframe = viewModel.currentReframe {
+                    VStack(spacing: 16) {
+                        // Original Thought
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Original Thought")
+                                .font(.custom("Nunito-Regular", size: 14))
+                                .foregroundColor(themeManager.colors.textLight)
+                            
+                            Text(reframe.originalThought)
+                                .font(.custom("Nunito-Regular", size: 16))
+                                .foregroundColor(themeManager.colors.text)
+                                .padding(12)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(themeManager.colors.surface)
+                                .cornerRadius(8)
+                        }
+                        
+                        // Reframed Thought
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Reframe")
+                                .font(.custom("Nunito-Regular", size: 14))
+                                .foregroundColor(themeManager.colors.textLight)
+                            
+                            Text(reframe.reframedThought)
+                                .font(.custom("Nunito-Regular", size: 16))
+                                .foregroundColor(themeManager.colors.text)
+                                .padding(12)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(themeManager.colors.primary.opacity(0.1))
+                                .cornerRadius(8)
+                        }
+                        
+                        // Action Buttons
+                        HStack(spacing: 12) {
+                            Button {
+                                Task {
+                                    await viewModel.markAsHelpful()
+                                }
+                            } label: {
+                                HStack {
+                                    Image(systemName: "heart.fill")
+                                    Text("That Helped")
+                                }
+                                .font(.custom("Nunito-SemiBold", size: 16))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 44)
+                                .background(themeManager.colors.primary)
+                                .cornerRadius(12)
+                            }
+                            
+                            Button {
+                                viewModel.resetState()
+                            } label: {
+                                HStack {
+                                    Image(systemName: "arrow.triangle.2.circlepath")
+                                    Text("Try Another")
+                                }
+                                .font(.custom("Nunito-SemiBold", size: 16))
+                                .foregroundColor(themeManager.colors.primary)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 44)
+                                .background(themeManager.colors.primary.opacity(0.1))
+                                .cornerRadius(12)
+                            }
+                        }
+                        
+                        if viewModel.showReflectSuggestion {
+                            Text("This sounds like a reflection. You can log these anytime under Reflect ✨")
+                                .font(.custom("Nunito-Regular", size: 14))
+                                .foregroundColor(themeManager.colors.textLight)
+                                .multilineTextAlignment(.center)
+                                .padding(.top, 8)
+                        }
+                    }
+                    .padding(.horizontal)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+                
+                // Error Message
+                if case .error(let message) = viewModel.state {
+                    Text(message)
+                        .font(.custom("Nunito-Regular", size: 14))
+                        .foregroundColor(themeManager.colors.error)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                        .transition(.opacity)
+                }
                 
                 // Reframes List
                 if !viewModel.reframes.isEmpty {
@@ -91,7 +206,9 @@ struct ReframeScreen: View {
             Text("Are you sure you want to delete this reframe? This action cannot be undone.")
         }
         .alert("Error", isPresented: $viewModel.showError) {
-            Button("OK", role: .cancel) {}
+            Button("OK", role: .cancel) {
+                viewModel.resetState()
+            }
         } message: {
             Text(viewModel.errorMessage ?? "An unknown error occurred")
         }
@@ -103,4 +220,5 @@ struct ReframeScreen: View {
 
 #Preview {
     ReframeScreen()
+        .environmentObject(ThemeManager())
 } 
