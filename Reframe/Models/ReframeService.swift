@@ -2,29 +2,39 @@ import Foundation
 import FirebaseFirestore
 import FirebaseAuth
 
+/// Service responsible for managing reframe data in Firestore
 class ReframeService: ObservableObject {
     static let shared = ReframeService()
     private let db = Firestore.firestore()
     private var reframeListener: ListenerRegistration?
     
+    // MARK: - Published Properties
     @Published var dailyReframeCount: Int = 0
     @Published var lastReframeDate: Date?
     @Published var errorMessage: String?
+    @Published var nonsenseTracker: NonsenseTracker?
     
+    // MARK: - Constants
     private let DAILY_LIMIT = 5
+    private let NONSENSE_LIMIT = 10
+    private let NONSENSE_COOLDOWN: TimeInterval = 24 * 3600 // 24 hours
     
+    // MARK: - Initialization
     private init() {
         setupAuthStateListener()
     }
     
+    // MARK: - Private Methods
     private func setupAuthStateListener() {
         Auth.auth().addStateDidChangeListener { [weak self] _, user in
-            if user != nil {
+            if let userId = user?.uid {
                 self?.setupReframeCountListener()
+                self?.setupNonsenseTrackerListener(userId: userId)
             } else {
                 self?.cleanupReframeListener()
                 self?.dailyReframeCount = 0
                 self?.lastReframeDate = nil
+                self?.nonsenseTracker = nil
             }
         }
     }
@@ -41,7 +51,6 @@ class ReframeService: ObservableObject {
             return
         }
         
-        // Get today's start timestamp
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         let todayTimestamp = Timestamp(date: today)
@@ -67,6 +76,61 @@ class ReframeService: ObservableObject {
             }
     }
     
+    private func setupNonsenseTrackerListener(userId: String) {
+        db.collection("nonsense_tracking")
+            .document(userId)
+            .addSnapshotListener { [weak self] snapshot, error in
+                if let data = snapshot?.data() {
+                    do {
+                        self?.nonsenseTracker = try snapshot?.data(as: NonsenseTracker.self)
+                    } catch {
+                        print("Error decoding nonsense tracker: \(error)")
+                    }
+                }
+            }
+    }
+    
+    private func updateNonsenseTracker() async throws {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        let now = Date()
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: now)
+        
+        var newCount = 1
+        var cooldownEndDate: Date? = nil
+        
+        if let tracker = nonsenseTracker {
+            // Reset count if it's a new day
+            if !calendar.isDate(tracker.lastNonsenseDate, inSameDayAs: today) {
+                newCount = 1
+            } else {
+                newCount = tracker.count + 1
+            }
+            
+            // Set cooldown if limit reached
+            if newCount >= NONSENSE_LIMIT {
+                cooldownEndDate = now.addingTimeInterval(NONSENSE_COOLDOWN)
+            }
+        }
+        
+        let newTracker = NonsenseTracker(
+            userId: userId,
+            count: newCount,
+            lastNonsenseDate: now,
+            cooldownEndDate: cooldownEndDate
+        )
+        
+        try await db.collection("nonsense_tracking")
+            .document(userId)
+            .setData(from: newTracker)
+        
+        await MainActor.run {
+            self.nonsenseTracker = newTracker
+        }
+    }
+    
+    // MARK: - Public Methods
     func canCreateReframe() -> Bool {
         guard Auth.auth().currentUser != nil else { return false }
         return dailyReframeCount < DAILY_LIMIT
@@ -77,19 +141,46 @@ class ReframeService: ObservableObject {
         return max(0, DAILY_LIMIT - dailyReframeCount)
     }
     
+    func canSubmitNonsense() -> Bool {
+        guard let tracker = nonsenseTracker else { return true }
+        
+        // Check if in cooldown
+        if let cooldownEndDate = tracker.cooldownEndDate {
+            return Date() > cooldownEndDate
+        }
+        
+        // Check if limit reached
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        if calendar.isDate(tracker.lastNonsenseDate, inSameDayAs: today) {
+            return tracker.count < NONSENSE_LIMIT
+        }
+        
+        return true
+    }
+    
+    func getNonsenseCooldownEndDate() -> Date? {
+        return nonsenseTracker?.cooldownEndDate
+    }
+    
     func createReframe(originalThought: String, reframedThought: String, category: String? = nil) async throws -> Reframe {
-        print("Creating reframe in Firestore...")
         guard let userId = Auth.auth().currentUser?.uid else {
-            print("No user ID found - user not authenticated")
             throw NSError(domain: "ReframeService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Please sign in to create reframes"])
         }
         
-        guard canCreateReframe() else {
-            print("Daily reframe limit reached")
-            throw NSError(domain: "ReframeService", code: -2, userInfo: [NSLocalizedDescriptionKey: "Daily reframe limit reached"])
+        // Check nonsense limits if this is a nonsense input
+        if category == "Nonsense" {
+            guard canSubmitNonsense() else {
+                throw NSError(domain: "ReframeService", code: -3, userInfo: [NSLocalizedDescriptionKey: "Please wait before submitting more unclear thoughts"])
+            }
+            try await updateNonsenseTracker()
+        } else {
+            // Regular reframe limits
+            guard canCreateReframe() else {
+                throw NSError(domain: "ReframeService", code: -2, userInfo: [NSLocalizedDescriptionKey: "Daily reframe limit reached"])
+            }
         }
         
-        print("Creating reframe object...")
         let reframe = Reframe(
             userId: userId,
             originalThought: originalThought,
@@ -100,14 +191,11 @@ class ReframeService: ObservableObject {
         )
         
         do {
-            print("Saving reframe to Firestore...")
             let docRef = try await db.collection("reframes").addDocument(from: reframe)
-            print("Reframe saved successfully with ID: \(docRef.documentID)")
             var savedReframe = reframe
             savedReframe.id = docRef.documentID
             return savedReframe
         } catch {
-            print("Error saving reframe to Firestore: \(error.localizedDescription)")
             throw error
         }
     }
@@ -121,9 +209,7 @@ class ReframeService: ObservableObject {
     }
     
     func getReframes() async throws -> [Reframe] {
-        print("Fetching reframes from Firestore...")
         guard let userId = Auth.auth().currentUser?.uid else {
-            print("No user ID found - user not authenticated")
             throw NSError(domain: "ReframeService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Please sign in to view reframes"])
         }
         
@@ -132,7 +218,6 @@ class ReframeService: ObservableObject {
             .order(by: "timestamp", descending: true)
             .getDocuments()
         
-        print("Found \(snapshot.documents.count) reframes")
         return try snapshot.documents.compactMap { document in
             try document.data(as: Reframe.self)
         }

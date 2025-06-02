@@ -2,6 +2,7 @@ import Foundation
 import SwiftUI
 import FirebaseAuth
 
+/// Represents the current state of the reframe process
 enum ReframeState: Equatable {
     case idle
     case classifying
@@ -24,8 +25,10 @@ enum ReframeState: Equatable {
     }
 }
 
+/// ViewModel responsible for managing the reframe feature's state and business logic
 @MainActor
 class ReframeViewModel: ObservableObject {
+    // MARK: - Published Properties
     @Published var originalThought: String = ""
     @Published var reframedThought: String = ""
     @Published var isLoading: Bool = false
@@ -35,24 +38,26 @@ class ReframeViewModel: ObservableObject {
     @Published var state: ReframeState = .idle
     @Published var showReflectSuggestion: Bool = false
     @Published var currentReframe: Reframe?
+    @Published var showNonsenseCooldown: Bool = false
     
+    // MARK: - Dependencies
     private let reframeService = ReframeService.shared
     private let aiService = AIService.shared
     
+    // MARK: - Computed Properties
     var remainingReframes: Int {
-        let remaining = reframeService.remainingReframes()
-        return remaining
+        reframeService.remainingReframes()
     }
     
     var canCreateReframe: Bool {
-        let canCreate = reframeService.canCreateReframe()
-        return canCreate
+        reframeService.canCreateReframe()
     }
     
     var isGuestMode: Bool {
-        return Auth.auth().currentUser == nil
+        Auth.auth().currentUser == nil
     }
     
+    // MARK: - Public Methods
     func createReframe() async {
         guard !originalThought.isEmpty else {
             errorMessage = "Please enter a thought to reframe"
@@ -60,60 +65,38 @@ class ReframeViewModel: ObservableObject {
             return
         }
         
-        print("Starting reframe process for thought: \(originalThought)")
         state = .classifying
         errorMessage = nil
         
         do {
-            // Step 1: Classify the thought
-            print("Classifying thought...")
             let classification = try await aiService.classifyThought(originalThought)
-            print("Classification result: \(classification)")
             
             switch classification {
             case .negative:
-                // Step 2: Generate reframe for negative thought
-                print("Generating reframe for negative thought...")
                 state = .generating
                 let reframe = try await aiService.generateReframe(for: originalThought)
-                print("Generated reframe: \(reframe)")
-                
-                // Step 3: Save to Firestore
-                print("Saving reframe to Firestore...")
                 let newReframe = try await reframeService.createReframe(
                     originalThought: originalThought,
                     reframedThought: reframe
                 )
-                print("Saved reframe with ID: \(newReframe.id ?? "unknown")")
                 
-                // Update UI state
                 await MainActor.run {
                     self.reframedThought = reframe
                     self.currentReframe = newReframe
                     self.state = .success
                 }
                 
-                print("Loading reframes to update UI...")
                 await loadReframes()
-                print("Reframe process completed successfully")
                 
             case .positive:
-                // For positive thoughts, generate an affirmation
-                print("Generating affirmation for positive thought...")
                 state = .generating
                 let affirmation = try await aiService.generateAffirmation(for: originalThought)
-                print("Generated affirmation: \(affirmation)")
-                
-                // Save as a positive reflection
-                print("Saving positive reflection to Firestore...")
                 let newReframe = try await reframeService.createReframe(
                     originalThought: originalThought,
                     reframedThought: affirmation,
                     category: "Positive Reflection"
                 )
-                print("Saved reflection with ID: \(newReframe.id ?? "unknown")")
                 
-                // Update UI state
                 await MainActor.run {
                     self.reframedThought = affirmation
                     self.currentReframe = newReframe
@@ -121,31 +104,37 @@ class ReframeViewModel: ObservableObject {
                     self.state = .success
                 }
                 
-                print("Loading reframes to update UI...")
                 await loadReframes()
-                print("Reflection process completed successfully")
                 
             case .nonsense:
-                await MainActor.run {
-                    let nonsenseReframe = Reframe(
-                        userId: Auth.auth().currentUser?.uid ?? "nonsense",
+                do {
+                    let nonsenseReframe = try await reframeService.createReframe(
                         originalThought: originalThought,
                         reframedThought: "I'm not quite sure how to reflect on that. Try sharing something that's been on your mind.",
-                        timestamp: Date(),
                         category: "Nonsense"
                     )
-                    self.currentReframe = nonsenseReframe
-                    self.state = .success
+                    
+                    await MainActor.run {
+                        self.currentReframe = nonsenseReframe
+                        self.state = .success
+                    }
+                } catch {
+                    if let error = error as NSError?, error.code == -3 {
+                        await MainActor.run {
+                            self.showNonsenseCooldown = true
+                            self.state = .idle
+                        }
+                    } else {
+                        throw error
+                    }
                 }
             }
             
-            // Clear input after successful processing
             await MainActor.run {
                 self.originalThought = ""
             }
             
         } catch {
-            print("Error in reframe process: \(error.localizedDescription)")
             await MainActor.run {
                 self.state = .error(error.localizedDescription)
                 self.errorMessage = error.localizedDescription
