@@ -40,6 +40,7 @@ class ReframeViewModel: ObservableObject {
     @Published var currentReframe: Reframe?
     @Published var showNonsenseCooldown: Bool = false
     @Published var selectedMode: HomeOption = .reframe
+    @Published var isCurrentReframeLogged: Bool = false
     
     // MARK: - Dependencies
     private let reframeService = ReframeService.shared
@@ -91,6 +92,7 @@ class ReframeViewModel: ObservableObject {
                 await MainActor.run {
                     self.reframedThought = reframe
                     self.currentReframe = newReframe
+                    self.isCurrentReframeLogged = journalService.isReframeLogged(reframe: newReframe)
                     self.state = .success
                 }
                 
@@ -108,6 +110,7 @@ class ReframeViewModel: ObservableObject {
                 await MainActor.run {
                     self.reframedThought = affirmation
                     self.currentReframe = newReframe
+                    self.isCurrentReframeLogged = journalService.isReframeLogged(reframe: newReframe)
                     self.showReflectSuggestion = true
                     self.state = .success
                 }
@@ -124,6 +127,7 @@ class ReframeViewModel: ObservableObject {
                     
                     await MainActor.run {
                         self.currentReframe = nonsenseReframe
+                        self.isCurrentReframeLogged = journalService.isReframeLogged(reframe: nonsenseReframe)
                         self.state = .success
                     }
                 } catch {
@@ -239,6 +243,7 @@ class ReframeViewModel: ObservableObject {
         showError = false
         currentReframe = nil
         reframedThought = ""
+        isCurrentReframeLogged = false
     }
     
     func markAsHelpful() async {
@@ -260,6 +265,9 @@ class ReframeViewModel: ObservableObject {
         
         do {
             try await journalService.logReframeToJournal(reframe: reframe)
+            await MainActor.run {
+                self.isCurrentReframeLogged = true
+            }
         } catch {
             await MainActor.run {
                 self.errorMessage = error.localizedDescription

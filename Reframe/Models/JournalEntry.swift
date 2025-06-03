@@ -7,6 +7,7 @@ struct JournalEntry: Identifiable, Codable {
     let content: String
     let timestamp: Date
     let category: String
+    let reframeId: String?
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -14,5 +15,6 @@ struct JournalEntry: Identifiable, Codable {
         case content
         case timestamp
         case category
+        case reframeId
     }
 } 

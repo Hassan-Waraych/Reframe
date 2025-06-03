@@ -176,16 +176,17 @@ struct ReframeResultView: View {
                         } label: {
                             HStack {
                                 Image(systemName: "book.fill")
-                                Text("Log to Journal")
+                                Text(viewModel.isCurrentReframeLogged ? "Logged to Journal" : "Log to Journal")
                             }
                             .font(.system(size: 15, weight: .semibold, design: .rounded))
-                            .foregroundColor(themeManager.colors.text)
+                            .foregroundColor(viewModel.isCurrentReframeLogged ? themeManager.colors.textLight : themeManager.colors.text)
                             .frame(maxWidth: .infinity)
                             .frame(height: 40)
-                            .background(themeManager.colors.surface)
+                            .background(viewModel.isCurrentReframeLogged ? themeManager.colors.surface.opacity(0.5) : themeManager.colors.surface)
                             .cornerRadius(10)
                             .shadow(color: Color.black.opacity(0.03), radius: 1, x: 0, y: 1)
                         }
+                        .disabled(viewModel.isCurrentReframeLogged)
                     }
                     
                     Button {
