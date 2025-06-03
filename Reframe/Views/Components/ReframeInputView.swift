@@ -8,6 +8,7 @@ struct ReframeInputView: View {
     @Binding var showReframeResult: Bool
     @Binding var currentQuote: String
     let quotes: [String]
+    @FocusState private var isInputFocused: Bool
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -37,6 +38,7 @@ struct ReframeInputView: View {
                     )
                     .scrollContentBackground(.hidden)
                     .disabled(selectedMode == .reframe ? !viewModel.canCreateReframe : false)
+                    .focused($isInputFocused)
             }
             
             Button(action: {
@@ -88,6 +90,9 @@ struct ReframeInputView: View {
             }
             .disabled(viewModel.isLoading || viewModel.originalThought.isEmpty || (selectedMode == .reframe && !viewModel.canCreateReframe))
             .opacity((viewModel.isLoading || viewModel.originalThought.isEmpty || (selectedMode == .reframe && !viewModel.canCreateReframe)) ? 0.6 : 1)
+        }
+        .onTapGesture {
+            isInputFocused = false
         }
     }
 }
