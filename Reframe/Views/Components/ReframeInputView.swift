@@ -11,13 +11,13 @@ struct ReframeInputView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("What's on your mind?")
+            Text(selectedMode == .reframe ? "What's on your mind?" : "What would you like to reflect on?")
                 .font(.custom("Quicksand-SemiBold", size: 20))
                 .foregroundColor(themeManager.colors.text)
             
             ZStack(alignment: .topLeading) {
                 if viewModel.originalThought.isEmpty {
-                    Text("Type your thoughts here...")
+                    Text(selectedMode == .reframe ? "Type your thoughts here..." : "Write your reflection here...")
                         .font(.custom("Nunito-Regular", size: 16))
                         .foregroundColor(themeManager.colors.textLight)
                         .padding(.horizontal, 16)
@@ -36,14 +36,20 @@ struct ReframeInputView: View {
                             .stroke(themeManager.colors.border, lineWidth: 1)
                     )
                     .scrollContentBackground(.hidden)
-                    .disabled(!viewModel.canCreateReframe)
+                    .disabled(selectedMode == .reframe ? !viewModel.canCreateReframe : false)
             }
             
             Button(action: {
                 Task {
-                    await viewModel.createReframe()
+                    if selectedMode == .reframe {
+                        await viewModel.createReframe()
+                        withAnimation(.spring()) {
+                            currentQuote = quotes.randomElement() ?? quotes[0]
+                        }
+                    } else {
+                        await viewModel.createReflection()
+                    }
                     withAnimation(.spring()) {
-                        currentQuote = quotes.randomElement() ?? quotes[0]
                         showReframeResult = true
                     }
                 }
@@ -53,9 +59,9 @@ struct ReframeInputView: View {
                         ProgressView()
                             .progressViewStyle(CircularProgressViewStyle(tint: .white))
                             .padding(.trailing, 8)
-                        Text(viewModel.state == .classifying ? "Analyzing..." : "Generating...")
+                        Text(viewModel.state == .classifying ? "Analyzing..." : "Saving...")
                     } else {
-                        Text("Submit")
+                        Text(selectedMode == .reframe ? "Submit" : "Save Reflection")
                         Image(systemName: "arrow.right")
                             .font(.system(size: 18, weight: .semibold))
                     }
@@ -80,8 +86,8 @@ struct ReframeInputView: View {
                 .cornerRadius(16)
                 .shadow(color: (selectedMode == .reframe ? themeManager.colors.primary : themeManager.colors.secondary).opacity(0.3), radius: 12, x: 0, y: 6)
             }
-            .disabled(viewModel.isLoading || viewModel.originalThought.isEmpty || !viewModel.canCreateReframe)
-            .opacity((viewModel.isLoading || viewModel.originalThought.isEmpty || !viewModel.canCreateReframe) ? 0.6 : 1)
+            .disabled(viewModel.isLoading || viewModel.originalThought.isEmpty || (selectedMode == .reframe && !viewModel.canCreateReframe))
+            .opacity((viewModel.isLoading || viewModel.originalThought.isEmpty || (selectedMode == .reframe && !viewModel.canCreateReframe)) ? 0.6 : 1)
         }
     }
 }

@@ -58,6 +58,7 @@ class ReframeService: ObservableObject {
         reframeListener = db.collection("reframes")
             .whereField("userId", isEqualTo: userId)
             .whereField("timestamp", isGreaterThanOrEqualTo: todayTimestamp)
+            .whereField("category", isNotEqualTo: "Reflection") // Only count non-reflection entries
             .addSnapshotListener { [weak self] snapshot, error in
                 if let error = error {
                     self?.errorMessage = error.localizedDescription
@@ -168,16 +169,19 @@ class ReframeService: ObservableObject {
             throw NSError(domain: "ReframeService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Please sign in to create reframes"])
         }
         
-        // Check nonsense limits if this is a nonsense input
-        if category == "Nonsense" {
-            guard canSubmitNonsense() else {
-                throw NSError(domain: "ReframeService", code: -3, userInfo: [NSLocalizedDescriptionKey: "Please wait before submitting more unclear thoughts"])
-            }
-            try await updateNonsenseTracker()
-        } else {
-            // Regular reframe limits
-            guard canCreateReframe() else {
-                throw NSError(domain: "ReframeService", code: -2, userInfo: [NSLocalizedDescriptionKey: "Daily reframe limit reached"])
+        // Skip limit checks for reflections
+        if category != "Reflection" {
+            // Check nonsense limits if this is a nonsense input
+            if category == "Nonsense" {
+                guard canSubmitNonsense() else {
+                    throw NSError(domain: "ReframeService", code: -3, userInfo: [NSLocalizedDescriptionKey: "Please wait before submitting more unclear thoughts"])
+                }
+                try await updateNonsenseTracker()
+            } else {
+                // Regular reframe limits
+                guard canCreateReframe() else {
+                    throw NSError(domain: "ReframeService", code: -2, userInfo: [NSLocalizedDescriptionKey: "Daily reframe limit reached"])
+                }
             }
         }
         

@@ -39,6 +39,7 @@ class ReframeViewModel: ObservableObject {
     @Published var showReflectSuggestion: Bool = false
     @Published var currentReframe: Reframe?
     @Published var showNonsenseCooldown: Bool = false
+    @Published var selectedMode: HomeOption = .reframe
     
     // MARK: - Dependencies
     private let reframeService = ReframeService.shared
@@ -46,11 +47,17 @@ class ReframeViewModel: ObservableObject {
     
     // MARK: - Computed Properties
     var remainingReframes: Int {
-        reframeService.remainingReframes()
+        // Only count non-reflection entries
+        let usedReframes = reframes.filter { $0.category != "Reflection" }.count
+        return 5 - usedReframes
     }
     
     var canCreateReframe: Bool {
-        reframeService.canCreateReframe()
+        // Only check limit for reframes, not reflections
+        if selectedMode == .reflect {
+            return true
+        }
+        return remainingReframes > 0
     }
     
     var isGuestMode: Bool {
@@ -129,6 +136,43 @@ class ReframeViewModel: ObservableObject {
                     }
                 }
             }
+            
+            await MainActor.run {
+                self.originalThought = ""
+            }
+            
+        } catch {
+            await MainActor.run {
+                self.state = .error(error.localizedDescription)
+                self.errorMessage = error.localizedDescription
+                self.showError = true
+            }
+        }
+    }
+    
+    func createReflection() async {
+        guard !originalThought.isEmpty else {
+            errorMessage = "Please enter your reflection"
+            showError = true
+            return
+        }
+        
+        state = .generating
+        errorMessage = nil
+        
+        do {
+            let newReframe = try await reframeService.createReframe(
+                originalThought: originalThought,
+                reframedThought: originalThought, // For reflections, we keep the original thought
+                category: "Reflection"
+            )
+            
+            await MainActor.run {
+                self.currentReframe = newReframe
+                self.state = .success
+            }
+            
+            await loadReframes()
             
             await MainActor.run {
                 self.originalThought = ""

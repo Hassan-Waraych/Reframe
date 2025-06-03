@@ -47,6 +47,7 @@ struct HomeScreen: View {
                     ) {
                         withAnimation(.spring()) {
                             selectedMode = .reframe
+                            viewModel.selectedMode = .reframe
                         }
                     }
                     
@@ -57,6 +58,7 @@ struct HomeScreen: View {
                     ) {
                         withAnimation(.spring()) {
                             selectedMode = .reflect
+                            viewModel.selectedMode = .reflect
                         }
                     }
                 }
@@ -111,7 +113,7 @@ struct HomeScreen: View {
                 .padding(.horizontal)
                 
                 // Latest Reframe
-                if let latestReframe = viewModel.reframes.first {
+                if let latestReframe = viewModel.reframes.first(where: { $0.category != "Reflection" }) {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Latest Reframe")
                             .font(.custom("Quicksand-Bold", size: 20))

@@ -14,6 +14,10 @@ struct ReframeResultView: View {
         reframe.category == "Positive Reflection"
     }
     
+    var isReflection: Bool {
+        reframe.category == "Reflection"
+    }
+    
     var body: some View {
         ZStack {
             Color.black.opacity(0.4)
@@ -22,7 +26,7 @@ struct ReframeResultView: View {
             VStack(spacing: 14) {
                 // Header
                 HStack {
-                    Text("Your Reframe")
+                    Text(isReflection ? "Your Reflection" : "Your Reframe")
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                         .foregroundColor(themeManager.colors.text)
                     Spacer()
@@ -40,44 +44,66 @@ struct ReframeResultView: View {
                         .frame(maxWidth: .infinity, maxHeight: 0)
                 }
                 
-                // Original Thought
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Original Thought")
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .foregroundColor(themeManager.colors.textLight)
-                    Text(reframe.originalThought)
-                        .font(.system(size: 15, weight: .regular, design: .rounded))
-                        .foregroundColor(themeManager.colors.text)
-                        .padding(10)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(themeManager.colors.surface)
-                        )
+                if isReflection {
+                    // Reflection View
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Your Reflection")
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .foregroundColor(themeManager.colors.secondary)
+                        Text(reframe.originalThought)
+                            .font(.system(size: 15, weight: .medium, design: .rounded))
+                            .foregroundColor(themeManager.colors.text)
+                            .padding(12)
+                            .frame(maxWidth: .infinity, minHeight: 120, alignment: .leading)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(themeManager.colors.secondary.opacity(0.07))
+                                    .shadow(color: themeManager.colors.secondary.opacity(0.08), radius: 6, x: 0, y: 2)
+                            )
+                    }
+                    .opacity(animateIn ? 1 : 0)
+                    .offset(y: animateIn ? 0 : 15)
+                    .animation(.easeOut(duration: 0.35).delay(0.13), value: animateIn)
+                } else {
+                    // Original Thought
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Original Thought")
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .foregroundColor(themeManager.colors.textLight)
+                        Text(reframe.originalThought)
+                            .font(.system(size: 15, weight: .regular, design: .rounded))
+                            .foregroundColor(themeManager.colors.text)
+                            .padding(10)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(themeManager.colors.surface)
+                            )
+                    }
+                    .opacity(animateIn ? 1 : 0)
+                    .offset(y: animateIn ? 0 : 10)
+                    .animation(.easeOut(duration: 0.3).delay(0.08), value: animateIn)
+                    
+                    // Reframed Thought
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Reframe")
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .foregroundColor(themeManager.colors.primary)
+                        Text(reframe.reframedThought)
+                            .font(.system(size: 15, weight: .medium, design: .rounded))
+                            .foregroundColor(themeManager.colors.text)
+                            .padding(12)
+                            .frame(maxWidth: .infinity, minHeight: 120, alignment: .leading)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(themeManager.colors.primary.opacity(0.07))
+                                    .shadow(color: themeManager.colors.primary.opacity(0.08), radius: 6, x: 0, y: 2)
+                            )
+                    }
+                    .opacity(animateIn ? 1 : 0)
+                    .offset(y: animateIn ? 0 : 15)
+                    .animation(.easeOut(duration: 0.35).delay(0.13), value: animateIn)
                 }
-                .opacity(animateIn ? 1 : 0)
-                .offset(y: animateIn ? 0 : 10)
-                .animation(.easeOut(duration: 0.3).delay(0.08), value: animateIn)
-                
-                // Reframed Thought
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Reframe")
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .foregroundColor(themeManager.colors.primary)
-                    Text(reframe.reframedThought)
-                        .font(.system(size: 15, weight: .medium, design: .rounded))
-                        .foregroundColor(themeManager.colors.text)
-                        .padding(12)
-                        .frame(maxWidth: .infinity, minHeight: 120, alignment: .leading)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(themeManager.colors.primary.opacity(0.07))
-                                .shadow(color: themeManager.colors.primary.opacity(0.08), radius: 6, x: 0, y: 2)
-                        )
-                }
-                .opacity(animateIn ? 1 : 0)
-                .offset(y: animateIn ? 0 : 15)
-                .animation(.easeOut(duration: 0.35).delay(0.13), value: animateIn)
                 
                 // Soft nudge for positive reflections
                 if reframe.category == "Positive Reflection" {
@@ -113,32 +139,34 @@ struct ReframeResultView: View {
                 
                 // Action Buttons
                 VStack(spacing: 10) {
-                    Button {
-                        Task {
-                            await viewModel.markAsHelpful()
-                            onDismiss()
-                        }
-                    } label: {
-                        HStack {
-                            Image(systemName: "heart.fill")
-                            Text("That Helped")
-                        }
-                        .font(.system(size: 15, weight: .semibold, design: .rounded))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 40)
-                        .background(
-                            LinearGradient(
-                                gradient: Gradient(colors: [
-                                    themeManager.colors.primary,
-                                    themeManager.colors.primaryDark
-                                ]),
-                                startPoint: .leading,
-                                endPoint: .trailing
+                    if !isReflection {
+                        Button {
+                            Task {
+                                await viewModel.markAsHelpful()
+                                onDismiss()
+                            }
+                        } label: {
+                            HStack {
+                                Image(systemName: "heart.fill")
+                                Text("That Helped")
+                            }
+                            .font(.system(size: 15, weight: .semibold, design: .rounded))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 40)
+                            .background(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        themeManager.colors.primary,
+                                        themeManager.colors.primaryDark
+                                    ]),
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
                             )
-                        )
-                        .cornerRadius(10)
-                        .shadow(color: themeManager.colors.primary.opacity(0.13), radius: 5, x: 0, y: 2)
+                            .cornerRadius(10)
+                            .shadow(color: themeManager.colors.primary.opacity(0.13), radius: 5, x: 0, y: 2)
+                        }
                     }
                     
                     Button {
@@ -149,10 +177,10 @@ struct ReframeResultView: View {
                             Text("Log to Journal")
                         }
                         .font(.system(size: 15, weight: .semibold, design: .rounded))
-                        .foregroundColor(themeManager.colors.primary)
+                        .foregroundColor(isReflection ? themeManager.colors.secondary : themeManager.colors.primary)
                         .frame(maxWidth: .infinity)
                         .frame(height: 40)
-                        .background(themeManager.colors.primary.opacity(0.09))
+                        .background(isReflection ? themeManager.colors.secondary.opacity(0.09) : themeManager.colors.primary.opacity(0.09))
                         .cornerRadius(10)
                     }
                     
@@ -160,8 +188,8 @@ struct ReframeResultView: View {
                         onDismiss()
                     } label: {
                         HStack {
-                            Image(systemName: "arrow.triangle.2.circlepath")
-                            Text("Try Another")
+                            Image(systemName: isReflection ? "plus" : "arrow.triangle.2.circlepath")
+                            Text(isReflection ? "Add Another" : "Try Another")
                         }
                         .font(.system(size: 15, weight: .semibold, design: .rounded))
                         .foregroundColor(themeManager.colors.text)
@@ -186,7 +214,7 @@ struct ReframeResultView: View {
                     .shadow(color: Color.black.opacity(0.18), radius: 24, x: 0, y: 10)
                     .overlay(
                         RoundedRectangle(cornerRadius: 28)
-                            .stroke(themeManager.colors.primary.opacity(0.10), lineWidth: 1)
+                            .stroke(isReflection ? themeManager.colors.secondary.opacity(0.10) : themeManager.colors.primary.opacity(0.10), lineWidth: 1)
                     )
             )
         }
@@ -207,11 +235,13 @@ struct ReframeResultView: View {
 #Preview {
     ReframeResultView(
         reframe: Reframe(
+            id: "1",
             userId: "preview",
-            originalThought: "I'm not good enough",
-            reframedThought: "I am capable of growth and improvement",
+            originalThought: "I'm feeling anxious about my presentation tomorrow.",
+            reframedThought: "I'm prepared and ready to share my knowledge with others.",
             timestamp: Date(),
-            category: "Positive Reflection"
+            category: "Reflection",
+            helped: false
         ),
         viewModel: ReframeViewModel(),
         onDismiss: {}
