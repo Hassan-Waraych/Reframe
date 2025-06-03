@@ -167,6 +167,25 @@ struct ReframeResultView: View {
                             .cornerRadius(10)
                             .shadow(color: themeManager.colors.primary.opacity(0.13), radius: 5, x: 0, y: 2)
                         }
+                        
+                        Button {
+                            Task {
+                                await viewModel.logToJournal()
+                                onDismiss()
+                            }
+                        } label: {
+                            HStack {
+                                Image(systemName: "book.fill")
+                                Text("Log to Journal")
+                            }
+                            .font(.system(size: 15, weight: .semibold, design: .rounded))
+                            .foregroundColor(themeManager.colors.text)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 40)
+                            .background(themeManager.colors.surface)
+                            .cornerRadius(10)
+                            .shadow(color: Color.black.opacity(0.03), radius: 1, x: 0, y: 1)
+                        }
                     }
                     
                     Button {

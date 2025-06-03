@@ -8,6 +8,7 @@ struct DevSettingsScreen: View {
     @State private var showOnboardingResetAlert = false
     @State private var showReframeLimitResetAlert = false
     @State private var showClearReframesAlert = false
+    @State private var showClearJournalAlert = false
     
     struct TestResults {
         let connection: Bool
@@ -133,6 +134,26 @@ struct DevSettingsScreen: View {
                     }
                 }
                 .padding(.horizontal)
+                
+                // Journal Section
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Journal")
+                        .font(.system(size: themeManager.typography.fontSize.h3, weight: .bold))
+                        .foregroundColor(themeManager.colors.text)
+                    
+                    Button(action: {
+                        showClearJournalAlert = true
+                    }) {
+                        Text("Clear All Journal Entries")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 48)
+                            .background(themeManager.colors.error)
+                            .cornerRadius(12)
+                    }
+                }
+                .padding(.horizontal)
             }
             .padding(.vertical)
         }
@@ -183,6 +204,20 @@ struct DevSettingsScreen: View {
             }
         } message: {
             Text("This will permanently delete all your reframes. This action cannot be undone.")
+        }
+        .alert("Clear All Journal Entries", isPresented: $showClearJournalAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Clear All", role: .destructive) {
+                Task {
+                    do {
+                        try await JournalService.shared.clearAllEntries()
+                    } catch {
+                        // Error is handled by the journalService
+                    }
+                }
+            }
+        } message: {
+            Text("This will permanently delete all your journal entries. This action cannot be undone.")
         }
     }
     

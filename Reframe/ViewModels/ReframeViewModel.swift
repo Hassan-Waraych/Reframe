@@ -254,4 +254,17 @@ class ReframeViewModel: ObservableObject {
             }
         }
     }
+    
+    func logToJournal() async {
+        guard let reframe = currentReframe else { return }
+        
+        do {
+            try await journalService.logReframeToJournal(reframe: reframe)
+        } catch {
+            await MainActor.run {
+                self.errorMessage = error.localizedDescription
+                self.showError = true
+            }
+        }
+    }
 } 
