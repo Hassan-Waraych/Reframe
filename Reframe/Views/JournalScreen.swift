@@ -68,6 +68,7 @@ struct JournalScreen: View {
 struct JournalEntryView: View {
     @EnvironmentObject var themeManager: ThemeManager
     let entry: JournalEntry
+    @State private var isExpanded = false
     
     private var isReframe: Bool {
         entry.category == "Reframe"
@@ -107,21 +108,35 @@ struct JournalEntryView: View {
             VStack(alignment: .leading, spacing: 12) {
                 if let parts = contentParts {
                     // Reframe Entry
-                    Text(parts.original)
-                        .font(.system(size: 15, weight: .regular, design: .rounded))
-                        .foregroundColor(themeManager.colors.text.opacity(0.8))
-                        .padding(.horizontal, 16)
-                    
-                    Text(parts.reframed)
-                        .font(.system(size: 15, weight: .medium, design: .rounded))
-                        .foregroundColor(themeManager.colors.text)
-                        .padding(12)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(entryColor.opacity(0.1))
-                        )
-                        .padding(.horizontal, 16)
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(parts.original)
+                            .font(.system(size: 15, weight: .regular, design: .rounded))
+                            .foregroundColor(themeManager.colors.text.opacity(0.8))
+                            .padding(.horizontal, 16)
+                        
+                        if isExpanded {
+                            Text(parts.reframed)
+                                .font(.system(size: 15, weight: .medium, design: .rounded))
+                                .foregroundColor(themeManager.colors.text)
+                                .padding(12)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(entryColor.opacity(0.1))
+                                )
+                                .padding(.horizontal, 16)
+                                .transition(.opacity.combined(with: .move(edge: .top)))
+                        }
+                        
+                        HStack {
+                            Spacer()
+                            Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(entryColor)
+                                .padding(.trailing, 16)
+                                .padding(.bottom, 8)
+                        }
+                    }
                 } else {
                     // Reflection Entry
                     Text(entry.content)
@@ -141,6 +156,14 @@ struct JournalEntryView: View {
             RoundedRectangle(cornerRadius: 16)
                 .stroke(entryColor.opacity(0.2), lineWidth: 1)
         )
+        .onTapGesture {
+            if isReframe {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    isExpanded.toggle()
+                }
+            }
+        }
+        .contentShape(Rectangle())
     }
 }
 
