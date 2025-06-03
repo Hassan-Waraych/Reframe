@@ -44,6 +44,7 @@ class ReframeViewModel: ObservableObject {
     // MARK: - Dependencies
     private let reframeService = ReframeService.shared
     private let aiService = AIService.shared
+    private let journalService = JournalService.shared
     
     // MARK: - Computed Properties
     var remainingReframes: Int {
@@ -161,11 +162,15 @@ class ReframeViewModel: ObservableObject {
         errorMessage = nil
         
         do {
+            // Create the reframe entry
             let newReframe = try await reframeService.createReframe(
                 originalThought: originalThought,
                 reframedThought: originalThought, // For reflections, we keep the original thought
                 category: "Reflection"
             )
+            
+            // Add to journal
+            try await journalService.addEntry(content: originalThought)
             
             await MainActor.run {
                 self.currentReframe = newReframe

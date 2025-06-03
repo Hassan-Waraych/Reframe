@@ -170,21 +170,6 @@ struct ReframeResultView: View {
                     }
                     
                     Button {
-                        // TODO: Implement journal logging
-                    } label: {
-                        HStack {
-                            Image(systemName: "book.fill")
-                            Text("Log to Journal")
-                        }
-                        .font(.system(size: 15, weight: .semibold, design: .rounded))
-                        .foregroundColor(isReflection ? themeManager.colors.secondary : themeManager.colors.primary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 40)
-                        .background(isReflection ? themeManager.colors.secondary.opacity(0.09) : themeManager.colors.primary.opacity(0.09))
-                        .cornerRadius(10)
-                    }
-                    
-                    Button {
                         onDismiss()
                     } label: {
                         HStack {
