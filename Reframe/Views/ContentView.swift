@@ -54,11 +54,11 @@ struct ContentView: View {
                     .tag(1)
                     
                     NavigationStack {
-                        RemindersScreen(selectedTab: $selectedTab)
+                        InsightsScreen(selectedTab: $selectedTab)
                     }
                     .tabItem {
-                        Image(systemName: "bell.fill")
-                        Text("Reminders")
+                        Image(systemName: "chart.line.uptrend.xyaxis")
+                        Text("Insights")
                     }
                     .tag(2)
                     
