@@ -10,6 +10,7 @@ struct ReframeResultView: View {
     @State private var animateIn = false
     @State private var showConfetti = false
     @State private var isMarkedAsHelpful = false
+    @State private var isLoggedToJournal = false
     
     var isPositive: Bool {
         reframe.category == "Positive Reflection"
@@ -173,24 +174,24 @@ struct ReframeResultView: View {
                         Button {
                             Task {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                    viewModel.isCurrentReframeLogged = true
+                                    isLoggedToJournal = true
                                 }
                                 await viewModel.logToJournal()
                             }
                         } label: {
                             HStack {
-                                Image(systemName: viewModel.isCurrentReframeLogged ? "checkmark.circle.fill" : "book.fill")
-                                Text(viewModel.isCurrentReframeLogged ? "Saved to Journal" : "Add to Journal")
+                                Image(systemName: isLoggedToJournal ? "checkmark.circle.fill" : "book.fill")
+                                Text(isLoggedToJournal ? "Saved to Journal" : "Add to Journal")
                             }
                             .font(.system(size: 15, weight: .semibold, design: .rounded))
-                            .foregroundColor(viewModel.isCurrentReframeLogged ? themeManager.colors.textLight : themeManager.colors.text)
+                            .foregroundColor(isLoggedToJournal ? themeManager.colors.textLight : themeManager.colors.text)
                             .frame(maxWidth: .infinity)
                             .frame(height: 40)
-                            .background(viewModel.isCurrentReframeLogged ? themeManager.colors.surface.opacity(0.5) : themeManager.colors.surface)
+                            .background(isLoggedToJournal ? themeManager.colors.surface.opacity(0.5) : themeManager.colors.surface)
                             .cornerRadius(10)
                             .shadow(color: Color.black.opacity(0.03), radius: 1, x: 0, y: 1)
                         }
-                        .disabled(viewModel.isCurrentReframeLogged)
+                        .disabled(isLoggedToJournal)
                     }
                     
                     Button {
@@ -235,6 +236,14 @@ struct ReframeResultView: View {
             if isPositive {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                     showConfetti = true
+                }
+            }
+            
+            // Check journal status when view appears
+            Task {
+                isLoggedToJournal = viewModel.journalService.isReframeLogged(reframe: reframe)
+                if let entry = viewModel.journalService.getJournalEntryForReframe(reframe: reframe) {
+                    isMarkedAsHelpful = entry.isFavorite
                 }
             }
         }

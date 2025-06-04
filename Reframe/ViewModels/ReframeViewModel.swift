@@ -45,7 +45,7 @@ class ReframeViewModel: ObservableObject {
     // MARK: - Dependencies
     private let reframeService: ReframeService
     private let aiService: AIService
-    private let journalService: JournalService
+    let journalService: JournalService
     
     init(reframeService: ReframeService = .shared,
          aiService: AIService = .shared,
@@ -270,8 +270,15 @@ class ReframeViewModel: ObservableObject {
             } else {
                 // If not logged yet, add as a favorite
                 try await journalService.logReframeToJournal(reframe: reframe)
-                await MainActor.run {
-                    self.isCurrentReframeLogged = true
+                
+                // Wait a moment for the entry to be available
+                try await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+                
+                if let newEntry = journalService.getJournalEntryForReframe(reframe: reframe) {
+                    try await journalService.updateEntryFavoriteStatus(newEntry, isFavorite: true)
+                    await MainActor.run {
+                        self.isCurrentReframeLogged = true
+                    }
                 }
             }
             

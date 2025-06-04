@@ -116,24 +116,7 @@ struct JournalEntryView: View {
     }
     
     var body: some View {
-        ZStack {
-            // Delete button background
-            HStack {
-                Spacer()
-                Button {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                        showDeleteAlert = true
-                    }
-                } label: {
-                    Image(systemName: "trash.fill")
-                        .font(.system(size: 20))
-                        .foregroundColor(.white)
-                        .frame(width: 80)
-                        .frame(maxHeight: .infinity)
-                        .background(themeManager.colors.error)
-                }
-            }
-            
+        ZStack(alignment: .trailing) {
             // Main content
             VStack(spacing: 0) {
                 // Card Header
@@ -170,9 +153,11 @@ struct JournalEntryView: View {
                             Label("Delete Entry", systemImage: "trash.fill")
                         }
                     } label: {
-                        Image(systemName: "ellipsis.circle.fill")
-                            .font(.system(size: 20))
+                        Image(systemName: "ellipsis")
+                            .font(.system(size: 16, weight: .medium))
                             .foregroundColor(themeManager.colors.textLight)
+                            .frame(width: 32, height: 32)
+                            .contentShape(Rectangle())
                     }
                     
                     Text(entry.timestamp.formatted(date: .abbreviated, time: .shortened))
@@ -236,34 +221,50 @@ struct JournalEntryView: View {
                     .stroke(entryColor.opacity(0.2), lineWidth: 1)
             )
             .offset(x: offset)
-            .gesture(
-                DragGesture()
-                    .onChanged { gesture in
-                        if gesture.translation.width < 0 {
-                            offset = gesture.translation.width
-                        }
-                    }
-                    .onEnded { gesture in
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                            if gesture.translation.width < -50 {
-                                offset = -80
-                                isSwiped = true
-                            } else {
-                                offset = 0
-                                isSwiped = false
-                            }
-                        }
-                    }
-            )
-            .onTapGesture {
-                if isReframe {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                        isExpanded.toggle()
+            
+            // Delete button
+            Button {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    showDeleteAlert = true
+                }
+            } label: {
+                Image(systemName: "trash")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(themeManager.colors.error)
+                    .frame(width: 60)
+                    .frame(maxHeight: .infinity)
+            }
+            .opacity(isSwiped ? 1 : 0)
+            .offset(x: offset + 60)
+            
+        }
+        .gesture(
+            DragGesture()
+                .onChanged { gesture in
+                    if gesture.translation.width < 0 {
+                        offset = gesture.translation.width
                     }
                 }
+                .onEnded { gesture in
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        if gesture.translation.width < -30 {
+                            offset = -60
+                            isSwiped = true
+                        } else {
+                            offset = 0
+                            isSwiped = false
+                        }
+                    }
+                }
+        )
+        .onTapGesture {
+            if isReframe {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    isExpanded.toggle()
+                }
             }
-            .contentShape(Rectangle())
         }
+        .contentShape(Rectangle())
         .alert("Delete Entry", isPresented: $showDeleteAlert) {
             Button("Cancel", role: .cancel) {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
