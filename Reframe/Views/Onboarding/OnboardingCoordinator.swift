@@ -3,10 +3,12 @@ import SwiftUI
 class OnboardingCoordinator: ObservableObject {
     @Published var currentStep: OnboardingStep = .welcome
     @Published var hasCompletedOnboarding = false
+    @Published var assignedCoach: Coach?
     
     enum OnboardingStep {
         case welcome
         case emotionalFraming
+        case coachIntro
         case signUp
         case firstThought
     }
@@ -21,6 +23,15 @@ class OnboardingCoordinator: ObservableObject {
         case .welcome:
             currentStep = .emotionalFraming
         case .emotionalFraming:
+            // Assign coach based on emotional needs
+            if let savedNeeds = UserDefaults.standard.data(forKey: "selectedEmotionalNeeds"),
+               let decoded = try? JSONDecoder().decode([String].self, from: savedNeeds) {
+                assignedCoach = CoachService.assignCoach(emotionalNeeds: decoded)
+                currentStep = .coachIntro
+            } else {
+                currentStep = .signUp
+            }
+        case .coachIntro:
             currentStep = .signUp
         case .signUp:
             currentStep = .firstThought
@@ -32,6 +43,8 @@ class OnboardingCoordinator: ObservableObject {
     func skip() {
         switch currentStep {
         case .emotionalFraming:
+            currentStep = .signUp
+        case .coachIntro:
             currentStep = .signUp
         case .signUp:
             currentStep = .firstThought
@@ -45,6 +58,7 @@ class OnboardingCoordinator: ObservableObject {
     func reset() {
         currentStep = .welcome
         hasCompletedOnboarding = false
+        assignedCoach = nil
         UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
     }
     
@@ -79,6 +93,14 @@ struct OnboardingView: View {
                         insertion: .move(edge: .trailing),
                         removal: .move(edge: .leading)
                     ))
+            case .coachIntro:
+                if let coach = coordinator.assignedCoach {
+                    CoachIntroScreen(coach: coach)
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .trailing),
+                            removal: .move(edge: .leading)
+                        ))
+                }
             case .signUp:
                 SignUpScreen()
                     .transition(.asymmetric(

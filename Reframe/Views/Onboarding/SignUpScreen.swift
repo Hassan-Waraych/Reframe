@@ -1,4 +1,6 @@
 import SwiftUI
+import FirebaseFirestore
+import FirebaseAuth
 
 struct SignUpScreen: View {
     @EnvironmentObject var themeManager: ThemeManager
@@ -87,12 +89,12 @@ struct SignUpScreen: View {
                         .background(themeManager.colors.surface)
                         .cornerRadius(12)
                         
-                        if let error = authService.errorMessage {
-                            Text(error)
+                        // Error Message
+                        if let errorMessage = authService.errorMessage {
+                            Text(errorMessage)
                                 .font(.custom("Nunito-Regular", size: 14))
                                 .foregroundColor(.red)
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.horizontal, 4)
                         }
                         
                         // Action Button
@@ -133,58 +135,40 @@ struct SignUpScreen: View {
                         }) {
                             Text(isLoginMode ? "Don't have an account? Sign Up" : "Already have an account? Sign In")
                                 .font(.custom("Nunito-Medium", size: 16))
-                                .foregroundColor(themeManager.colors.primary)
-                        }
-                        
-                        // Divider
-                        HStack {
-                            Rectangle()
-                                .fill(themeManager.colors.border)
-                                .frame(height: 1)
-                            
-                            Text("or")
-                                .font(.custom("Nunito-Regular", size: 14))
                                 .foregroundColor(themeManager.colors.textLight)
-                                .padding(.horizontal, 16)
-                            
-                            Rectangle()
-                                .fill(themeManager.colors.border)
-                                .frame(height: 1)
                         }
                         
-                        // Social Buttons
-                        VStack(spacing: 12) {
-                            Button(action: handleGoogleSignIn) {
-                                HStack {
-                                    Image("google_logo")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 24, height: 24)
+                        // Social Sign In
+                        if !isLoginMode {
+                            VStack(spacing: 16) {
+                                Text("Or sign up with")
+                                    .font(.custom("Nunito-Regular", size: 14))
+                                    .foregroundColor(themeManager.colors.textLight)
+                                
+                                HStack(spacing: 16) {
+                                    // Google Sign In
+                                    Button(action: handleGoogleSignIn) {
+                                        Image("google_logo")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 24, height: 24)
+                                            .frame(maxWidth: .infinity)
+                                            .frame(height: 48)
+                                            .background(themeManager.colors.surface)
+                                            .cornerRadius(12)
+                                    }
                                     
-                                    Text("Continue with Google")
-                                        .font(.custom("Nunito-SemiBold", size: 16))
-                                        .foregroundColor(themeManager.colors.text)
+                                    // Apple Sign In
+                                    Button(action: handleAppleSignIn) {
+                                        Image(systemName: "apple.logo")
+                                            .font(.system(size: 24))
+                                            .foregroundColor(themeManager.colors.text)
+                                            .frame(maxWidth: .infinity)
+                                            .frame(height: 48)
+                                            .background(themeManager.colors.surface)
+                                            .cornerRadius(12)
+                                    }
                                 }
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 56)
-                                .background(themeManager.colors.surface)
-                                .cornerRadius(16)
-                            }
-                            
-                            Button(action: handleAppleSignIn) {
-                                HStack {
-                                    Image(systemName: "apple.logo")
-                                        .font(.system(size: 24))
-                                        .foregroundColor(themeManager.colors.text)
-                                    
-                                    Text("Continue with Apple")
-                                        .font(.custom("Nunito-SemiBold", size: 16))
-                                        .foregroundColor(themeManager.colors.text)
-                                }
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 56)
-                                .background(themeManager.colors.surface)
-                                .cornerRadius(16)
                             }
                         }
                         
@@ -224,6 +208,17 @@ struct SignUpScreen: View {
                     try await authService.signIn(email: email, password: password)
                 } else {
                     try await authService.signUp(email: email, password: password)
+                    
+                    // Store assigned coach in Firestore if available
+                    if let coach = coordinator.assignedCoach {
+                        let db = Firestore.firestore()
+                        if let userId = Auth.auth().currentUser?.uid {
+                            try await db.collection("users").document(userId).setData([
+                                "coachId": coach.id,
+                                "coachAssignedAt": FieldValue.serverTimestamp()
+                            ], merge: true)
+                        }
+                    }
                 }
                 
                 if isFromSettings {
@@ -241,6 +236,18 @@ struct SignUpScreen: View {
         Task {
             do {
                 try await authService.signInWithGoogle()
+                
+                // Store assigned coach in Firestore if available
+                if let coach = coordinator.assignedCoach {
+                    let db = Firestore.firestore()
+                    if let userId = Auth.auth().currentUser?.uid {
+                        try await db.collection("users").document(userId).setData([
+                            "coachId": coach.id,
+                            "coachAssignedAt": FieldValue.serverTimestamp()
+                        ], merge: true)
+                    }
+                }
+                
                 if isFromSettings {
                     dismiss()
                 } else {
@@ -256,6 +263,18 @@ struct SignUpScreen: View {
         Task {
             do {
                 try await authService.signInWithApple()
+                
+                // Store assigned coach in Firestore if available
+                if let coach = coordinator.assignedCoach {
+                    let db = Firestore.firestore()
+                    if let userId = Auth.auth().currentUser?.uid {
+                        try await db.collection("users").document(userId).setData([
+                            "coachId": coach.id,
+                            "coachAssignedAt": FieldValue.serverTimestamp()
+                        ], merge: true)
+                    }
+                }
+                
                 if isFromSettings {
                     dismiss()
                 } else {

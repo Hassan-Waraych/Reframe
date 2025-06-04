@@ -1,17 +1,9 @@
 import SwiftUI
 
-struct EmotionalNeed: Identifiable, Codable {
-    let id: String
-    let title: String
-    let description: String
-    let icon: String
-}
-
 struct EmotionalFramingScreen: View {
-    @EnvironmentObject var themeManager: ThemeManager
-    @EnvironmentObject var coordinator: OnboardingCoordinator
+    @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var coordinator: OnboardingCoordinator
     @State private var selectedNeeds: Set<String> = []
-    @State private var isAnimating = false
     
     let emotionalNeeds = [
         EmotionalNeed(id: "overthinking", title: "Overthinking", description: "Help me break free from repetitive negative thoughts", icon: "brain"),
@@ -29,134 +21,70 @@ struct EmotionalFramingScreen: View {
             VStack(spacing: 24) {
                 // Header
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("When do you need Reframe most?")
-                        .font(.custom("Quicksand-Bold", size: 28))
+                    Text("What brings you here?")
+                        .font(.system(size: themeManager.typography.fontSize.h2, weight: .bold))
                         .foregroundColor(themeManager.colors.text)
                     
-                    Text("Select all areas where you'd like support")
-                        .font(.custom("Nunito-Regular", size: 16))
+                    Text("Select the areas you'd like to work on")
+                        .font(.system(size: themeManager.typography.fontSize.body))
                         .foregroundColor(themeManager.colors.textLight)
-                    
-                    if !selectedNeeds.isEmpty {
-                        Text("\(selectedNeeds.count) selected")
-                            .font(.custom("Quicksand-SemiBold", size: 14))
-                            .foregroundColor(themeManager.colors.primary)
-                            .padding(.top, 4)
-                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
                 // Needs Grid
                 LazyVGrid(columns: [GridItem(.flexible())], spacing: 12) {
                     ForEach(emotionalNeeds) { need in
-                        NeedCard(need: need, isSelected: selectedNeeds.contains(need.id)) {
-                            if selectedNeeds.contains(need.id) {
-                                selectedNeeds.remove(need.id)
-                            } else {
-                                selectedNeeds.insert(need.id)
+                        NeedCard(
+                            need: need,
+                            isSelected: selectedNeeds.contains(need.id),
+                            action: {
+                                if selectedNeeds.contains(need.id) {
+                                    selectedNeeds.remove(need.id)
+                                } else {
+                                    selectedNeeds.insert(need.id)
+                                }
                             }
-                        }
+                        )
                     }
                 }
                 
-                // Footer Buttons
-                VStack(spacing: 16) {
-                    Button(action: {
-                        // Save selected needs
-                        if let encoded = try? JSONEncoder().encode(Array(selectedNeeds)) {
-                            UserDefaults.standard.set(encoded, forKey: "selectedEmotionalNeeds")
-                        }
-                        coordinator.next()
-                    }) {
-                        Text("Continue")
-                            .font(.custom("Nunito-SemiBold", size: 18))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 56)
-                            .background(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        themeManager.colors.primary,
-                                        themeManager.colors.primaryDark
-                                    ]),
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .cornerRadius(16)
-                            .shadow(color: themeManager.colors.primary.opacity(0.3), radius: 12, x: 0, y: 6)
+                // Continue Button
+                Button(action: {
+                    // Save selected needs to UserDefaults
+                    if let encoded = try? JSONEncoder().encode(Array(selectedNeeds)) {
+                        UserDefaults.standard.set(encoded, forKey: "selectedEmotionalNeeds")
                     }
-                    .opacity(selectedNeeds.isEmpty ? 0.5 : 1)
-                    .disabled(selectedNeeds.isEmpty)
-                    
-                    Button(action: {
-                        coordinator.skip()
-                    }) {
-                        Text("Skip for now")
-                            .font(.custom("Nunito-Medium", size: 16))
-                            .foregroundColor(themeManager.colors.textLight)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 56)
-                    }
+                    coordinator.next()
+                }) {
+                    Text("Continue")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 56)
+                        .background(themeManager.colors.primary)
+                        .cornerRadius(16)
+                }
+                .disabled(selectedNeeds.isEmpty)
+                .opacity(selectedNeeds.isEmpty ? 0.5 : 1)
+                
+                // Skip Button
+                Button(action: {
+                    coordinator.next()
+                }) {
+                    Text("Skip for now")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(themeManager.colors.textLight)
                 }
             }
             .padding(24)
         }
         .background(themeManager.colors.background)
-        .opacity(isAnimating ? 1 : 0)
-        .offset(y: isAnimating ? 0 : 20)
         .onAppear {
-            withAnimation(.easeOut(duration: 0.5)) {
-                isAnimating = true
-            }
-            // Load previously selected needs
+            // Load previously selected needs if any
             if let savedNeeds = UserDefaults.standard.data(forKey: "selectedEmotionalNeeds"),
                let decoded = try? JSONDecoder().decode([String].self, from: savedNeeds) {
                 selectedNeeds = Set(decoded)
             }
-        }
-    }
-}
-
-struct NeedCard: View {
-    let need: EmotionalNeed
-    let isSelected: Bool
-    let action: () -> Void
-    @EnvironmentObject var themeManager: ThemeManager
-    
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 16) {
-                Image(systemName: need.icon)
-                    .font(.system(size: 24))
-                    .foregroundColor(isSelected ? themeManager.colors.primary : themeManager.colors.text)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(need.title)
-                        .font(.custom("Quicksand-SemiBold", size: 16))
-                        .foregroundColor(themeManager.colors.text)
-                    
-                    Text(need.description)
-                        .font(.custom("Nunito-Regular", size: 14))
-                        .foregroundColor(themeManager.colors.textLight)
-                        .lineSpacing(4)
-                }
-                
-                Spacer()
-                
-                if isSelected {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 24))
-                        .foregroundColor(themeManager.colors.primary)
-                }
-            }
-            .padding(16)
-            .background(themeManager.colors.surface)
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? themeManager.colors.primary : themeManager.colors.border, lineWidth: 2)
-            )
         }
     }
 }
