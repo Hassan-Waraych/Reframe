@@ -11,6 +11,7 @@ struct DevSettingsScreen: View {
     @State private var showReframeLimitResetAlert = false
     @State private var showClearReframesAlert = false
     @State private var showClearJournalAlert = false
+    @State private var showCoachTestView = false
     
     struct TestResults {
         let connection: Bool
@@ -27,6 +28,7 @@ struct DevSettingsScreen: View {
                 reframeLimitResetSection
                 streakSection
                 journalSection
+                coachSection
             }
             .padding(.vertical)
         }
@@ -62,6 +64,9 @@ struct DevSettingsScreen: View {
             }
         } message: {
             Text("This will permanently delete all your journal entries. This action cannot be undone.")
+        }
+        .sheet(isPresented: $showCoachTestView) {
+            CoachTestView()
         }
     }
     
@@ -258,6 +263,27 @@ struct DevSettingsScreen: View {
                     .frame(maxWidth: .infinity)
                     .frame(height: 48)
                     .background(themeManager.colors.error)
+                    .cornerRadius(12)
+            }
+        }
+        .padding(.horizontal)
+    }
+    
+    private var coachSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Coach")
+                .font(.system(size: themeManager.typography.fontSize.h3, weight: .bold))
+                .foregroundColor(themeManager.colors.text)
+            
+            Button(action: {
+                showCoachTestView = true
+            }) {
+                Text("Test Coach Assignment")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 48)
+                    .background(themeManager.colors.primary)
                     .cornerRadius(12)
             }
         }
