@@ -9,6 +9,7 @@ struct ReframeResultView: View {
     
     @State private var animateIn = false
     @State private var showConfetti = false
+    @State private var isMarkedAsHelpful = false
     
     var isPositive: Bool {
         reframe.category == "Positive Reflection"
@@ -143,12 +144,12 @@ struct ReframeResultView: View {
                         Button {
                             Task {
                                 await viewModel.markAsHelpful()
-                                onDismiss()
+                                isMarkedAsHelpful = true
                             }
                         } label: {
                             HStack {
-                                Image(systemName: "heart.fill")
-                                Text("That Helped")
+                                Image(systemName: isMarkedAsHelpful ? "checkmark.circle.fill" : "heart.fill")
+                                Text(isMarkedAsHelpful ? "Marked as Helpful" : "That Helped")
                             }
                             .font(.system(size: 15, weight: .semibold, design: .rounded))
                             .foregroundColor(.white)
@@ -157,26 +158,29 @@ struct ReframeResultView: View {
                             .background(
                                 LinearGradient(
                                     gradient: Gradient(colors: [
-                                        themeManager.colors.primary,
-                                        themeManager.colors.primaryDark
+                                        isMarkedAsHelpful ? themeManager.colors.secondary : themeManager.colors.primary,
+                                        isMarkedAsHelpful ? Color(hex: "7B4B8E") : themeManager.colors.primaryDark
                                     ]),
                                     startPoint: .leading,
                                     endPoint: .trailing
                                 )
                             )
                             .cornerRadius(10)
-                            .shadow(color: themeManager.colors.primary.opacity(0.13), radius: 5, x: 0, y: 2)
+                            .shadow(color: (isMarkedAsHelpful ? themeManager.colors.secondary : themeManager.colors.primary).opacity(0.13), radius: 5, x: 0, y: 2)
                         }
+                        .disabled(isMarkedAsHelpful)
                         
                         Button {
                             Task {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                    viewModel.isCurrentReframeLogged = true
+                                }
                                 await viewModel.logToJournal()
-                                onDismiss()
                             }
                         } label: {
                             HStack {
-                                Image(systemName: "book.fill")
-                                Text(viewModel.isCurrentReframeLogged ? "Logged to Journal" : "Log to Journal")
+                                Image(systemName: viewModel.isCurrentReframeLogged ? "checkmark.circle.fill" : "book.fill")
+                                Text(viewModel.isCurrentReframeLogged ? "Saved to Journal" : "Add to Journal")
                             }
                             .font(.system(size: 15, weight: .semibold, design: .rounded))
                             .foregroundColor(viewModel.isCurrentReframeLogged ? themeManager.colors.textLight : themeManager.colors.text)

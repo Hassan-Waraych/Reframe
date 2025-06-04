@@ -43,9 +43,17 @@ class ReframeViewModel: ObservableObject {
     @Published var isCurrentReframeLogged: Bool = false
     
     // MARK: - Dependencies
-    private let reframeService = ReframeService.shared
-    private let aiService = AIService.shared
-    private let journalService = JournalService.shared
+    private let reframeService: ReframeService
+    private let aiService: AIService
+    private let journalService: JournalService
+    
+    init(reframeService: ReframeService = .shared,
+         aiService: AIService = .shared,
+         journalService: JournalService = .shared) {
+        self.reframeService = reframeService
+        self.aiService = aiService
+        self.journalService = journalService
+    }
     
     // MARK: - Computed Properties
     var remainingReframes: Int {
@@ -250,8 +258,31 @@ class ReframeViewModel: ObservableObject {
         guard let reframe = currentReframe else { return }
         
         do {
-            try await reframeService.markReframeAsHelpful(reframe)
-            await loadReframes()
+            // Update the reframe in Firestore
+            try await reframeService.updateReframe(reframe.id ?? "", helped: true)
+            
+            // Handle journal entry
+            if isCurrentReframeLogged {
+                // If already logged, update the existing entry to be a favorite
+                if let existingEntry = journalService.getJournalEntryForReframe(reframe: reframe) {
+                    try await journalService.updateEntryFavoriteStatus(existingEntry, isFavorite: true)
+                }
+            } else {
+                // If not logged yet, add as a favorite
+                try await journalService.logReframeToJournal(reframe: reframe)
+                await MainActor.run {
+                    self.isCurrentReframeLogged = true
+                }
+            }
+            
+            // Update local state
+            await MainActor.run {
+                if let index = reframes.firstIndex(where: { $0.id == reframe.id }) {
+                    var updatedReframe = reframe
+                    updatedReframe.helped = true
+                    reframes[index] = updatedReframe
+                }
+            }
         } catch {
             await MainActor.run {
                 self.errorMessage = error.localizedDescription
