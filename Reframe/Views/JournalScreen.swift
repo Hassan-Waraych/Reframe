@@ -207,6 +207,7 @@ struct JournalEntryView: View {
                             .font(.system(size: 15, weight: .regular, design: .rounded))
                             .foregroundColor(themeManager.colors.text)
                             .padding(.horizontal, 16)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
                 .padding(.bottom, 16)

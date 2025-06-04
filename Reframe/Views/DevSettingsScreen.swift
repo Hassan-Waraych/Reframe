@@ -1,4 +1,6 @@
 import SwiftUI
+import FirebaseAuth
+import FirebaseFirestore
 
 struct DevSettingsScreen: View {
     @EnvironmentObject private var themeManager: ThemeManager
@@ -23,6 +25,7 @@ struct DevSettingsScreen: View {
                 firebaseTestsSection
                 onboardingResetSection
                 reframeLimitResetSection
+                streakSection
                 journalSection
             }
             .padding(.vertical)
@@ -184,6 +187,60 @@ struct DevSettingsScreen: View {
             }
         }
         .padding(.horizontal)
+    }
+    
+    @ViewBuilder
+    private var streakSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Streak")
+                .font(.system(size: themeManager.typography.fontSize.h3, weight: .bold))
+                .foregroundColor(themeManager.colors.text)
+
+            Button(action: { Task { await resetStreak() } }) {
+                Text("Reset Streak")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 48)
+                    .background(themeManager.colors.secondary)
+                    .cornerRadius(12)
+            }
+
+            Button(action: { Task { await incrementStreak() } }) {
+                Text("+1 Day Streak")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 48)
+                    .background(themeManager.colors.secondary)
+                    .cornerRadius(12)
+            }
+        }
+        .padding(.horizontal)
+    }
+
+    @MainActor
+    private func resetStreak() async {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        let streakRef = Firestore.firestore().collection("streaks").document(userId)
+        try? await streakRef.setData([
+            "userId": userId,
+            "count": 0,
+            "lastUpdated": Timestamp(date: Date())
+        ])
+    }
+
+    @MainActor
+    private func incrementStreak() async {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        let streakRef = Firestore.firestore().collection("streaks").document(userId)
+        let doc = try? await streakRef.getDocument()
+        if let data = doc?.data(), let count = data["count"] as? Int {
+            try? await streakRef.updateData([
+                "count": count + 1,
+                "lastUpdated": Timestamp(date: Date())
+            ])
+        }
     }
     
     private var journalSection: some View {

@@ -1,5 +1,7 @@
 import SwiftUI
 import Combine
+import FirebaseFirestore
+import FirebaseAuth
 
 enum HomeOption {
     case reframe
@@ -25,116 +27,114 @@ struct HomeScreen: View {
     
     var body: some View {
         ZStack {
-            VStack(spacing: 24) {
-                // Header with greeting
-                Text(greeting())
-                    .font(.custom("Quicksand-Bold", size: 32))
-                    .foregroundColor(themeManager.colors.text)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal)
-                
-                // Quote Card
-                QuoteCard(quote: currentQuote, isAnimating: $isAnimating)
-                    .padding(.horizontal)
-                    .transition(.scale.combined(with: .opacity))
-                
-                // Option Buttons
-                HStack(spacing: 16) {
-                    HomeOptionButton(
-                        title: "Reframe",
-                        icon: "arrow.triangle.2.circlepath",
-                        isSelected: selectedMode == .reframe
-                    ) {
-                        withAnimation(.spring()) {
-                            selectedMode = .reframe
-                            viewModel.selectedMode = .reframe
-                        }
-                    }
-                    
-                    HomeOptionButton(
-                        title: "Reflect",
-                        icon: "brain.head.profile",
-                        isSelected: selectedMode == .reflect
-                    ) {
-                        withAnimation(.spring()) {
-                            selectedMode = .reflect
-                            viewModel.selectedMode = .reflect
-                        }
-                    }
-                }
-                .padding(.horizontal)
-                
-                // Input Section
-                ReframeInputView(
-                    viewModel: viewModel,
-                    selectedMode: selectedMode,
-                    showReframeResult: $showReframeResult,
-                    currentQuote: $currentQuote,
-                    quotes: quotes
-                )
-                    .padding(.horizontal)
-                
-                // Progress Section
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Text("Reframes Used")
-                            .font(.custom("Quicksand-SemiBold", size: 16))
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    // Greeting and Streak aligned left
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Good \(greeting())")
+                            .font(.custom("Quicksand-Bold", size: 28))
                             .foregroundColor(themeManager.colors.text)
-                        
-                        Spacer()
-                        
-                        Text("\(5 - viewModel.remainingReframes)/5")
-                            .font(.custom("Nunito-Medium", size: 16))
-                            .foregroundColor(themeManager.colors.textLight)
-                    }
-                    
-                    GeometryReader { geometry in
-                        ZStack(alignment: .leading) {
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(themeManager.colors.surface)
-                                .frame(height: 12)
-                            
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [
-                                            themeManager.colors.primary,
-                                            themeManager.colors.primaryDark
-                                        ]),
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                )
-                                .frame(width: geometry.size.width * CGFloat(5 - viewModel.remainingReframes) / 5, height: 12)
+                        if viewModel.currentStreak > 0 {
+                            StreakView(streakCount: viewModel.currentStreak)
                         }
                     }
-                    .frame(height: 12)
-                }
-                .padding(.horizontal)
-                
-                // Latest Reframe
-                if let latestReframe = viewModel.reframes.first(where: { $0.category != "Reflection" }) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Latest Reframe")
-                            .font(.custom("Quicksand-Bold", size: 20))
-                            .foregroundColor(themeManager.colors.text)
-                            .padding(.horizontal)
-                        
-                        Button {
+                    .padding(.horizontal)
+
+                    // Quote Card (only here, not as a separate text)
+                    QuoteCard(quote: currentQuote, isAnimating: $isAnimating)
+                        .padding(.horizontal)
+                        .transition(.scale.combined(with: .opacity))
+
+                    // Option Buttons
+                    HStack(spacing: 16) {
+                        HomeOptionButton(
+                            title: "Reframe",
+                            icon: "arrow.triangle.2.circlepath",
+                            isSelected: selectedMode == .reframe
+                        ) {
                             withAnimation(.spring()) {
-                                viewModel.currentReframe = latestReframe
-                                showReframeResult = true
+                                selectedMode = .reframe
+                                viewModel.selectedMode = .reframe
                             }
-                        } label: {
-                            CompactReframeView(reframe: latestReframe)
+                        }
+                        HomeOptionButton(
+                            title: "Reflect",
+                            icon: "brain.head.profile",
+                            isSelected: selectedMode == .reflect
+                        ) {
+                            withAnimation(.spring()) {
+                                selectedMode = .reflect
+                                viewModel.selectedMode = .reflect
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+
+                    // Input Section
+                    ReframeInputView(
+                        viewModel: viewModel,
+                        selectedMode: selectedMode,
+                        showReframeResult: $showReframeResult,
+                        currentQuote: $currentQuote,
+                        quotes: quotes
+                    )
+                        .padding(.horizontal)
+
+                    // Progress Section
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text("Reframes Used")
+                                .font(.custom("Quicksand-SemiBold", size: 16))
+                                .foregroundColor(themeManager.colors.text)
+                            Spacer()
+                            Text("\(5 - viewModel.remainingReframes)/5")
+                                .font(.custom("Nunito-Medium", size: 16))
+                                .foregroundColor(themeManager.colors.textLight)
+                        }
+                        GeometryReader { geometry in
+                            ZStack(alignment: .leading) {
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(themeManager.colors.surface)
+                                    .frame(height: 12)
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [
+                                                themeManager.colors.primary,
+                                                themeManager.colors.primaryDark
+                                            ]),
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+                                    .frame(width: geometry.size.width * CGFloat(5 - viewModel.remainingReframes) / 5, height: 12)
+                            }
+                        }
+                        .frame(height: 12)
+                    }
+                    .padding(.horizontal)
+
+                    // Latest Reframe
+                    if let latestReframe = viewModel.reframes.first(where: { $0.category != "Reflection" }) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Latest Reframe")
+                                .font(.custom("Quicksand-Bold", size: 20))
+                                .foregroundColor(themeManager.colors.text)
                                 .padding(.horizontal)
+                            Button {
+                                withAnimation(.spring()) {
+                                    viewModel.currentReframe = latestReframe
+                                    showReframeResult = true
+                                }
+                            } label: {
+                                CompactReframeView(reframe: latestReframe)
+                                    .padding(.horizontal)
+                            }
                         }
                     }
                 }
-                
-                Spacer()
+                .padding(.vertical, 24)
             }
-            .padding(.vertical, 24)
             .background(themeManager.colors.background)
             .navigationBarHidden(true)
             
@@ -145,9 +145,12 @@ struct HomeScreen: View {
                     .transition(.opacity)
                 
                 ReframeResultView(reframe: reframe, viewModel: viewModel) {
-                    withAnimation(.spring()) {
-                        showReframeResult = false
-                        viewModel.resetState()
+                    Task {
+                        withAnimation(.spring()) {
+                            showReframeResult = false
+                            viewModel.resetState()
+                        }
+                        await viewModel.loadStreak()
                     }
                 }
                 .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -170,15 +173,16 @@ struct HomeScreen: View {
         }
         .task {
             await viewModel.loadReframes()
+            await viewModel.loadStreak()
         }
     }
     
     private func greeting() -> String {
         let hour = Calendar.current.component(.hour, from: Date())
         switch hour {
-        case 0..<12: return "Good Morning"
-        case 12..<17: return "Good Afternoon"
-        default: return "Good Evening"
+        case 0..<12: return "Morning"
+        case 12..<17: return "Afternoon"
+        default: return "Evening"
         }
     }
 }

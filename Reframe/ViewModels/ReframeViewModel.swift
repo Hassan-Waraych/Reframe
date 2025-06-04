@@ -41,18 +41,22 @@ class ReframeViewModel: ObservableObject {
     @Published var showNonsenseCooldown: Bool = false
     @Published var selectedMode: HomeOption = .reframe
     @Published var isCurrentReframeLogged: Bool = false
+    @Published var currentStreak: Int = 0
     
     // MARK: - Dependencies
     private let reframeService: ReframeService
     private let aiService: AIService
     let journalService: JournalService
+    private let streakService: StreakService
     
     init(reframeService: ReframeService = .shared,
          aiService: AIService = .shared,
-         journalService: JournalService = .shared) {
+         journalService: JournalService = .shared,
+         streakService: StreakService = .shared) {
         self.reframeService = reframeService
         self.aiService = aiService
         self.journalService = journalService
+        self.streakService = streakService
     }
     
     // MARK: - Computed Properties
@@ -97,6 +101,10 @@ class ReframeViewModel: ObservableObject {
                     reframedThought: reframe
                 )
                 
+                // Update streak
+                try await streakService.updateStreak()
+                currentStreak = try await streakService.getCurrentStreak()
+                
                 await MainActor.run {
                     self.reframedThought = reframe
                     self.currentReframe = newReframe
@@ -115,6 +123,10 @@ class ReframeViewModel: ObservableObject {
                     category: "Positive Reflection"
                 )
                 
+                // Update streak
+                try await streakService.updateStreak()
+                currentStreak = try await streakService.getCurrentStreak()
+            
                 await MainActor.run {
                     self.reframedThought = affirmation
                     self.currentReframe = newReframe
@@ -133,13 +145,17 @@ class ReframeViewModel: ObservableObject {
                         category: "Nonsense"
                     )
                     
+                    // Update streak
+                    try await streakService.updateStreak()
+                    currentStreak = try await streakService.getCurrentStreak()
+                    
                     await MainActor.run {
                         self.currentReframe = nonsenseReframe
                         self.isCurrentReframeLogged = journalService.isReframeLogged(reframe: nonsenseReframe)
                         self.state = .success
                     }
-                } catch {
-                    if let error = error as NSError?, error.code == -3 {
+                } catch let error as NSError {
+                    if error.code == -3 {
                         await MainActor.run {
                             self.showNonsenseCooldown = true
                             self.state = .idle
@@ -183,6 +199,10 @@ class ReframeViewModel: ObservableObject {
             
             // Add to journal
             try await journalService.addEntry(content: originalThought)
+            
+            // Update streak
+            try await streakService.updateStreak()
+            currentStreak = try await streakService.getCurrentStreak()
             
             await MainActor.run {
                 self.currentReframe = newReframe
@@ -311,6 +331,14 @@ class ReframeViewModel: ObservableObject {
                 self.errorMessage = error.localizedDescription
                 self.showError = true
             }
+        }
+    }
+    
+    func loadStreak() async {
+        do {
+            currentStreak = try await streakService.getCurrentStreak()
+        } catch {
+            print("Error loading streak: \(error.localizedDescription)")
         }
     }
 } 
