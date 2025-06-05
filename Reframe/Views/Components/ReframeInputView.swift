@@ -6,8 +6,6 @@ struct ReframeInputView: View {
     @ObservedObject var viewModel: ReframeViewModel
     let selectedMode: HomeOption
     @Binding var showReframeResult: Bool
-    @Binding var currentQuote: String
-    let quotes: [String]
     @FocusState private var isInputFocused: Bool
     
     var body: some View {
@@ -45,9 +43,6 @@ struct ReframeInputView: View {
                 Task {
                     if selectedMode == .reframe {
                         await viewModel.createReframe()
-                        withAnimation(.spring()) {
-                            currentQuote = quotes.randomElement() ?? quotes[0]
-                        }
                     } else {
                         await viewModel.createReflection()
                     }
@@ -101,9 +96,7 @@ struct ReframeInputView: View {
     ReframeInputView(
         viewModel: ReframeViewModel(),
         selectedMode: .reframe,
-        showReframeResult: .constant(false),
-        currentQuote: .constant("Your daily dose of wisdom will appear here..."),
-        quotes: ["Quote 1", "Quote 2", "Quote 3"]
+        showReframeResult: .constant(false)
     )
     .environmentObject(ThemeManager())
 } 

@@ -31,11 +31,6 @@ struct QuoteCard: View {
         .shadow(color: Color.black.opacity(0.08), radius: 15, x: 0, y: 8)
         .opacity(isAnimating ? 1 : 0)
         .offset(y: isAnimating ? 0 : 20)
-        .onAppear {
-            withAnimation(.easeOut(duration: 0.5)) {
-                isAnimating = true
-            }
-        }
     }
 }
 

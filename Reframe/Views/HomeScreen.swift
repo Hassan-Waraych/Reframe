@@ -13,17 +13,11 @@ struct HomeScreen: View {
     @Binding var selectedTab: Int
     @StateObject private var viewModel = ReframeViewModel()
     @StateObject private var reframeService = ReframeService.shared
+    @StateObject private var quoteService = QuoteService()
     @State private var selectedMode: HomeOption = .reframe
     @State private var isAnimating = false
     @State private var showQuote = false
-    @State private var currentQuote = "Your daily dose of wisdom will appear here..."
     @State private var showReframeResult = false
-    
-    let quotes = [
-        "The only way to do great work is to love what you do.",
-        "Life is what happens while you're busy making other plans.",
-        "The future belongs to those who believe in the beauty of their dreams."
-    ]
     
     var body: some View {
         ZStack {
@@ -40,10 +34,11 @@ struct HomeScreen: View {
                     }
                     .padding(.horizontal)
 
-                    // Quote Card (only here, not as a separate text)
-                    QuoteCard(quote: currentQuote, isAnimating: $isAnimating)
-                        .padding(.horizontal)
-                        .transition(.scale.combined(with: .opacity))
+                    // Quote Card
+                    if let quote = quoteService.currentQuote {
+                        QuoteCard(quote: quote.text, isAnimating: $quoteService.isAnimating)
+                            .padding(.horizontal)
+                    }
 
                     // Option Buttons
                     HStack(spacing: 16) {
@@ -74,11 +69,9 @@ struct HomeScreen: View {
                     ReframeInputView(
                         viewModel: viewModel,
                         selectedMode: selectedMode,
-                        showReframeResult: $showReframeResult,
-                        currentQuote: $currentQuote,
-                        quotes: quotes
+                        showReframeResult: $showReframeResult
                     )
-                        .padding(.horizontal)
+                    .padding(.horizontal)
 
                     // Progress Section
                     VStack(alignment: .leading, spacing: 8) {

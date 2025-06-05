@@ -1,0 +1,109 @@
+{
+    "quotes": [
+        {
+            "id": "1",
+            "text": "Your feelings are valid, and it's okay to not be okay sometimes.",
+            "author": "Unknown",
+            "category": "self-compassion",
+            "mood": "comforting"
+        },
+        {
+            "id": "2",
+            "text": "Healing is not linear. It's okay to take one step forward and two steps back.",
+            "author": "Unknown",
+            "category": "healing",
+            "mood": "reassuring"
+        },
+        {
+            "id": "3",
+            "text": "You are stronger than you think, and braver than you believe.",
+            "author": "A.A. Milne",
+            "category": "strength",
+            "mood": "empowering"
+        },
+        {
+            "id": "4",
+            "text": "It's okay to take a break. Rest is not a sign of weakness, but of wisdom.",
+            "author": "Unknown",
+            "category": "self-care",
+            "mood": "gentle"
+        },
+        {
+            "id": "5",
+            "text": "Your mental health is a priority. Your happiness is essential. Your self-care is a necessity.",
+            "author": "Unknown",
+            "category": "self-care",
+            "mood": "affirming"
+        },
+        {
+            "id": "6",
+            "text": "You don't have to be perfect to be worthy of love and respect.",
+            "author": "Unknown",
+            "category": "self-worth",
+            "mood": "validating"
+        },
+        {
+            "id": "7",
+            "text": "Every day is a fresh start. Every moment is a new beginning.",
+            "author": "Unknown",
+            "category": "hope",
+            "mood": "uplifting"
+        },
+        {
+            "id": "8",
+            "text": "Your feelings are temporary visitors. Let them come, and let them go.",
+            "author": "Unknown",
+            "category": "emotional-awareness",
+            "mood": "mindful"
+        },
+        {
+            "id": "9",
+            "text": "Small steps forward are still progress. Celebrate every victory, no matter how small.",
+            "author": "Unknown",
+            "category": "progress",
+            "mood": "encouraging"
+        },
+        {
+            "id": "10",
+            "text": "You are not alone in your struggles. Reach out, and let others in.",
+            "author": "Unknown",
+            "category": "connection",
+            "mood": "supportive"
+        },
+        {
+            "id": "11",
+            "text": "Your mind is a garden. Nurture it with positive thoughts and watch it bloom.",
+            "author": "Unknown",
+            "category": "mindfulness",
+            "mood": "nurturing"
+        },
+        {
+            "id": "12",
+            "text": "It's okay to ask for help. It's a sign of strength, not weakness.",
+            "author": "Unknown",
+            "category": "support",
+            "mood": "reassuring"
+        },
+        {
+            "id": "13",
+            "text": "You are enough, just as you are. No conditions, no exceptions.",
+            "author": "Unknown",
+            "category": "self-acceptance",
+            "mood": "affirming"
+        },
+        {
+            "id": "14",
+            "text": "Your journey is unique. Don't compare it to anyone else's path.",
+            "author": "Unknown",
+            "category": "individuality",
+            "mood": "validating"
+        },
+        {
+            "id": "15",
+            "text": "Take it one breath at a time. You've got this.",
+            "author": "Unknown",
+            "category": "mindfulness",
+            "mood": "calming"
+        }
+    ]
+} 
