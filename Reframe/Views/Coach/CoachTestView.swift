@@ -8,6 +8,7 @@ struct CoachTestView: View {
     @State private var selectedNeeds: Set<String> = []
     @State private var assignedCoach: Coach?
     @State private var showResetAlert = false
+    @State private var isAssigning = false
     
     let emotionalNeeds = [
         EmotionalNeed(id: "overthinking", title: "Overthinking", description: "Help me break free from repetitive negative thoughts", icon: "brain"),
@@ -91,18 +92,49 @@ struct CoachTestView: View {
     
     private var assignButton: some View {
         Button(action: {
-            assignedCoach = CoachService.assignCoach(emotionalNeeds: Array(selectedNeeds))
+            Task {
+                await assignCoach()
+            }
         }) {
-            Text("Assign Coach")
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-                .background(themeManager.colors.primary)
-                .cornerRadius(16)
+            HStack {
+                if isAssigning {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .padding(.trailing, 8)
+                    Text("Assigning...")
+                } else {
+                    Text("Assign Coach")
+                }
+            }
+            .font(.system(size: 16, weight: .semibold))
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .frame(height: 56)
+            .background(themeManager.colors.primary)
+            .cornerRadius(16)
         }
-        .disabled(selectedNeeds.isEmpty)
-        .opacity(selectedNeeds.isEmpty ? 0.5 : 1)
+        .disabled(selectedNeeds.isEmpty || isAssigning)
+        .opacity((selectedNeeds.isEmpty || isAssigning) ? 0.5 : 1)
+    }
+    
+    private func assignCoach() async {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        isAssigning = true
+        defer { isAssigning = false }
+        
+        do {
+            // Save emotional needs to user document
+            let db = Firestore.firestore()
+            try await db.collection("users").document(userId).setData([
+                "emotionalNeeds": Array(selectedNeeds)
+            ], merge: true)
+            
+            // Assign coach using the service
+            assignedCoach = try await CoachService.shared.assignCoach(for: userId)
+        } catch {
+            print("Error assigning coach: \(error)")
+        }
     }
     
     private func coachCardView(coach: Coach) -> some View {

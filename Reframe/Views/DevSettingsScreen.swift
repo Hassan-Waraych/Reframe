@@ -11,6 +11,7 @@ struct DevSettingsScreen: View {
     @State private var showReframeLimitResetAlert = false
     @State private var showClearReframesAlert = false
     @State private var showClearJournalAlert = false
+    @State private var showClearCoachMessagesAlert = false
     @State private var showCoachTestView = false
     
     struct TestResults {
@@ -64,6 +65,14 @@ struct DevSettingsScreen: View {
             }
         } message: {
             Text("This will permanently delete all your journal entries. This action cannot be undone.")
+        }
+        .alert("Clear All Coach Messages", isPresented: $showClearCoachMessagesAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Clear All", role: .destructive) {
+                clearAllCoachMessages()
+            }
+        } message: {
+            Text("This will permanently delete all your messages with your coach. This action cannot be undone.")
         }
         .sheet(isPresented: $showCoachTestView) {
             CoachTestView()
@@ -275,16 +284,30 @@ struct DevSettingsScreen: View {
                 .font(.system(size: themeManager.typography.fontSize.h3, weight: .bold))
                 .foregroundColor(themeManager.colors.text)
             
-            Button(action: {
-                showCoachTestView = true
-            }) {
-                Text("Test Coach Assignment")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 48)
-                    .background(themeManager.colors.primary)
-                    .cornerRadius(12)
+            VStack(spacing: 12) {
+                Button(action: {
+                    showCoachTestView = true
+                }) {
+                    Text("Test Coach Assignment")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                        .background(themeManager.colors.primary)
+                        .cornerRadius(12)
+                }
+                
+                Button(action: {
+                    showClearCoachMessagesAlert = true
+                }) {
+                    Text("Clear All Coach Messages")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                        .background(themeManager.colors.secondary)
+                        .cornerRadius(12)
+                }
             }
         }
         .padding(.horizontal)
@@ -344,6 +367,25 @@ struct DevSettingsScreen: View {
                 try await JournalService.shared.clearAllEntries()
             } catch {
                 // Error is handled by the journalService
+            }
+        }
+    }
+    
+    private func clearAllCoachMessages() {
+        if let userId = Auth.auth().currentUser?.uid {
+            Task {
+                do {
+                    let db = Firestore.firestore()
+                    let snapshot = try await db.collection("coachMessages")
+                        .whereField("userId", isEqualTo: userId)
+                        .getDocuments()
+                    
+                    for document in snapshot.documents {
+                        try await document.reference.delete()
+                    }
+                } catch {
+                    print("Error clearing coach messages: \(error)")
+                }
             }
         }
     }

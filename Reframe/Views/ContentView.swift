@@ -54,13 +54,22 @@ struct ContentView: View {
                     .tag(1)
                     
                     NavigationStack {
+                        CoachHomeView(selectedTab: $selectedTab)
+                    }
+                    .tabItem {
+                        Image(systemName: "bubble.left.and.bubble.right.fill")
+                        Text("Coach")
+                    }
+                    .tag(2)
+                    
+                    NavigationStack {
                         InsightsScreen(selectedTab: $selectedTab)
                     }
                     .tabItem {
                         Image(systemName: "chart.line.uptrend.xyaxis")
                         Text("Insights")
                     }
-                    .tag(2)
+                    .tag(3)
                     
                     NavigationStack {
                         SettingsScreen(selectedTab: $selectedTab)
@@ -69,7 +78,7 @@ struct ContentView: View {
                         Image(systemName: "gearshape.fill")
                         Text("Settings")
                     }
-                    .tag(3)
+                    .tag(4)
                 }
                 .accentColor(themeManager.colors.primary)
             }

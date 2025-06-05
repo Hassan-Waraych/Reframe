@@ -1,0 +1,295 @@
+import SwiftUI
+
+struct CoachHomeView: View {
+    @EnvironmentObject private var themeManager: ThemeManager
+    @Binding var selectedTab: Int
+    @StateObject private var viewModel = CoachHomeViewModel()
+    @State private var showInputSheet = false
+    @State private var showCoachDetails = false
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                // Header
+                HStack {
+                    Button(action: {
+                        selectedTab = 0
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 24, weight: .semibold))
+                            .foregroundColor(themeManager.colors.primary)
+                            .frame(width: 48, height: 48)
+                            .background(themeManager.colors.surface)
+                            .clipShape(Circle())
+                            .shadow(color: themeManager.colors.primary.opacity(0.1), radius: 8, x: 0, y: 4)
+                    }
+                    Text("Coach")
+                        .font(.custom("Quicksand-Bold", size: 28))
+                        .foregroundColor(themeManager.colors.text)
+                    Spacer()
+                }
+                .padding(.horizontal)
+                // Coach Info Section
+                if let coach = viewModel.currentCoach {
+                    coachInfoSection(coach: coach)
+                }
+                
+                // Talk to Your Coach Section
+                talkToCoachSection
+                
+                // Past Conversations Section
+                pastConversationsSection
+            }
+            .padding(.vertical)
+            .padding(.horizontal, 20)
+        }
+        .background(themeManager.colors.background)
+        .navigationBarHidden(true)
+        .sheet(isPresented: $showInputSheet) {
+            CoachInputSheet()
+        }
+        .sheet(isPresented: $showCoachDetails) {
+            if let coach = viewModel.currentCoach {
+                coachDetailsModal(coach: coach)
+            }
+        }
+        .task {
+            await viewModel.loadData()
+        }
+        .alert("Error", isPresented: $viewModel.showError) {
+            Button("OK") {
+                viewModel.resetState()
+            }
+        } message: {
+            Text(viewModel.errorMessage ?? "An error occurred")
+        }
+    }
+    
+    private func coachInfoSection(coach: Coach) -> some View {
+        Button(action: { showCoachDetails = true }) {
+            VStack(alignment: .leading, spacing: 24) {
+                // Header
+                HStack(spacing: 16) {
+                    Text(coach.emoji)
+                        .font(.system(size: 48))
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(coach.name)
+                            .font(.system(size: themeManager.typography.fontSize.h2, weight: .bold))
+                            .foregroundColor(themeManager.colors.text)
+                        
+                        Text(coach.description)
+                            .font(.system(size: themeManager.typography.fontSize.body))
+                            .foregroundColor(themeManager.colors.textLight)
+                    }
+                }
+                
+                // Quote
+                Text(coach.quote)
+                    .font(.system(size: themeManager.typography.fontSize.body, weight: .medium))
+                    .foregroundColor(themeManager.colors.text)
+                    .italic()
+                    .padding(.vertical, 8)
+                
+                // View More Indicator
+                HStack {
+                    Text("View full profile")
+                        .font(.system(size: themeManager.typography.fontSize.body, weight: .medium))
+                        .foregroundColor(themeManager.colors.primary)
+                    
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(themeManager.colors.primary)
+                }
+            }
+            .padding(24)
+            .background(themeManager.colors.surface)
+            .cornerRadius(16)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    private func coachDetailsModal(coach: Coach) -> some View {
+        NavigationView {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    // Header
+                    HStack(spacing: 16) {
+                        Text(coach.emoji)
+                            .font(.system(size: 48))
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(coach.name)
+                                .font(.system(size: themeManager.typography.fontSize.h2, weight: .bold))
+                                .foregroundColor(themeManager.colors.text)
+                            
+                            Text(coach.description)
+                                .font(.system(size: themeManager.typography.fontSize.body))
+                                .foregroundColor(themeManager.colors.textLight)
+                        }
+                    }
+                    
+                    // Quote
+                    Text(coach.quote)
+                        .font(.system(size: themeManager.typography.fontSize.body, weight: .medium))
+                        .foregroundColor(themeManager.colors.text)
+                        .italic()
+                        .padding(.vertical, 8)
+                    
+                    // Background
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Background")
+                            .font(.system(size: themeManager.typography.fontSize.h3, weight: .semibold))
+                            .foregroundColor(themeManager.colors.text)
+                        
+                        Text(coach.background)
+                            .font(.system(size: themeManager.typography.fontSize.body))
+                            .foregroundColor(themeManager.colors.textLight)
+                    }
+                    
+                    // Approach
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Their Approach")
+                            .font(.system(size: themeManager.typography.fontSize.h3, weight: .semibold))
+                            .foregroundColor(themeManager.colors.text)
+                        
+                        Text(coach.approach)
+                            .font(.system(size: themeManager.typography.fontSize.body))
+                            .foregroundColor(themeManager.colors.textLight)
+                    }
+                    
+                    // Specialties
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Specialties")
+                            .font(.system(size: themeManager.typography.fontSize.h3, weight: .semibold))
+                            .foregroundColor(themeManager.colors.text)
+                        
+                        FlowLayout(spacing: 8) {
+                            ForEach(coach.specialties, id: \.self) { specialty in
+                                Text(specialty)
+                                    .font(.system(size: themeManager.typography.fontSize.small))
+                                    .foregroundColor(themeManager.colors.text)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(themeManager.colors.surface)
+                                    .cornerRadius(16)
+                            }
+                        }
+                    }
+                }
+                .padding(24)
+            }
+            .background(themeManager.colors.background)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Coach Profile")
+                        .font(.custom("Quicksand-Bold", size: 20))
+                        .foregroundColor(themeManager.colors.text)
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        showCoachDetails = false
+                    }
+                    .foregroundColor(themeManager.colors.text)
+                }
+            }
+        }
+    }
+    
+    private var talkToCoachSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Talk to Your Coach")
+                .font(.system(size: themeManager.typography.fontSize.h2, weight: .bold))
+                .foregroundColor(themeManager.colors.text)
+            
+            Button(action: { showInputSheet = true }) {
+                HStack {
+                    Image(systemName: "bubble.left.and.bubble.right.fill")
+                        .font(.system(size: 20))
+                    Text("Share your thoughts")
+                        .font(.system(size: themeManager.typography.fontSize.body, weight: .medium))
+                }
+                .foregroundColor(themeManager.colors.text)
+                .frame(maxWidth: .infinity)
+                .frame(height: 56)
+                .background(themeManager.colors.primary)
+                .cornerRadius(16)
+            }
+        }
+    }
+    
+    private var pastConversationsSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Past Conversations")
+                .font(.system(size: themeManager.typography.fontSize.h2, weight: .bold))
+                .foregroundColor(themeManager.colors.text)
+            
+            if viewModel.isLoading {
+                ProgressView()
+                    .frame(maxWidth: .infinity)
+                    .padding(32)
+                    .tint(themeManager.colors.primary)
+            } else if viewModel.historyItems.isEmpty {
+                Text("No conversations yet. Start by sharing your thoughts with your coach.")
+                    .font(.system(size: themeManager.typography.fontSize.body))
+                    .foregroundColor(themeManager.colors.textLight)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            } else {
+                ForEach(viewModel.historyItems) { item in
+                    CoachHistoryCard(historyItem: item)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - FlowLayout
+struct FlowLayout: Layout {
+    var spacing: CGFloat = 8
+    
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let sizes = subviews.map { $0.sizeThatFits(.unspecified) }
+        return layout(sizes: sizes, proposal: proposal).size
+    }
+    
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let sizes = subviews.map { $0.sizeThatFits(.unspecified) }
+        let offsets = layout(sizes: sizes, proposal: proposal).offsets
+        
+        for (offset, subview) in zip(offsets, subviews) {
+            subview.place(at: CGPoint(x: bounds.minX + offset.x, y: bounds.minY + offset.y), proposal: .unspecified)
+        }
+    }
+    
+    private func layout(sizes: [CGSize], proposal: ProposedViewSize) -> (offsets: [CGPoint], size: CGSize) {
+        guard let containerWidth = proposal.width else {
+            return (sizes.map { _ in .zero }, .zero)
+        }
+        
+        var offsets: [CGPoint] = []
+        var currentX: CGFloat = 0
+        var currentY: CGFloat = 0
+        var maxY: CGFloat = 0
+        var rowHeight: CGFloat = 0
+        
+        for size in sizes {
+            if currentX + size.width > containerWidth {
+                currentX = 0
+                currentY += rowHeight + spacing
+                rowHeight = 0
+            }
+            
+            offsets.append(CGPoint(x: currentX, y: currentY))
+            currentX += size.width + spacing
+            rowHeight = max(rowHeight, size.height)
+            maxY = max(maxY, currentY + rowHeight)
+        }
+        
+        return (offsets, CGSize(width: containerWidth, height: maxY))
+    }
+}
+
+#Preview {
+    CoachHomeView(selectedTab: .constant(0))
+        .environmentObject(ThemeManager())
+} 

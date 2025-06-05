@@ -78,12 +78,21 @@ struct CoachIntroScreen: View {
 
 #Preview {
     CoachIntroScreen(coach: Coach(
-        id: "1",
-        name: "Sarah",
-        emoji: "🌟",
-        description: "A compassionate guide who helps you navigate life's challenges with wisdom and understanding.",
-        toneSummary: "Warm, empathetic, and solution-focused. I'll help you find clarity and build resilience.",
-        covers: ["anxiety", "stress", "self-doubt"]
+        id: "theo",
+        name: "Theo",
+        emoji: "🍃",
+        description: "Grounded and calm. Helps manage anxiety and perfectionism.",
+        toneSummary: "Soothing, mindful, realistic reassurance.",
+        covers: ["anxiety", "perfectionism", "stress"],
+        background: "Theo brings a unique blend of mindfulness and practical wisdom to his coaching. With a background in meditation and cognitive behavioral therapy, he helps you find peace in chaos and clarity in confusion.",
+        specialties: [
+            "Mindfulness techniques",
+            "Anxiety management",
+            "Perfectionism reframing",
+            "Stress reduction"
+        ],
+        approach: "Theo believes in meeting you where you are, using gentle guidance to help you find your own path to peace. He combines practical exercises with deep listening to help you build resilience and find balance.",
+        quote: "Peace isn't the absence of chaos, but the ability to find calm within it."
     ))
     .environmentObject(ThemeManager())
     .environmentObject(OnboardingCoordinator())

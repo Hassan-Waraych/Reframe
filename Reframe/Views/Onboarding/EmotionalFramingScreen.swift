@@ -38,42 +38,42 @@ struct EmotionalFramingScreen: View {
                             need: need,
                             isSelected: selectedNeeds.contains(need.id),
                             action: {
-                                if selectedNeeds.contains(need.id) {
-                                    selectedNeeds.remove(need.id)
-                                } else {
-                                    selectedNeeds.insert(need.id)
-                                }
+                            if selectedNeeds.contains(need.id) {
+                                selectedNeeds.remove(need.id)
+                            } else {
+                                selectedNeeds.insert(need.id)
                             }
+                        }
                         )
                     }
                 }
                 
                 // Continue Button
-                Button(action: {
+                    Button(action: {
                     // Save selected needs to UserDefaults
-                    if let encoded = try? JSONEncoder().encode(Array(selectedNeeds)) {
-                        UserDefaults.standard.set(encoded, forKey: "selectedEmotionalNeeds")
-                    }
-                    coordinator.next()
-                }) {
-                    Text("Continue")
+                        if let encoded = try? JSONEncoder().encode(Array(selectedNeeds)) {
+                            UserDefaults.standard.set(encoded, forKey: "selectedEmotionalNeeds")
+                        }
+                        coordinator.next()
+                    }) {
+                        Text("Continue")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 56)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 56)
                         .background(themeManager.colors.primary)
-                        .cornerRadius(16)
-                }
+                            .cornerRadius(16)
+                    }
                 .disabled(selectedNeeds.isEmpty)
-                .opacity(selectedNeeds.isEmpty ? 0.5 : 1)
-                
+                    .opacity(selectedNeeds.isEmpty ? 0.5 : 1)
+                    
                 // Skip Button
-                Button(action: {
+                    Button(action: {
                     coordinator.next()
-                }) {
-                    Text("Skip for now")
+                    }) {
+                        Text("Skip for now")
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(themeManager.colors.textLight)
+                            .foregroundColor(themeManager.colors.textLight)
                 }
             }
             .padding(24)

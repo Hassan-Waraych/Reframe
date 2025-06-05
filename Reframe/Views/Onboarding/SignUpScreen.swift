@@ -147,25 +147,25 @@ struct SignUpScreen: View {
                                 
                                 HStack(spacing: 16) {
                                     // Google Sign In
-                                    Button(action: handleGoogleSignIn) {
-                                        Image("google_logo")
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(width: 24, height: 24)
-                                            .frame(maxWidth: .infinity)
+                            Button(action: handleGoogleSignIn) {
+                                    Image("google_logo")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 24, height: 24)
+                                .frame(maxWidth: .infinity)
                                             .frame(height: 48)
-                                            .background(themeManager.colors.surface)
+                                .background(themeManager.colors.surface)
                                             .cornerRadius(12)
-                                    }
-                                    
+                            }
+                            
                                     // Apple Sign In
-                                    Button(action: handleAppleSignIn) {
-                                        Image(systemName: "apple.logo")
-                                            .font(.system(size: 24))
-                                            .foregroundColor(themeManager.colors.text)
-                                            .frame(maxWidth: .infinity)
+                            Button(action: handleAppleSignIn) {
+                                    Image(systemName: "apple.logo")
+                                        .font(.system(size: 24))
+                                        .foregroundColor(themeManager.colors.text)
+                                .frame(maxWidth: .infinity)
                                             .frame(height: 48)
-                                            .background(themeManager.colors.surface)
+                                .background(themeManager.colors.surface)
                                             .cornerRadius(12)
                                     }
                                 }

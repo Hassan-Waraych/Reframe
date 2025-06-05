@@ -1,4 +1,6 @@
 import SwiftUI
+import FirebaseFirestore
+import FirebaseAuth
 
 class OnboardingCoordinator: ObservableObject {
     @Published var currentStep: OnboardingStep = .welcome
@@ -26,8 +28,34 @@ class OnboardingCoordinator: ObservableObject {
             // Assign coach based on emotional needs
             if let savedNeeds = UserDefaults.standard.data(forKey: "selectedEmotionalNeeds"),
                let decoded = try? JSONDecoder().decode([String].self, from: savedNeeds) {
-                assignedCoach = CoachService.assignCoach(emotionalNeeds: decoded)
-                currentStep = .coachIntro
+                Task {
+                    do {
+                        if let userId = Auth.auth().currentUser?.uid {
+                            // Save emotional needs to user document
+                            let db = Firestore.firestore()
+                            try await db.collection("users").document(userId).setData([
+                                "emotionalNeeds": decoded
+                            ], merge: true)
+                            
+                            // Assign coach
+                            assignedCoach = try await CoachService.shared.assignCoach(for: userId)
+                            await MainActor.run {
+                                currentStep = .coachIntro
+                            }
+                        } else {
+                            // For guest users, assign a random coach
+                            assignedCoach = Coach.coaches.randomElement() ?? Coach.coaches[0]
+                            await MainActor.run {
+                                currentStep = .signUp
+                            }
+                        }
+                    } catch {
+                        print("Error assigning coach: \(error)")
+                        await MainActor.run {
+                            currentStep = .signUp
+                        }
+                    }
+                }
             } else {
                 currentStep = .signUp
             }
