@@ -9,6 +9,7 @@ struct CoachTestView: View {
     @State private var assignedCoach: Coach?
     @State private var showResetAlert = false
     @State private var isAssigning = false
+    @State private var showAssignmentResult = false
     
     let emotionalNeeds = [
         EmotionalNeed(id: "overthinking", title: "Overthinking", description: "Help me break free from repetitive negative thoughts", icon: "brain"),
@@ -124,14 +125,16 @@ struct CoachTestView: View {
         defer { isAssigning = false }
         
         do {
-            // Save emotional needs to user document
+            // First, clear the existing coach assignment and update emotional needs
             let db = Firestore.firestore()
-            try await db.collection("users").document(userId).setData([
+            try await db.collection("users").document(userId).updateData([
+                "coachId": FieldValue.delete(),
                 "emotionalNeeds": Array(selectedNeeds)
-            ], merge: true)
+            ])
             
-            // Assign coach using the service
+            // Then assign a new coach
             assignedCoach = try await CoachService.shared.assignCoach(for: userId)
+            showAssignmentResult = true
         } catch {
             print("Error assigning coach: \(error)")
         }
@@ -155,7 +158,27 @@ struct CoachTestView: View {
                 .foregroundColor(themeManager.colors.text)
                 .multilineTextAlignment(.center)
             
-            // Tone Summary
+            // Matched Needs
+            VStack(spacing: 8) {
+                Text("Matched Your Needs")
+                    .font(.system(size: themeManager.typography.fontSize.h3, weight: .semibold))
+                    .foregroundColor(themeManager.colors.text)
+                
+                let matchedNeeds = Set(coach.covers).intersection(selectedNeeds)
+                ForEach(Array(matchedNeeds), id: \.self) { need in
+                    if let needInfo = emotionalNeeds.first(where: { $0.id == need }) {
+                        HStack {
+                            Image(systemName: needInfo.icon)
+                                .foregroundColor(themeManager.colors.primary)
+                            Text(needInfo.title)
+                                .font(.system(size: themeManager.typography.fontSize.body))
+                                .foregroundColor(themeManager.colors.text)
+                        }
+                    }
+                }
+            }
+            
+            // Approach
             VStack(spacing: 8) {
                 Text("Their Approach")
                     .font(.system(size: themeManager.typography.fontSize.h3, weight: .semibold))
@@ -165,19 +188,6 @@ struct CoachTestView: View {
                     .font(.system(size: themeManager.typography.fontSize.body))
                     .foregroundColor(themeManager.colors.textLight)
                     .multilineTextAlignment(.center)
-            }
-            
-            // Covered Needs
-            VStack(spacing: 8) {
-                Text("Covers These Needs")
-                    .font(.system(size: themeManager.typography.fontSize.h3, weight: .semibold))
-                    .foregroundColor(themeManager.colors.text)
-                
-                ForEach(coach.covers, id: \.self) { need in
-                    Text(need)
-                        .font(.system(size: themeManager.typography.fontSize.body))
-                        .foregroundColor(themeManager.colors.textLight)
-                }
             }
         }
         .padding(24)

@@ -5,6 +5,7 @@ import FirebaseAuth
 class CoachHomeViewModel: ObservableObject {
     @Published var currentCoach: Coach?
     @Published var historyItems: [CoachHistoryItem] = []
+    @Published var messages: [CoachMessage] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var showError = false
@@ -22,7 +23,7 @@ class CoachHomeViewModel: ObservableObject {
             }
             
             // Load assigned coach
-            currentCoach = try await coachService.assignCoach(for: userId)
+            currentCoach = try await coachService.getCurrentCoach(for: userId)
             
             // Load history items
             historyItems = try await coachService.getHistory()
@@ -39,9 +40,9 @@ class CoachHomeViewModel: ObservableObject {
         
         do {
             // Send message and get response
-            let message = try await coachService.sendMessage(content, coachId: coach.id)
+            _ = try await coachService.sendMessage(content, coachId: coach.id)
             
-            // Reload history to show new message
+            // Reload history to show new conversation
             await loadData()
         } catch {
             errorMessage = error.localizedDescription

@@ -6,6 +6,8 @@ struct CoachHomeView: View {
     @StateObject private var viewModel = CoachHomeViewModel()
     @State private var showInputSheet = false
     @State private var showCoachDetails = false
+    @State private var showHistoryView = false
+    @State private var showEmotionalFraming = false
     
     var body: some View {
         ScrollView {
@@ -29,16 +31,44 @@ struct CoachHomeView: View {
                     Spacer()
                 }
                 .padding(.horizontal)
+                
                 // Coach Info Section
                 if let coach = viewModel.currentCoach {
                     coachInfoSection(coach: coach)
+                    
+                    // Talk to Your Coach Section
+                    talkToCoachSection
+                    
+                    // Past Conversations Section
+                    pastConversationsSection
+                } else {
+                    // No Coach Assigned
+                    VStack(spacing: 24) {
+                        Text("Find Your Perfect Coach")
+                            .font(.system(size: themeManager.typography.fontSize.h2, weight: .bold))
+                            .foregroundColor(themeManager.colors.text)
+                        
+                        Text("Let's match you with a coach who understands your needs")
+                            .font(.system(size: themeManager.typography.fontSize.body))
+                            .foregroundColor(themeManager.colors.textLight)
+                            .multilineTextAlignment(.center)
+                        
+                        Button(action: {
+                            showEmotionalFraming = true
+                        }) {
+                            Text("Choose Your Coach")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 56)
+                                .background(themeManager.colors.primary)
+                                .cornerRadius(16)
+                        }
+                    }
+                    .padding(24)
+                    .background(themeManager.colors.surface)
+                    .cornerRadius(16)
                 }
-                
-                // Talk to Your Coach Section
-                talkToCoachSection
-                
-                // Past Conversations Section
-                pastConversationsSection
             }
             .padding(.vertical)
             .padding(.horizontal, 20)
@@ -46,15 +76,23 @@ struct CoachHomeView: View {
         .background(themeManager.colors.background)
         .navigationBarHidden(true)
         .sheet(isPresented: $showInputSheet) {
-            CoachInputSheet()
+            CoachInputSheet(viewModel: viewModel)
         }
         .sheet(isPresented: $showCoachDetails) {
             if let coach = viewModel.currentCoach {
                 coachDetailsModal(coach: coach)
             }
         }
-        .task {
-            await viewModel.loadData()
+        .sheet(isPresented: $showHistoryView) {
+            CoachHistoryView(viewModel: viewModel)
+        }
+        .sheet(isPresented: $showEmotionalFraming) {
+            CoachEmotionalFramingView(viewModel: viewModel)
+        }
+        .onAppear {
+            Task {
+                await viewModel.loadData()
+            }
         }
         .alert("Error", isPresented: $viewModel.showError) {
             Button("OK") {
@@ -220,26 +258,40 @@ struct CoachHomeView: View {
     
     private var pastConversationsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Past Conversations")
-                .font(.system(size: themeManager.typography.fontSize.h2, weight: .bold))
-                .foregroundColor(themeManager.colors.text)
+            HStack {
+                Text("Past Conversations")
+                    .font(.system(size: themeManager.typography.fontSize.h3, weight: .semibold))
+                    .foregroundColor(themeManager.colors.text)
+                
+                Spacer()
+                
+                Button(action: {
+                    showHistoryView = true
+                }) {
+                    Text("View All")
+                        .font(.system(size: themeManager.typography.fontSize.body, weight: .medium))
+                        .foregroundColor(themeManager.colors.primary)
+                }
+            }
             
-            if viewModel.isLoading {
-                ProgressView()
-                    .frame(maxWidth: .infinity)
-                    .padding(32)
-                    .tint(themeManager.colors.primary)
-            } else if viewModel.historyItems.isEmpty {
-                Text("No conversations yet. Start by sharing your thoughts with your coach.")
+            if viewModel.historyItems.isEmpty {
+                Text("No past conversations yet")
                     .font(.system(size: themeManager.typography.fontSize.body))
-                    .foregroundColor(themeManager.colors.textLight)
+                    .foregroundColor(themeManager.colors.text.opacity(0.6))
                     .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 32)
             } else {
-                ForEach(viewModel.historyItems) { item in
-                    CoachHistoryCard(historyItem: item)
+                VStack(spacing: 16) {
+                    ForEach(Array(viewModel.historyItems.prefix(3))) { item in
+                        NavigationLink(destination: CoachConversationDetailView(item: item)) {
+                            ConversationCard(item: item)
+                        }
+                    }
                 }
             }
         }
+        .padding(.horizontal, 24)
+        .padding(.vertical, 16)
     }
 }
 
