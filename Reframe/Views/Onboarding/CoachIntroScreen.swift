@@ -92,7 +92,10 @@ struct CoachIntroScreen: View {
             "Stress reduction"
         ],
         approach: "Theo believes in meeting you where you are, using gentle guidance to help you find your own path to peace. He combines practical exercises with deep listening to help you build resilience and find balance.",
-        quote: "Peace isn't the absence of chaos, but the ability to find calm within it."
+        quote: "Peace isn't the absence of chaos, but the ability to find calm within it.",
+        introStyle: "Mindful acknowledgment of feelings, gentle invitation to explore",
+        techniqueStyle: "Breathing exercises, mindfulness practices, present-moment awareness",
+        closingStyle: "Encouraging finding peace in the present moment"
     ))
     .environmentObject(ThemeManager())
     .environmentObject(OnboardingCoordinator())

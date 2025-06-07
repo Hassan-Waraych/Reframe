@@ -12,9 +12,13 @@ struct Coach: Identifiable, Codable {
     let specialties: [String]
     let approach: String
     let quote: String
+    let introStyle: String
+    let techniqueStyle: String
+    let closingStyle: String
     
     enum CodingKeys: String, CodingKey {
         case id, name, emoji, description, toneSummary, covers, background, specialties, approach, quote
+        case introStyle, techniqueStyle, closingStyle
     }
 }
 
@@ -36,7 +40,10 @@ extension Coach {
                 "Stress reduction"
             ],
             approach: "Theo believes in meeting you where you are, using gentle guidance to help you find your own path to peace. He combines practical exercises with deep listening to help you build resilience and find balance.",
-            quote: "Peace isn't the absence of chaos, but the ability to find calm within it."
+            quote: "Peace isn't the absence of chaos, but the ability to find calm within it.",
+            introStyle: "Mindful acknowledgment of feelings, gentle invitation to explore",
+            techniqueStyle: "Breathing exercises, mindfulness practices, present-moment awareness",
+            closingStyle: "Encouraging finding peace in the present moment"
         ),
         Coach(
             id: "maya",
@@ -53,7 +60,10 @@ extension Coach {
                 "Personal growth"
             ],
             approach: "Maya creates a safe, nurturing space where you can explore your feelings and build a stronger sense of self. She uses a combination of validation and gentle challenges to help you grow.",
-            quote: "Your worth isn't determined by your achievements, but by your inherent value as a human being."
+            quote: "Your worth isn't determined by your achievements, but by your inherent value as a human being.",
+            introStyle: "Warm validation of feelings, emphasis on self-worth",
+            techniqueStyle: "Self-compassion exercises, perspective-shifting questions",
+            closingStyle: "Affirming inherent worth and potential"
         ),
         Coach(
             id: "jordan",
@@ -70,7 +80,10 @@ extension Coach {
                 "Boundary setting"
             ],
             approach: "Jordan believes in empowering you to make your own decisions while providing the tools and perspective needed to navigate life's challenges. They combine empathy with practical guidance.",
-            quote: "Change isn't something to fear, but an opportunity to grow and discover new strengths."
+            quote: "Change isn't something to fear, but an opportunity to grow and discover new strengths.",
+            introStyle: "Empathetic acknowledgment, focus on growth potential",
+            techniqueStyle: "Boundary-setting exercises, relationship navigation tools",
+            closingStyle: "Encouraging growth through change"
         ),
         Coach(
             id: "alex",
@@ -87,7 +100,10 @@ extension Coach {
                 "Mental clarity"
             ],
             approach: "Alex helps you step back from overwhelming thoughts and see situations with fresh perspective. They use structured techniques to help you find practical solutions to complex problems.",
-            quote: "Clarity comes not from having all the answers, but from asking the right questions."
+            quote: "Clarity comes not from having all the answers, but from asking the right questions.",
+            introStyle: "Clear acknowledgment, focus on finding solutions",
+            techniqueStyle: "Cognitive reframing, structured problem-solving",
+            closingStyle: "Encouraging continued growth and learning"
         )
     ]
 } 
