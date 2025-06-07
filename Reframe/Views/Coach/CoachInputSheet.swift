@@ -59,16 +59,17 @@ struct CoachInputSheet: View {
                                     .font(.system(size: themeManager.typography.fontSize.body, weight: .medium))
                                     .foregroundColor(themeManager.colors.text)
                                 
-                                TextEditor(text: $messageText)
-                                    .font(.system(size: themeManager.typography.fontSize.body))
-                                    .foregroundColor(themeManager.colors.text)
-                                    .frame(minHeight: 120)
-                                    .padding(16)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 16)
-                                            .fill(themeManager.colors.surface)
-                                            .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
-                                    )
+                                ZStack {
+                                    TextEditor(text: $messageText)
+                                        .font(.system(size: themeManager.typography.fontSize.body))
+                                        .foregroundColor(themeManager.colors.text)
+                                        .frame(minHeight: 120)
+                                        .scrollContentBackground(.hidden)
+                                }
+                                .background(themeManager.colors.surface)
+                                .cornerRadius(16)
+                                .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
+                                .padding(0)
                             }
                         }
                     } else {

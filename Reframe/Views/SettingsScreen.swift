@@ -19,11 +19,7 @@ struct SettingsScreen: View {
                 // Header
                 HStack {
                     Button(action: {
-                        if selectedTab == 3 {
-                            selectedTab = 0
-                        } else {
-                            dismiss()
-                        }
+                        selectedTab = 0
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 24, weight: .semibold))
