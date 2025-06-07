@@ -4,6 +4,7 @@ import FirebaseFirestore
 
 struct DevSettingsScreen: View {
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var authService: AuthService
     @Environment(\.dismiss) private var dismiss
     @State private var loading = false
     @State private var testResults: TestResults?
@@ -28,6 +29,7 @@ struct DevSettingsScreen: View {
                 onboardingResetSection
                 reframeLimitResetSection
                 streakSection
+                userStatusSection
                 journalSection
                 coachSection
             }
@@ -232,7 +234,42 @@ struct DevSettingsScreen: View {
         }
         .padding(.horizontal)
     }
-
+    
+    private var userStatusSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("User Status")
+                .font(.system(size: themeManager.typography.fontSize.h3, weight: .bold))
+                .foregroundColor(themeManager.colors.text)
+            
+            HStack(spacing: 16) {
+                Button(action: { Task { await setUserStatus(.free) } }) {
+                    Text("Set Free")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                        .background(themeManager.colors.secondary)
+                        .cornerRadius(12)
+                }
+                
+                Button(action: { Task { await setUserStatus(.premium) } }) {
+                    Text("Set Premium")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                        .background(themeManager.colors.primary)
+                        .cornerRadius(12)
+                }
+            }
+            
+            Text("Current Status: \(authService.userStatus.rawValue.capitalized)")
+                .font(.system(size: 16))
+                .foregroundColor(themeManager.colors.textLight)
+        }
+        .padding(.horizontal)
+    }
+    
     @MainActor
     private func resetStreak() async {
         guard let userId = Auth.auth().currentUser?.uid else { return }
@@ -255,6 +292,16 @@ struct DevSettingsScreen: View {
                 "lastUpdated": Timestamp(date: Date())
             ])
         }
+    }
+    
+    @MainActor
+    private func setUserStatus(_ status: UserStatus) async {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        let db = Firestore.firestore()
+        try? await db.collection("users").document(userId).updateData([
+            "userStatus": status.rawValue
+        ])
+        authService.userStatus = status
     }
     
     private var journalSection: some View {
@@ -394,4 +441,5 @@ struct DevSettingsScreen: View {
 #Preview {
     DevSettingsScreen()
         .environmentObject(ThemeManager())
+        .environmentObject(AuthService.shared)
 } 

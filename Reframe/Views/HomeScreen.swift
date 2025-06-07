@@ -18,6 +18,7 @@ struct HomeScreen: View {
     @State private var isAnimating = false
     @State private var showQuote = false
     @State private var showReframeResult = false
+    @State private var showPremiumModal = false
     
     var body: some View {
         ZStack {
@@ -74,38 +75,48 @@ struct HomeScreen: View {
                     .padding(.horizontal)
 
                     // Progress Section
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Text("Reframes Used")
-                                .font(.custom("Quicksand-SemiBold", size: 16))
-                                .foregroundColor(themeManager.colors.text)
-                            Spacer()
-                            Text("\(5 - viewModel.remainingReframes)/5")
-                                .font(.custom("Nunito-Medium", size: 16))
-                                .foregroundColor(themeManager.colors.textLight)
-                        }
-                        GeometryReader { geometry in
-                            ZStack(alignment: .leading) {
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(themeManager.colors.surface)
-                                    .frame(height: 12)
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(
-                                        LinearGradient(
-                                            gradient: Gradient(colors: [
-                                                themeManager.colors.primary,
-                                                themeManager.colors.primaryDark
-                                            ]),
-                                            startPoint: .leading,
-                                            endPoint: .trailing
+                    if !viewModel.authService.isPremiumUser() {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("Reframes Used")
+                                    .font(.custom("Quicksand-SemiBold", size: 16))
+                                    .foregroundColor(themeManager.colors.text)
+                                Spacer()
+                                Text("\(5 - viewModel.remainingReframes)/5")
+                                    .font(.custom("Nunito-Medium", size: 16))
+                                    .foregroundColor(themeManager.colors.textLight)
+                            }
+                            GeometryReader { geometry in
+                                ZStack(alignment: .leading) {
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(themeManager.colors.surface)
+                                        .frame(height: 12)
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(
+                                            LinearGradient(
+                                                gradient: Gradient(colors: [
+                                                    themeManager.colors.primary,
+                                                    themeManager.colors.primaryDark
+                                                ]),
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
                                         )
-                                    )
-                                    .frame(width: geometry.size.width * CGFloat(5 - viewModel.remainingReframes) / 5, height: 12)
+                                        .frame(width: geometry.size.width * CGFloat(5 - viewModel.remainingReframes) / 5, height: 12)
+                                }
+                            }
+                            .frame(height: 12)
+                            
+                            Button(action: {
+                                showPremiumModal = true
+                            }) {
+                                Text("Upgrade for unlimited reframes")
+                                    .font(.custom("Nunito-SemiBold", size: 14))
+                                    .foregroundColor(themeManager.colors.primary)
                             }
                         }
-                        .frame(height: 12)
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
 
                     // Latest Reframe
                     if let latestReframe = viewModel.reframes.first(where: { $0.category != "Reflection" }) {
@@ -167,6 +178,9 @@ struct HomeScreen: View {
         .task {
             await viewModel.loadReframes()
             await viewModel.loadStreak()
+        }
+        .fullScreenCover(isPresented: $showPremiumModal) {
+            PremiumModalScreen()
         }
     }
     

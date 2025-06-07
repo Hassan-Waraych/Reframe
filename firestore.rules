@@ -19,7 +19,9 @@ service cloud.firestore {
     // User profiles
     match /users/{userId} {
       allow read: if isAuthenticated();
-      allow write: if isOwner(userId);
+      allow write: if isOwner(userId) && 
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['userStatus']) || 
+         request.resource.data.userStatus in ['free', 'premium']);
     }
     
     // Journal entries rules

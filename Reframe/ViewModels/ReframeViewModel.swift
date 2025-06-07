@@ -48,22 +48,26 @@ class ReframeViewModel: ObservableObject {
     private let aiService: AIService
     let journalService: JournalService
     private let streakService: StreakService
+    let authService: AuthService
     
     init(reframeService: ReframeService = .shared,
          aiService: AIService = .shared,
          journalService: JournalService = .shared,
-         streakService: StreakService = .shared) {
+         streakService: StreakService = .shared,
+         authService: AuthService = .shared) {
         self.reframeService = reframeService
         self.aiService = aiService
         self.journalService = journalService
         self.streakService = streakService
+        self.authService = authService
     }
     
     // MARK: - Computed Properties
     var remainingReframes: Int {
         // Only count non-reflection entries
         let usedReframes = reframes.filter { $0.category != "Reflection" }.count
-        return 5 - usedReframes
+        let limit = authService.isPremiumUser() ? Int.max : 5
+        return limit - usedReframes
     }
     
     var canCreateReframe: Bool {

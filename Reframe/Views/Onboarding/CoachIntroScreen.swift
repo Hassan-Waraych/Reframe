@@ -82,6 +82,7 @@ struct CoachIntroScreen: View {
         name: "Theo",
         emoji: "🍃",
         description: "Grounded and calm. Helps manage anxiety and perfectionism.",
+        isPremium: false,
         toneSummary: "Soothing, mindful, realistic reassurance.",
         covers: ["anxiety", "perfectionism", "stress"],
         background: "Theo brings a unique blend of mindfulness and practical wisdom to his coaching. With a background in meditation and cognitive behavioral therapy, he helps you find peace in chaos and clarity in confusion.",

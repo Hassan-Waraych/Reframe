@@ -2,12 +2,19 @@ import Foundation
 import FirebaseAuth
 import FirebaseCore
 import SwiftUI
+import FirebaseFirestore
+
+enum UserStatus: String {
+    case free = "free"
+    case premium = "premium"
+}
 
 class AuthService: ObservableObject {
     @Published var currentUser: User?
     @Published var isAuthenticated = false
     @Published var errorMessage: String?
     @Published var isLoading = false
+    @Published var userStatus: UserStatus = .free
     
     static let shared = AuthService()
     
@@ -24,8 +31,33 @@ class AuthService: ObservableObject {
             DispatchQueue.main.async {
                 self?.currentUser = user
                 self?.isAuthenticated = user != nil
+                if let user = user {
+                    self?.fetchUserStatus(userId: user.uid)
+                } else {
+                    self?.userStatus = .free
+                }
             }
         }
+    }
+    
+    private func fetchUserStatus(userId: String) {
+        let db = Firestore.firestore()
+        db.collection("users").document(userId).getDocument { [weak self] snapshot, error in
+            DispatchQueue.main.async {
+                if let data = snapshot?.data(),
+                   let statusString = data["userStatus"] as? String,
+                   let status = UserStatus(rawValue: statusString) {
+                    self?.userStatus = status
+                } else {
+                    // Default to free if no status is set
+                    self?.userStatus = .free
+                }
+            }
+        }
+    }
+    
+    func isPremiumUser() -> Bool {
+        return userStatus == .premium
     }
     
     // MARK: - Authentication Methods
@@ -36,9 +68,18 @@ class AuthService: ObservableObject {
         
         do {
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
+            
+            // Create user document with default free status
+            let db = Firestore.firestore()
+            try await db.collection("users").document(result.user.uid).setData([
+                "userStatus": UserStatus.free.rawValue,
+                "createdAt": FieldValue.serverTimestamp()
+            ])
+            
             DispatchQueue.main.async {
                 self.currentUser = result.user
                 self.isAuthenticated = true
+                self.userStatus = .free
                 self.errorMessage = nil
                 self.isLoading = false
             }
