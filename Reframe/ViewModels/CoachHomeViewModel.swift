@@ -52,20 +52,28 @@ class CoachHomeViewModel: ObservableObject {
     
     func markAsHelpful(_ item: CoachHistoryItem) async {
         do {
+            // First check if we have a journal entry for this item
+            if let journalEntry = JournalService.shared.getJournalEntryForCoach(historyItem: item) {
+                // If already logged, update the existing entry to be a favorite
+                try await JournalService.shared.updateEntryFavoriteStatus(journalEntry, isFavorite: true)
+            } else {
+                // If not logged yet, add as a favorite
+                try await JournalService.shared.logCoachToJournal(historyItem: item)
+                
+                // Wait a moment for the entry to be available
+                try await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+                
+                if let newEntry = JournalService.shared.getJournalEntryForCoach(historyItem: item) {
+                    try await JournalService.shared.updateEntryFavoriteStatus(newEntry, isFavorite: true)
+                }
+            }
+            
+            // Update the history item in Firestore
             try await coachService.markHistoryItemAsHelpful(item.id)
             
             // Update local state
             if let index = historyItems.firstIndex(where: { $0.id == item.id }) {
-                historyItems[index] = CoachHistoryItem(
-                    id: item.id,
-                    userId: item.userId,
-                    coachId: item.coachId,
-                    userMessage: item.userMessage,
-                    coachResponse: item.coachResponse,
-                    timestamp: item.timestamp,
-                    wasHelpful: true,
-                    isSavedToJournal: item.isSavedToJournal
-                )
+                historyItems[index].wasHelpful = true
             }
         } catch {
             errorMessage = error.localizedDescription
@@ -75,7 +83,7 @@ class CoachHomeViewModel: ObservableObject {
     
     func saveToJournal(_ item: CoachHistoryItem) async {
         do {
-            try await coachService.saveHistoryItemToJournal(item.id)
+            try await JournalService.shared.logCoachToJournal(historyItem: item)
             
             // Update local state
             if let index = historyItems.firstIndex(where: { $0.id == item.id }) {

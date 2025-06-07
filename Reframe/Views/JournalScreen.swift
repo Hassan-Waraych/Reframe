@@ -103,16 +103,31 @@ struct JournalEntryView: View {
         entry.category == "Reframe"
     }
     
+    private var isCoach: Bool {
+        entry.category == "Coach"
+    }
+    
     private var entryColor: Color {
-        isReframe ? Color(hex: "FF7F6B") : themeManager.colors.secondary
+        if isReframe {
+            return Color(hex: "FF7F6B")
+        } else if isCoach {
+            return Color(hex: "7B4B8E")
+        } else {
+            return themeManager.colors.secondary
+        }
     }
     
     private var contentParts: (original: String, reframed: String)? {
-        guard isReframe else { return nil }
+        guard isReframe || isCoach else { return nil }
         let components = entry.content.components(separatedBy: "\n\n")
         guard components.count >= 2 else { return nil }
-        return (components[0].replacingOccurrences(of: "Original Thought: ", with: ""),
-                components[1].replacingOccurrences(of: "Reframed Thought: ", with: ""))
+        if isReframe {
+            return (components[0].replacingOccurrences(of: "Original Thought: ", with: ""),
+                    components[1].replacingOccurrences(of: "Reframed Thought: ", with: ""))
+        } else {
+            return (components[0].replacingOccurrences(of: "Your Message: ", with: ""),
+                    components[1].replacingOccurrences(of: "Coach's Response: ", with: ""))
+        }
     }
     
     var body: some View {
@@ -171,7 +186,7 @@ struct JournalEntryView: View {
                 // Card Content
                 VStack(alignment: .leading, spacing: 12) {
                     if let parts = contentParts {
-                        // Reframe Entry
+                        // Reframe or Coach Entry
                         VStack(alignment: .leading, spacing: 12) {
                             Text(parts.original)
                                 .font(.system(size: 15, weight: .regular, design: .rounded))
@@ -259,7 +274,7 @@ struct JournalEntryView: View {
                 }
         )
         .onTapGesture {
-            if isReframe {
+            if isReframe || isCoach {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                     isExpanded.toggle()
                 }
