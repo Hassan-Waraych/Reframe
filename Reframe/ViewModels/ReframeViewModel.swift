@@ -66,7 +66,7 @@ class ReframeViewModel: ObservableObject {
     var remainingReframes: Int {
         // Only count non-reflection entries
         let usedReframes = reframes.filter { $0.category != "Reflection" }.count
-        let limit = authService.isPremiumUser() ? Int.max : 5
+        let limit = authService.isPremiumUser() ? Int.max : 3
         return limit - usedReframes
     }
     

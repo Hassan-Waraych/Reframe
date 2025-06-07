@@ -4,10 +4,13 @@ struct CoachHomeView: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @Binding var selectedTab: Int
     @StateObject private var viewModel = CoachHomeViewModel()
+    @StateObject private var authService = AuthService.shared
     @State private var showInputSheet = false
     @State private var showCoachDetails = false
     @State private var showHistoryView = false
     @State private var showEmotionalFraming = false
+    @State private var showSwitchCoachModal = false
+    @State private var showPaywall = false
     
     var body: some View {
         ScrollView {
@@ -36,8 +39,127 @@ struct CoachHomeView: View {
                 if let coach = viewModel.currentCoach {
                     coachInfoSection(coach: coach)
                     
+                    // Switch Coach Button
+                    Button(action: {
+                        if authService.isPremiumUser() {
+                            showSwitchCoachModal = true
+                        } else {
+                            showPaywall = true
+                        }
+                    }) {
+                        HStack {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                                .font(.system(size: 16, weight: .semibold))
+                            Text("Switch Coach")
+                                .font(.system(size: 16, weight: .semibold))
+                        }
+                        .foregroundColor(themeManager.colors.primary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(themeManager.colors.surface)
+                        .cornerRadius(12)
+                        .overlay(
+                            Group {
+                                if !authService.isPremiumUser() {
+                                    Image(systemName: "star.fill")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(.yellow)
+                                        .rotationEffect(.degrees(-15))
+                                        .offset(x: 74, y: -16)
+                                }
+                            }
+                        )
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
+                    
                     // Talk to Your Coach Section
                     talkToCoachSection
+                    
+                    // Usage Limit Section
+                    if !authService.isPremiumUser() {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("Coach Sessions Used")
+                                    .font(.custom("Quicksand-SemiBold", size: 16))
+                                    .foregroundColor(themeManager.colors.text)
+                                Spacer()
+                                let maxCount = 1
+                                let displayCount = min(viewModel.coachUsageCount, maxCount)
+                                Text("\(displayCount)/\(maxCount)")
+                                    .font(.custom("Nunito-Medium", size: 16))
+                                    .foregroundColor(themeManager.colors.textLight)
+                            }
+                            GeometryReader { geometry in
+                                let maxCount = 1
+                                let displayCount = min(viewModel.coachUsageCount, maxCount)
+                                ZStack(alignment: .leading) {
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(themeManager.colors.surface)
+                                        .frame(height: 12)
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(
+                                            LinearGradient(
+                                                gradient: Gradient(colors: [
+                                                    themeManager.colors.primary,
+                                                    themeManager.colors.primaryDark
+                                                ]),
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
+                                        .frame(width: geometry.size.width * CGFloat(displayCount) / CGFloat(maxCount), height: 12)
+                                }
+                            }
+                            .frame(height: 12)
+                            
+                            Button(action: {
+                                showPaywall = true
+                            }) {
+                                Text("Upgrade for 25 coach sessions per day")
+                                    .font(.custom("Nunito-SemiBold", size: 14))
+                                    .foregroundColor(themeManager.colors.primary)
+                            }
+                        }
+                        .padding(.horizontal)
+                    } else {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("Coach Sessions Used")
+                                    .font(.custom("Quicksand-SemiBold", size: 16))
+                                    .foregroundColor(themeManager.colors.text)
+                                Spacer()
+                                let maxCount = 25
+                                let displayCount = min(viewModel.coachUsageCount, maxCount)
+                                Text("\(displayCount)/\(maxCount)")
+                                    .font(.custom("Nunito-Medium", size: 16))
+                                    .foregroundColor(themeManager.colors.textLight)
+                            }
+                            GeometryReader { geometry in
+                                let maxCount = 25
+                                let displayCount = min(viewModel.coachUsageCount, maxCount)
+                                ZStack(alignment: .leading) {
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(themeManager.colors.surface)
+                                        .frame(height: 12)
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(
+                                            LinearGradient(
+                                                gradient: Gradient(colors: [
+                                                    themeManager.colors.primary,
+                                                    themeManager.colors.primaryDark
+                                                ]),
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
+                                        .frame(width: geometry.size.width * CGFloat(displayCount) / CGFloat(maxCount), height: 12)
+                                }
+                            }
+                            .frame(height: 12)
+                        }
+                        .padding(.horizontal)
+                    }
                     
                     // Past Conversations Section
                     pastConversationsSection
@@ -89,9 +211,23 @@ struct CoachHomeView: View {
         .sheet(isPresented: $showEmotionalFraming) {
             CoachEmotionalFramingView(viewModel: viewModel)
         }
+        .sheet(isPresented: $showSwitchCoachModal) {
+            CoachSwitchingModal(viewModel: viewModel)
+        }
+        .sheet(isPresented: $showPaywall) {
+            PremiumModalScreen()
+        }
         .onAppear {
             Task {
                 await viewModel.loadData()
+            }
+        }
+        .onChange(of: showSwitchCoachModal) { isShowing in
+            if !isShowing {
+                // Refresh coach data when the modal is dismissed
+                Task {
+                    await viewModel.loadData()
+                }
             }
         }
         .alert("Error", isPresented: $viewModel.showError) {

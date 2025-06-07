@@ -82,7 +82,7 @@ struct HomeScreen: View {
                                     .font(.custom("Quicksand-SemiBold", size: 16))
                                     .foregroundColor(themeManager.colors.text)
                                 Spacer()
-                                Text("\(5 - viewModel.remainingReframes)/5")
+                                Text("\(3 - viewModel.remainingReframes)/3")
                                     .font(.custom("Nunito-Medium", size: 16))
                                     .foregroundColor(themeManager.colors.textLight)
                             }
@@ -102,7 +102,7 @@ struct HomeScreen: View {
                                                 endPoint: .trailing
                                             )
                                         )
-                                        .frame(width: geometry.size.width * CGFloat(5 - viewModel.remainingReframes) / 5, height: 12)
+                                        .frame(width: geometry.size.width * CGFloat(3 - viewModel.remainingReframes) / 3, height: 12)
                                 }
                             }
                             .frame(height: 12)

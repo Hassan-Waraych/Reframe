@@ -13,6 +13,7 @@ struct DevSettingsScreen: View {
     @State private var showClearReframesAlert = false
     @State private var showClearJournalAlert = false
     @State private var showClearCoachMessagesAlert = false
+    @State private var showClearCoachHistoryAlert = false
     @State private var showCoachTestView = false
     
     struct TestResults {
@@ -75,6 +76,14 @@ struct DevSettingsScreen: View {
             }
         } message: {
             Text("This will permanently delete all your messages with your coach. This action cannot be undone.")
+        }
+        .alert("Clear All Coach History", isPresented: $showClearCoachHistoryAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Clear All", role: .destructive) {
+                clearAllCoachHistory()
+            }
+        } message: {
+            Text("This will permanently delete all your coach conversation history. This action cannot be undone.")
         }
         .sheet(isPresented: $showCoachTestView) {
             CoachTestView()
@@ -355,6 +364,18 @@ struct DevSettingsScreen: View {
                         .background(themeManager.colors.secondary)
                         .cornerRadius(12)
                 }
+
+                Button(action: {
+                    showClearCoachHistoryAlert = true
+                }) {
+                    Text("Clear All Coach History")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                        .background(themeManager.colors.error)
+                        .cornerRadius(12)
+                }
             }
         }
         .padding(.horizontal)
@@ -432,6 +453,25 @@ struct DevSettingsScreen: View {
                     }
                 } catch {
                     print("Error clearing coach messages: \(error)")
+                }
+            }
+        }
+    }
+    
+    private func clearAllCoachHistory() {
+        if let userId = Auth.auth().currentUser?.uid {
+            Task {
+                do {
+                    let db = Firestore.firestore()
+                    let snapshot = try await db.collection("coachHistory")
+                        .whereField("userId", isEqualTo: userId)
+                        .getDocuments()
+                    
+                    for document in snapshot.documents {
+                        try await document.reference.delete()
+                    }
+                } catch {
+                    print("Error clearing coach history: \(error)")
                 }
             }
         }

@@ -1,5 +1,6 @@
 import Foundation
 import FirebaseAuth
+import FirebaseFirestore
 
 @MainActor
 class CoachHomeViewModel: ObservableObject {
@@ -9,8 +10,20 @@ class CoachHomeViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var showError = false
+    @Published var availableCoaches: [Coach] = []
+    @Published var coachUsageCount: Int = 0
     
     private let coachService = CoachService.shared
+    private let authService = AuthService.shared
+    
+    var remainingCoachSessions: Int {
+        let limit = authService.isPremiumUser() ? 25 : 1
+        return limit - coachUsageCount
+    }
+    
+    var canUseCoach: Bool {
+        return remainingCoachSessions > 0
+    }
     
     func loadData() async {
         isLoading = true
@@ -27,6 +40,21 @@ class CoachHomeViewModel: ObservableObject {
             
             // Load history items
             historyItems = try await coachService.getHistory()
+            
+            // Load available coaches
+            availableCoaches = Coach.coaches
+            
+            // Load today's coach usage count
+            let db = Firestore.firestore()
+            let calendar = Calendar.current
+            let startOfDay = calendar.startOfDay(for: Date())
+            
+            let snapshot = try await db.collection("coachMessages")
+                .whereField("userId", isEqualTo: userId)
+                .whereField("timestamp", isGreaterThanOrEqualTo: startOfDay)
+                .getDocuments()
+            
+            coachUsageCount = snapshot.documents.count
         } catch {
             errorMessage = error.localizedDescription
             showError = true
@@ -38,9 +66,19 @@ class CoachHomeViewModel: ObservableObject {
     func submitMessage(_ content: String) async {
         guard let coach = currentCoach else { return }
         
+        // Check if user has reached their daily limit
+        if !canUseCoach {
+            errorMessage = "You've reached your daily coach session limit. Upgrade to premium for 25 sessions per day."
+            showError = true
+            return
+        }
+        
         do {
             // Send message and get response
             _ = try await coachService.sendMessage(content, coachId: coach.id)
+            
+            // Increment usage count
+            coachUsageCount += 1
             
             // Reload history to show new conversation
             await loadData()
