@@ -111,7 +111,6 @@ Reframe/Info.plist
 Reframe/Secrets.swift
 Reframe/Config.swift
 Reframe/APIKeys.swift
-Reframe/Services/
 ReframeTests/
 
 # Build and derived data

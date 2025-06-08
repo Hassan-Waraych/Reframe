@@ -253,7 +253,7 @@ class ReframeService: ObservableObject {
     func getReframes() async throws -> [Reframe] {
         if Auth.auth().currentUser == nil {
             // For guest users, get from local storage
-            let localReframes = localStorage.getLocalReframes()
+            let localReframes = localStorage.getReframes()
             return localReframes.compactMap { localReframe in
                 guard let content = localReframe.content else { return nil }
                 
@@ -264,7 +264,7 @@ class ReframeService: ObservableObject {
                 let reframedThought = components[1].replacingOccurrences(of: "Reframed Thought: ", with: "")
                 
                 return Reframe(
-                    id: localReframe.id,
+                    id: localReframe.id ?? UUID().uuidString,
                     userId: "guest",
                     originalThought: originalThought,
                     reframedThought: reframedThought,
@@ -275,15 +275,36 @@ class ReframeService: ObservableObject {
             }
         }
         
+        // For authenticated users, get from Firestore
         let snapshot = try await db.collection("reframes")
             .whereField("userId", isEqualTo: Auth.auth().currentUser!.uid)
-            .order(by: "timestamp", descending: true)
+            .order(by: "createdAt", descending: true)
             .getDocuments()
         
-        return try snapshot.documents.compactMap { document -> Reframe? in
-            var reframe = try document.data(as: Reframe.self)
-            reframe.id = document.documentID
-            return reframe
+        return snapshot.documents.compactMap { document in
+            let data = document.data()
+            guard let content = data["content"] as? String,
+                  let category = data["category"] as? String,
+                  let createdAt = (data["createdAt"] as? Timestamp)?.dateValue() else {
+                print("Failed to parse reframe document: \(document.documentID)")
+                return nil
+            }
+            
+            let components = content.components(separatedBy: "\n\n")
+            guard components.count >= 2 else { return nil }
+            
+            let originalThought = components[0].replacingOccurrences(of: "Original Thought: ", with: "")
+            let reframedThought = components[1].replacingOccurrences(of: "Reframed Thought: ", with: "")
+            
+            return Reframe(
+                id: document.documentID,
+                userId: Auth.auth().currentUser!.uid,
+                originalThought: originalThought,
+                reframedThought: reframedThought,
+                timestamp: createdAt,
+                category: category,
+                helped: data["helped"] as? Bool ?? false
+            )
         }
     }
     

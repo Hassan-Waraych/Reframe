@@ -98,7 +98,7 @@ class JournalService: ObservableObject {
         
         entriesListener = db.collection("journal_entries")
             .whereField("userId", isEqualTo: userId)
-            .order(by: "timestamp", descending: true)
+            .order(by: "createdAt", descending: true)
             .addSnapshotListener { [weak self] snapshot, error in
                 if let error = error {
                     self?.errorMessage = error.localizedDescription
@@ -107,18 +107,41 @@ class JournalService: ObservableObject {
                 
                 guard let documents = snapshot?.documents else { return }
                 
-                do {
-                    let loadedEntries = try documents.compactMap { document -> JournalEntry? in
-                        var entry = try document.data(as: JournalEntry.self)
-                        entry.id = document.documentID
-                        return entry
+                let loadedEntries = documents.compactMap { document -> JournalEntry? in
+                    let data = document.data()
+                    guard let content = data["content"] as? String,
+                          let category = data["category"] as? String,
+                          let createdAt = (data["createdAt"] as? Timestamp)?.dateValue() else {
+                        print("Failed to parse journal entry document: \(document.documentID)")
+                        return nil
                     }
                     
-                    DispatchQueue.main.async {
-                        self?.entries = loadedEntries
+                    // Parse content based on category
+                    let originalThought: String?
+                    let reframeId = data["reframeId"] as? String
+                    
+                    if category == "Reframe" {
+                        let components = content.components(separatedBy: "\n\n")
+                        originalThought = components.count > 0 ? components[0].replacingOccurrences(of: "Original Thought: ", with: "") : nil
+                    } else {
+                        originalThought = nil
                     }
-                } catch {
-                    self?.errorMessage = error.localizedDescription
+                    
+                    var entry = JournalEntry(
+                        userId: userId,
+                        content: content,
+                        originalThought: originalThought,
+                        timestamp: createdAt,
+                        category: category,
+                        reframeId: reframeId,
+                        isFavorite: data["isFavorite"] as? Bool ?? false
+                    )
+                    entry.id = document.documentID
+                    return entry
+                }
+                
+                DispatchQueue.main.async {
+                    self?.entries = loadedEntries
                 }
             }
     }
