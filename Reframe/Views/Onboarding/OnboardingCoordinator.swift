@@ -30,24 +30,30 @@ class OnboardingCoordinator: ObservableObject {
                let decoded = try? JSONDecoder().decode([String].self, from: savedNeeds) {
                 Task {
                     do {
+                        // Get only free coaches
+                        let freeCoaches = Coach.coaches.filter { !$0.isPremium }
+                        
+                        // Find coaches that cover the selected emotional needs
+                        let matchingCoaches = freeCoaches.filter { coach in
+                            // Check if coach covers any of the selected needs
+                            !Set(coach.covers).isDisjoint(with: Set(decoded))
+                        }
+                        
+                        // If no exact matches, use a random free coach
+                        assignedCoach = matchingCoaches.randomElement() ?? freeCoaches.randomElement()
+                        
+                        // Save emotional needs and coach to Firestore if user is already signed in
                         if let userId = Auth.auth().currentUser?.uid {
-                            // Save emotional needs to user document
                             let db = Firestore.firestore()
                             try await db.collection("users").document(userId).setData([
-                                "emotionalNeeds": decoded
+                                "emotionalNeeds": decoded,
+                                "coachId": assignedCoach?.id ?? "",
+                                "coachAssignedAt": FieldValue.serverTimestamp()
                             ], merge: true)
-                            
-                            // Assign coach
-                            assignedCoach = try await CoachService.shared.assignCoach(for: userId)
-                            await MainActor.run {
-                                currentStep = .coachIntro
-                            }
-                        } else {
-                            // For guest users, assign a random coach
-                            assignedCoach = Coach.coaches.randomElement() ?? Coach.coaches[0]
-                            await MainActor.run {
-                                currentStep = .signUp
-                            }
+                        }
+                        
+                        await MainActor.run {
+                            currentStep = .coachIntro
                         }
                     } catch {
                         print("Error assigning coach: \(error)")
@@ -95,9 +101,16 @@ class OnboardingCoordinator: ObservableObject {
         UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
     }
     
-    func handleGuestMode() {
-        // Skip to first thought for guest users
-        currentStep = .firstThought
+    // Helper function to save coach to user's account
+    func saveCoachToUserAccount() async throws {
+        guard let userId = Auth.auth().currentUser?.uid,
+              let coach = assignedCoach else { return }
+        
+        let db = Firestore.firestore()
+        try await db.collection("users").document(userId).setData([
+            "coachId": coach.id,
+            "coachAssignedAt": FieldValue.serverTimestamp()
+        ], merge: true)
     }
 }
 

@@ -138,50 +138,27 @@ struct SignUpScreen: View {
                                 .foregroundColor(themeManager.colors.textLight)
                         }
                         
-                        // Social Sign In
-                        if !isLoginMode {
-                            VStack(spacing: 16) {
-                                Text("Or sign up with")
-                                    .font(.custom("Nunito-Regular", size: 14))
-                                    .foregroundColor(themeManager.colors.textLight)
-                                
-                                HStack(spacing: 16) {
-                                    // Google Sign In
+                        // Social Sign In Buttons
+                        HStack(spacing: 16) {
                             Button(action: handleGoogleSignIn) {
-                                    Image("google_logo")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 24, height: 24)
-                                .frame(maxWidth: .infinity)
-                                            .frame(height: 48)
-                                .background(themeManager.colors.surface)
-                                            .cornerRadius(12)
+                                Image("google_logo")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 24, height: 24)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 48)
+                                    .background(themeManager.colors.surface)
+                                    .cornerRadius(12)
                             }
                             
-                                    // Apple Sign In
                             Button(action: handleAppleSignIn) {
-                                    Image(systemName: "apple.logo")
-                                        .font(.system(size: 24))
-                                        .foregroundColor(themeManager.colors.text)
-                                .frame(maxWidth: .infinity)
-                                            .frame(height: 48)
-                                .background(themeManager.colors.surface)
-                                            .cornerRadius(12)
-                                    }
-                                }
-                            }
-                        }
-                        
-                        if !isFromSettings {
-                            // Guest Mode Button
-                            Button(action: {
-                                coordinator.handleGuestMode()
-                            }) {
-                                Text("Continue as Guest")
-                                    .font(.custom("Nunito-Medium", size: 16))
-                                    .foregroundColor(themeManager.colors.textLight)
+                                Image(systemName: "apple.logo")
+                                    .font(.system(size: 24))
+                                    .foregroundColor(themeManager.colors.text)
                                     .frame(maxWidth: .infinity)
-                                    .frame(height: 56)
+                                    .frame(height: 48)
+                                    .background(themeManager.colors.surface)
+                                    .cornerRadius(12)
                             }
                         }
                     }
@@ -209,22 +186,14 @@ struct SignUpScreen: View {
                 } else {
                     try await authService.signUp(email: email, password: password)
                     
-                    // Store assigned coach in Firestore if available
-                    if let coach = coordinator.assignedCoach {
-                        let db = Firestore.firestore()
-                        if let userId = Auth.auth().currentUser?.uid {
-                            try await db.collection("users").document(userId).setData([
-                                "coachId": coach.id,
-                                "coachAssignedAt": FieldValue.serverTimestamp()
-                            ], merge: true)
-                        }
-                    }
+                    // Save coach to user's account
+                    try await coordinator.saveCoachToUserAccount()
                 }
                 
                 if isFromSettings {
                     dismiss()
                 } else {
-                    coordinator.completeOnboarding()
+                    coordinator.next()
                 }
             } catch {
                 // Error is handled by the authService
