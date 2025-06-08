@@ -2,12 +2,11 @@ import Foundation
 import FirebaseFirestore
 import FirebaseAuth
 
-/// Service responsible for managing reframe data in Firestore and local storage
+/// Service responsible for managing reframe data in Firestore
 class ReframeService: ObservableObject {
     static let shared = ReframeService()
     private let db = Firestore.firestore()
     private var reframeListener: ListenerRegistration?
-    private let localStorage = LocalStorageService.shared
     
     // MARK: - Published Properties
     @Published var dailyReframeCount: Int = 0
@@ -134,45 +133,16 @@ class ReframeService: ObservableObject {
     
     // MARK: - Public Methods
     func canCreateReframe() -> Bool {
-        if Auth.auth().currentUser == nil {
-            // For guest users, check local storage
-            let localReframes = localStorage.getLocalReframes()
-            let calendar = Calendar.current
-            let today = calendar.startOfDay(for: Date())
-            let todayReframes = localReframes.filter { reframe in
-                if let createdAt = reframe.createdAt {
-                    return calendar.isDate(createdAt, inSameDayAs: today) && reframe.category != "Reflection"
-                }
-                return false
-            }
-            return todayReframes.count < DAILY_LIMIT
-        }
+        guard Auth.auth().currentUser != nil else { return false }
         return dailyReframeCount < DAILY_LIMIT
     }
     
     func remainingReframes() -> Int {
-        if Auth.auth().currentUser == nil {
-            // For guest users, check local storage
-            let localReframes = localStorage.getLocalReframes()
-            let calendar = Calendar.current
-            let today = calendar.startOfDay(for: Date())
-            let todayReframes = localReframes.filter { reframe in
-                if let createdAt = reframe.createdAt {
-                    return calendar.isDate(createdAt, inSameDayAs: today) && reframe.category != "Reflection"
-                }
-                return false
-            }
-            return max(0, DAILY_LIMIT - todayReframes.count)
-        }
+        guard Auth.auth().currentUser != nil else { return 0 }
         return max(0, DAILY_LIMIT - dailyReframeCount)
     }
     
     func canSubmitNonsense() -> Bool {
-        if Auth.auth().currentUser == nil {
-            // For guest users, always allow nonsense submissions
-            return true
-        }
-        
         guard let tracker = nonsenseTracker else { return true }
         
         // Check if in cooldown
@@ -195,24 +165,8 @@ class ReframeService: ObservableObject {
     }
     
     func createReframe(originalThought: String, reframedThought: String, category: String? = nil) async throws -> Reframe {
-        if Auth.auth().currentUser == nil {
-            // For guest users, save to local storage
-            let reframeId = localStorage.saveReframe(
-                originalThought: originalThought,
-                reframedThought: reframedThought,
-                category: category ?? "Reframe"
-            )
-            
-            // Create a Reframe object for consistency
-            return Reframe(
-                id: reframeId,
-                userId: "guest",
-                originalThought: originalThought,
-                reframedThought: reframedThought,
-                timestamp: Date(),
-                category: category,
-                helped: false
-            )
+        guard let userId = Auth.auth().currentUser?.uid else {
+            throw NSError(domain: "ReframeService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Please sign in to create reframes"])
         }
         
         // Skip limit checks for reflections
@@ -232,7 +186,7 @@ class ReframeService: ObservableObject {
         }
         
         let reframe = Reframe(
-            userId: Auth.auth().currentUser!.uid,
+            userId: userId,
             originalThought: originalThought,
             reframedThought: reframedThought,
             timestamp: Date(),
@@ -251,83 +205,28 @@ class ReframeService: ObservableObject {
     }
     
     func getReframes() async throws -> [Reframe] {
-        if Auth.auth().currentUser == nil {
-            // For guest users, get from local storage
-            let localReframes = localStorage.getReframes()
-            return localReframes.compactMap { localReframe in
-                guard let content = localReframe.content else { return nil }
-                
-                let components = content.components(separatedBy: "\n\n")
-                guard components.count >= 2 else { return nil }
-                
-                let originalThought = components[0].replacingOccurrences(of: "Original Thought: ", with: "")
-                let reframedThought = components[1].replacingOccurrences(of: "Reframed Thought: ", with: "")
-                
-                return Reframe(
-                    id: localReframe.id ?? UUID().uuidString,
-                    userId: "guest",
-                    originalThought: originalThought,
-                    reframedThought: reframedThought,
-                    timestamp: localReframe.createdAt ?? Date(),
-                    category: localReframe.category,
-                    helped: localReframe.helped
-                )
-            }
+        guard let userId = Auth.auth().currentUser?.uid else {
+            throw NSError(domain: "ReframeService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Please sign in to view reframes"])
         }
         
-        // For authenticated users, get from Firestore
         let snapshot = try await db.collection("reframes")
-            .whereField("userId", isEqualTo: Auth.auth().currentUser!.uid)
-            .order(by: "createdAt", descending: true)
+            .whereField("userId", isEqualTo: userId)
+            .order(by: "timestamp", descending: true)
             .getDocuments()
         
-        return snapshot.documents.compactMap { document in
-            let data = document.data()
-            guard let content = data["content"] as? String,
-                  let category = data["category"] as? String,
-                  let createdAt = (data["createdAt"] as? Timestamp)?.dateValue() else {
-                print("Failed to parse reframe document: \(document.documentID)")
-                return nil
-            }
-            
-            let components = content.components(separatedBy: "\n\n")
-            guard components.count >= 2 else { return nil }
-            
-            let originalThought = components[0].replacingOccurrences(of: "Original Thought: ", with: "")
-            let reframedThought = components[1].replacingOccurrences(of: "Reframed Thought: ", with: "")
-            
-            return Reframe(
-                id: document.documentID,
-                userId: Auth.auth().currentUser!.uid,
-                originalThought: originalThought,
-                reframedThought: reframedThought,
-                timestamp: createdAt,
-                category: category,
-                helped: data["helped"] as? Bool ?? false
-            )
+        return try snapshot.documents.compactMap { document -> Reframe? in
+            var reframe = try document.data(as: Reframe.self)
+            reframe.id = document.documentID
+            return reframe
         }
     }
     
     func deleteReframe(_ reframe: Reframe) async throws {
-        if Auth.auth().currentUser == nil {
-            // For guest users, delete from local storage
-            if let id = reframe.id {
-                localStorage.deleteReframe(id: id)
-            }
-            return
-        }
-        
         guard let id = reframe.id else { return }
         try await db.collection("reframes").document(id).delete()
     }
     
     func updateReframe(_ id: String, helped: Bool) async throws {
-        if Auth.auth().currentUser == nil {
-            // For guest users, update in local storage
-            localStorage.updateReframe(id: id, helped: helped)
-            return
-        }
-        
         try await db.collection("reframes").document(id).updateData([
             "helped": helped
         ])
@@ -339,19 +238,20 @@ class ReframeService: ObservableObject {
     }
     
     func clearAllReframes() async throws {
-        if Auth.auth().currentUser == nil {
-            // For guest users, clear local storage
-            localStorage.clearAllReframes()
-            return
+        guard let userId = Auth.auth().currentUser?.uid else {
+            throw NSError(domain: "ReframeService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Please sign in to clear reframes"])
         }
         
         let snapshot = try await db.collection("reframes")
-            .whereField("userId", isEqualTo: Auth.auth().currentUser!.uid)
+            .whereField("userId", isEqualTo: userId)
             .getDocuments()
         
         for document in snapshot.documents {
             try await document.reference.delete()
         }
+        
+        // Reset the daily count
+        resetDailyCount()
     }
     
     deinit {
