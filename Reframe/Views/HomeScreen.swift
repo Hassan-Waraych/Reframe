@@ -136,6 +136,10 @@ struct HomeScreen: View {
                             }
                         }
                     }
+
+                    // Feature Grid
+                    FeatureGrid()
+                        .padding(.top, 24)
                 }
                 .padding(.vertical, 24)
             }
