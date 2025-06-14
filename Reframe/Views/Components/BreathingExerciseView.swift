@@ -18,18 +18,6 @@ struct BreathingExerciseView: View {
     
     var body: some View {
         VStack(spacing: 32) {
-            // Header
-            VStack(spacing: 8) {
-                Text(tool.title)
-                    .font(.custom("Poppins-Bold", size: 28))
-                    .foregroundColor(themeManager.colors.text)
-                
-                Text(tool.description)
-                    .font(.custom("Poppins-Regular", size: 16))
-                    .foregroundColor(themeManager.colors.text.opacity(0.7))
-                    .multilineTextAlignment(.center)
-            }
-            
             // Breathing Circle
             ZStack {
                 // Background Circle

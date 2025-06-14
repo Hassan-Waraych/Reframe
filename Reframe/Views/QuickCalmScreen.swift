@@ -15,6 +15,22 @@ struct QuickCalmScreen: View {
             type: .breathing(inhale: 4, hold: 4, exhale: 4, holdAfter: 4)
         ),
         CalmingTool(
+            id: "breath_2",
+            title: "Calming Breath",
+            description: "4-7-8 breathing pattern for deep relaxation",
+            category: .breathing,
+            icon: "wind",
+            type: .breathing(inhale: 4, hold: 7, exhale: 8, holdAfter: 0)
+        ),
+        CalmingTool(
+            id: "breath_3",
+            title: "Deep Breathing",
+            description: "5-2-7 pattern for stress relief",
+            category: .breathing,
+            icon: "leaf.fill",
+            type: .breathing(inhale: 5, hold: 2, exhale: 7, holdAfter: 0)
+        ),
+        CalmingTool(
             id: "ground_1",
             title: "5-4-3-2-1 Grounding",
             description: "Use your senses to stay present and calm",
@@ -174,16 +190,16 @@ struct ToolDetailView: View {
                         )
                     case .grounding:
                         GroundingExerciseView(tool: tool)
-                    case .bodyScan:
-                        Text("Body scan content coming soon")
                     case .meditation:
-                        Text("Meditation content coming soon")
+                        MeditationView(tool: tool)
                     case .gratitude:
-                        Text("Gratitude content coming soon")
+                        GratitudeView(tool: tool)
                     case .stretch:
-                        Text("Stretch content coming soon")
+                        StretchView(tool: tool)
                     case .yoga:
-                        Text("Yoga content coming soon")
+                        YogaView(tool: tool)
+                    case .bodyScan:
+                        BodyScanView(tool: tool)
                     }
                 }
             }
