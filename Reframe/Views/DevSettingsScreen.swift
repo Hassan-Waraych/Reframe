@@ -1,6 +1,7 @@
 import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
+import Foundation
 
 struct DevSettingsScreen: View {
     @EnvironmentObject private var themeManager: ThemeManager
@@ -33,6 +34,7 @@ struct DevSettingsScreen: View {
                 userStatusSection
                 journalSection
                 coachSection
+                dailyWisdomPreviewSection
             }
             .padding(.vertical)
         }
@@ -475,6 +477,81 @@ struct DevSettingsScreen: View {
                 }
             }
         }
+    }
+    
+    private var dailyWisdomPreviewSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Preview Daily Wisdom Strategies")
+                .font(.system(size: 22, weight: .bold))
+                .foregroundColor(themeManager.colors.text)
+                .padding(.horizontal)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 32) {
+                    ForEach(dailyBoostStrategies, id: \.id) { strategy in
+                        ZStack {
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color(red: 0.87, green: 0.67, blue: 0.39),
+                                    Color(red: 0.74, green: 0.51, blue: 0.22)
+                                ]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            .frame(width: 320, height: 480)
+                            .cornerRadius(32)
+                            VStack(spacing: 20) {
+                                Image("TreeIcon")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 140, height: 140)
+                                    .background(Color.clear)
+                                    .padding(.top, 32)
+                                Text(strategy.title)
+                                    .font(.custom("Snell Roundhand", size: 28).weight(.bold))
+                                    .foregroundColor(Color(red: 0.22, green: 0.13, blue: 0.07))
+                                    .padding(.bottom, 2)
+                                Text(strategy.description)
+                                    .font(.custom("Georgia", size: 16))
+                                    .foregroundColor(Color(red: 0.22, green: 0.13, blue: 0.07))
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 12)
+                                    .lineLimit(4)
+                                    .minimumScaleFactor(0.7)
+                                Spacer()
+                            }
+                            .frame(width: 300, height: 440)
+                            .padding(.bottom, 24)
+                            VStack {
+                                Spacer()
+                                WaveShape()
+                                    .fill(Color(red: 0.56, green: 0.34, blue: 0.13))
+                                    .frame(height: 40)
+                                    .cornerRadius(16, corners: [.bottomLeft, .bottomRight])
+                            }
+                        }
+                        .frame(width: 320, height: 480)
+                        .shadow(radius: 8)
+                    }
+                }
+                .padding(.horizontal)
+            }
+        }
+    }
+}
+
+// Helper for corner radius on specific corners
+fileprivate extension View {
+    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
+        clipShape( RoundedCorner(radius: radius, corners: corners) )
+    }
+}
+
+fileprivate struct RoundedCorner: Shape {
+    var radius: CGFloat = 0.0
+    var corners: UIRectCorner = .allCorners
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
+        return Path(path.cgPath)
     }
 }
 
