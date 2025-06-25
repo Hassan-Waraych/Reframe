@@ -211,6 +211,32 @@ class JournalService: ObservableObject {
         }
     }
     
+    func logGuidedPromptToJournal(prompt: JournalPrompt, response: String) async throws {
+        guard let userId = Auth.auth().currentUser?.uid else {
+            throw NSError(domain: "JournalService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Please sign in to add journal entries"])
+        }
+        
+        let content = """
+        Prompt: \(prompt.text)
+        
+        Your Response: \(response)
+        """
+        
+        let entry = JournalEntry(
+            userId: userId,
+            content: content,
+            timestamp: Date(),
+            category: "Guided Prompt",
+            isFavorite: false
+        )
+        
+        do {
+            try await db.collection("journal_entries").addDocument(from: entry)
+        } catch {
+            throw error
+        }
+    }
+    
     deinit {
         cleanupEntriesListener()
     }

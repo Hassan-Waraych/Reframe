@@ -107,26 +107,37 @@ struct JournalEntryView: View {
         entry.category == "Coach"
     }
     
+    private var isGuidedPrompt: Bool {
+        entry.category == "Guided Prompt"
+    }
+    
     private var entryColor: Color {
         if isReframe {
             return Color(hex: "FF7F6B")
         } else if isCoach {
             return Color(hex: "7B4B8E")
+        } else if isGuidedPrompt {
+            return Color(hex: "4A90E2")
         } else {
             return themeManager.colors.secondary
         }
     }
     
     private var contentParts: (original: String, reframed: String)? {
-        guard isReframe || isCoach else { return nil }
+        guard isReframe || isCoach || isGuidedPrompt else { return nil }
         let components = entry.content.components(separatedBy: "\n\n")
         guard components.count >= 2 else { return nil }
         if isReframe {
             return (components[0].replacingOccurrences(of: "Original Thought: ", with: ""),
                     components[1].replacingOccurrences(of: "Reframed Thought: ", with: ""))
-        } else {
+        } else if isCoach {
             return (components[0].replacingOccurrences(of: "Your Message: ", with: ""),
                     components[1].replacingOccurrences(of: "Coach's Response: ", with: ""))
+        } else if isGuidedPrompt {
+            return (components[0].replacingOccurrences(of: "Prompt: ", with: ""),
+                    components[1].replacingOccurrences(of: "Your Response: ", with: ""))
+        } else {
+            return nil
         }
     }
     
@@ -274,7 +285,7 @@ struct JournalEntryView: View {
                 }
         )
         .onTapGesture {
-            if isReframe || isCoach {
+            if isReframe || isCoach || isGuidedPrompt {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                     isExpanded.toggle()
                 }

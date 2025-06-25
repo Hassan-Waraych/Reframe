@@ -118,68 +118,203 @@ struct JournalEntryModal: View {
     let onDismiss: () -> Void
     @EnvironmentObject var themeManager: ThemeManager
     @FocusState private var isFocused: Bool
+    @StateObject private var journalService = JournalService.shared
+    @State private var isSaving = false
+    @State private var showError = false
+    @State private var errorMessage = ""
+    @State private var showSuccessAnimation = false
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Image(systemName: prompt.icon)
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundColor(prompt.category.color)
+            ZStack {
+                VStack(spacing: 20) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Image(systemName: prompt.icon)
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundColor(prompt.category.color)
+                            
+                            Text(prompt.title)
+                                .font(.custom("Poppins-Bold", size: 20))
+                                .foregroundColor(themeManager.colors.text)
+                        }
                         
-                        Text(prompt.title)
-                            .font(.custom("Poppins-Bold", size: 20))
+                        Text(prompt.text)
+                            .font(.custom("Poppins-Bold", size: 16))
                             .foregroundColor(themeManager.colors.text)
+                            .padding(.leading, 4)
                     }
+                    .padding()
+                    .background(themeManager.colors.surface)
+                    .cornerRadius(16)
                     
-                    Text(prompt.text)
-                        .font(.custom("Poppins-Bold", size: 16))
-                        .foregroundColor(themeManager.colors.text)
-                        .padding(.leading, 4)
+                    ZStack {
+                        themeManager.colors.surface
+                            .cornerRadius(16)
+                        
+                        TextEditor(text: $journalEntry)
+                            .font(.custom("Poppins-Bold", size: 16))
+                            .foregroundColor(themeManager.colors.text)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .padding()
+                            .scrollContentBackground(.hidden)
+                            .background(Color.clear)
+                            .focused($isFocused)
+                    }
                 }
                 .padding()
-                .background(themeManager.colors.surface)
-                .cornerRadius(16)
-                
-                ZStack {
-                    themeManager.colors.surface
-                        .cornerRadius(16)
-                    
-                    TextEditor(text: $journalEntry)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Cancel") {
+                            onDismiss()
+                        }
                         .font(.custom("Poppins-Bold", size: 16))
                         .foregroundColor(themeManager.colors.text)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .padding()
-                        .scrollContentBackground(.hidden)
-                        .background(Color.clear)
-                        .focused($isFocused)
-                }
-            }
-            .padding()
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        onDismiss()
+                        .disabled(isSaving)
                     }
-                    .font(.custom("Poppins-Bold", size: 16))
-                    .foregroundColor(themeManager.colors.text)
+                    
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Save") {
+                            Task {
+                                await saveEntry()
+                            }
+                        }
+                        .font(.custom("Poppins-Bold", size: 16))
+                        .foregroundColor(journalEntry.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? themeManager.colors.textLight : prompt.category.color)
+                        .disabled(journalEntry.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSaving)
+                    }
+                }
+                .background(themeManager.colors.background)
+                .alert("Error", isPresented: $showError) {
+                    Button("OK") { }
+                } message: {
+                    Text(errorMessage)
                 }
                 
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        // TODO: Implement save functionality
-                        onDismiss()
-                    }
-                    .font(.custom("Poppins-Bold", size: 16))
-                    .foregroundColor(prompt.category.color)
+                // Success Animation Overlay
+                if showSuccessAnimation {
+                    SuccessAnimationView(prompt: prompt)
+                        .transition(.opacity.combined(with: .scale))
                 }
             }
-            .background(themeManager.colors.background)
         }
         .onAppear {
             isFocused = true
+        }
+    }
+    
+    private func saveEntry() async {
+        let trimmedEntry = journalEntry.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedEntry.isEmpty else { return }
+        
+        isSaving = true
+        
+        do {
+            try await journalService.logGuidedPromptToJournal(prompt: prompt, response: trimmedEntry)
+            await MainActor.run {
+                journalEntry = ""
+                showSuccessAnimation = true
+                
+                // Hide success animation after 2 seconds and dismiss
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        showSuccessAnimation = false
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        onDismiss()
+                    }
+                }
+            }
+        } catch {
+            await MainActor.run {
+                errorMessage = error.localizedDescription
+                showError = true
+            }
+        }
+        
+        await MainActor.run {
+            isSaving = false
+        }
+    }
+}
+
+struct SuccessAnimationView: View {
+    let prompt: JournalPrompt
+    @EnvironmentObject var themeManager: ThemeManager
+    @State private var animateCheckmark = false
+    @State private var animateText = false
+    @State private var animateIcon = false
+    
+    var body: some View {
+        ZStack {
+            // Background blur
+            Color.black.opacity(0.3)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 20) {
+                // Animated icon
+                ZStack {
+                    Circle()
+                        .fill(prompt.category.color.opacity(0.15))
+                        .frame(width: 80, height: 80)
+                        .scaleEffect(animateIcon ? 1.1 : 0.8)
+                        .animation(.easeInOut(duration: 0.6).repeatCount(1, autoreverses: true), value: animateIcon)
+                    
+                    Image(systemName: prompt.icon)
+                        .font(.system(size: 36, weight: .semibold))
+                        .foregroundColor(prompt.category.color)
+                        .scaleEffect(animateIcon ? 1.2 : 0.9)
+                        .animation(.easeInOut(duration: 0.6).repeatCount(1, autoreverses: true), value: animateIcon)
+                }
+                
+                // Success checkmark
+                ZStack {
+                    Circle()
+                        .fill(prompt.category.color)
+                        .frame(width: 60, height: 60)
+                        .scaleEffect(animateCheckmark ? 1.0 : 0.0)
+                        .animation(.spring(response: 0.6, dampingFraction: 0.6), value: animateCheckmark)
+                    
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 30, weight: .bold))
+                        .foregroundColor(.white)
+                        .scaleEffect(animateCheckmark ? 1.0 : 0.0)
+                        .animation(.spring(response: 0.6, dampingFraction: 0.6).delay(0.2), value: animateCheckmark)
+                }
+                
+                // Success text
+                VStack(spacing: 8) {
+                    Text("Saved to Journal")
+                        .font(.custom("Poppins-Bold", size: 24))
+                        .foregroundColor(themeManager.colors.text)
+                        .opacity(animateText ? 1.0 : 0.0)
+                        .animation(.easeInOut(duration: 0.5).delay(0.4), value: animateText)
+                    
+                    Text(prompt.title)
+                        .font(.custom("Poppins-Bold", size: 16))
+                        .foregroundColor(themeManager.colors.textLight)
+                        .opacity(animateText ? 1.0 : 0.0)
+                        .animation(.easeInOut(duration: 0.5).delay(0.6), value: animateText)
+                }
+            }
+            .padding(40)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(themeManager.colors.background)
+                    .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
+            )
+            .scaleEffect(animateText ? 1.0 : 0.8)
+            .animation(.spring(response: 0.6, dampingFraction: 0.8), value: animateText)
+        }
+        .onAppear {
+            animateIcon = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                animateCheckmark = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                animateText = true
+            }
         }
     }
 }
