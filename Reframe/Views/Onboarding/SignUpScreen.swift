@@ -138,27 +138,68 @@ struct SignUpScreen: View {
                                 .foregroundColor(themeManager.colors.textLight)
                         }
                         
-                        // Social Sign In Buttons
-                        HStack(spacing: 16) {
-                            Button(action: handleGoogleSignIn) {
-                                Image("google_logo")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 24, height: 24)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 48)
-                                    .background(themeManager.colors.surface)
-                                    .cornerRadius(12)
-                            }
-                            
-                            Button(action: handleAppleSignIn) {
-                                Image(systemName: "apple.logo")
-                                    .font(.system(size: 24))
-                                    .foregroundColor(themeManager.colors.text)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 48)
-                                    .background(themeManager.colors.surface)
-                                    .cornerRadius(12)
+                        // Social Sign In Buttons (only show for sign up)
+                        if !isLoginMode {
+                            VStack(spacing: 16) {
+                                HStack {
+                                    Rectangle()
+                                        .frame(height: 1)
+                                        .foregroundColor(themeManager.colors.border)
+                                    
+                                    Text("Or sign up with")
+                                        .font(.custom("Nunito-Regular", size: 14))
+                                        .foregroundColor(themeManager.colors.textLight)
+                                        .padding(.horizontal, 16)
+                                    
+                                    Rectangle()
+                                        .frame(height: 1)
+                                        .foregroundColor(themeManager.colors.border)
+                                }
+                                
+                                HStack(spacing: 16) {
+                                    Button(action: handleGoogleSignIn) {
+                                        HStack {
+                                            Image("google_logo")
+                                                .resizable()
+                                                .scaledToFit()
+                                                .frame(width: 20, height: 20)
+                                            
+                                            Text("Google")
+                                                .font(.custom("Nunito-Medium", size: 16))
+                                                .foregroundColor(themeManager.colors.text)
+                                        }
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 48)
+                                        .background(themeManager.colors.surface)
+                                        .cornerRadius(12)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .stroke(themeManager.colors.border, lineWidth: 1)
+                                        )
+                                    }
+                                    .disabled(authService.isLoading)
+                                    
+                                    Button(action: handleAppleSignIn) {
+                                        HStack {
+                                            Image(systemName: "apple.logo")
+                                                .font(.system(size: 20))
+                                                .foregroundColor(themeManager.colors.text)
+                                            
+                                            Text("Apple")
+                                                .font(.custom("Nunito-Medium", size: 16))
+                                                .foregroundColor(themeManager.colors.text)
+                                        }
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 48)
+                                        .background(themeManager.colors.surface)
+                                        .cornerRadius(12)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .stroke(themeManager.colors.border, lineWidth: 1)
+                                        )
+                                    }
+                                    .disabled(authService.isLoading)
+                                }
                             }
                         }
                     }

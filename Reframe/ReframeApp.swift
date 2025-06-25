@@ -7,6 +7,7 @@
 
 import SwiftUI
 import FirebaseCore
+import GoogleSignIn
 
 @main
 struct ReframeApp: App {
@@ -23,6 +24,10 @@ struct ReframeApp: App {
             ContentView()
                 .environmentObject(themeManager)
                 .environmentObject(authService)
+                .onOpenURL { url in
+                    // Handle Google Sign-In URL callback
+                    GIDSignIn.sharedInstance.handle(url)
+                }
         }
     }
 }
