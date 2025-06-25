@@ -48,20 +48,7 @@ struct SettingsScreen: View {
                         }
                     }) {
                         HStack(spacing: 16) {
-                            AsyncImage(url: URL(string: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop")) { image in
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                            } placeholder: {
-                                Color.gray.opacity(0.2)
-                            }
-                            .frame(width: 70, height: 70)
-                            .clipShape(Circle())
-                            .overlay(
-                                Circle()
-                                    .stroke(themeManager.colors.primary, lineWidth: 2)
-                            )
-                            .shadow(color: themeManager.colors.primary.opacity(0.2), radius: 8, x: 0, y: 4)
+                            UserAvatar(size: 70, email: authService.getUserEmail())
                             
                             VStack(alignment: .leading, spacing: 4) {
                                 if authService.isAuthenticated {
