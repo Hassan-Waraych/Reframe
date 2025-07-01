@@ -405,6 +405,26 @@ struct DevSettingsScreen: View {
                     .cornerRadius(12)
             }
             
+            Button(action: { Task { await forceCheckMilestones() } }) {
+                Text("Force Check All Milestones")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 48)
+                    .background(themeManager.colors.primary)
+                    .cornerRadius(12)
+            }
+            
+            Button(action: { testNotification() }) {
+                Text("Test Notification")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 48)
+                    .background(themeManager.colors.secondary)
+                    .cornerRadius(12)
+            }
+            
             LazyVGrid(columns: [
                 GridItem(.flexible()),
                 GridItem(.flexible())
@@ -420,6 +440,15 @@ struct DevSettingsScreen: View {
     @MainActor
     private func resetAllMilestones() async {
         await MilestoneService.shared.resetAllMilestones()
+    }
+    
+    @MainActor
+    private func forceCheckMilestones() async {
+        await MilestoneService.shared.forceCheckMilestones()
+    }
+    
+    private func testNotification() {
+        MilestoneService.shared.testNotification()
     }
     
     private func runTests() {

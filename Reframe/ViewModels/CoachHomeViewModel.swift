@@ -82,6 +82,13 @@ class CoachHomeViewModel: ObservableObject {
             
             // Reload history to show new conversation
             await loadData()
+            
+            // Force check milestones after a short delay
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                Task {
+                    await MilestoneService.shared.forceCheckMilestones()
+                }
+            }
         } catch {
             errorMessage = error.localizedDescription
             showError = true

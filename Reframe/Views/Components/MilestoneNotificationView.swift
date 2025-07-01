@@ -85,6 +85,7 @@ struct MilestoneNotificationView: View {
                     Spacer()
                 }
             }
+            .zIndex(9999) // Ensure this appears above all other content
             .onAppear {
                 showNotification()
             }

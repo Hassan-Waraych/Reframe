@@ -88,17 +88,23 @@ struct ContentView: View {
         .environmentObject(coordinator)
         .environmentObject(milestoneService)
         .overlay(
-            MilestoneNotificationView(
-                milestone: milestoneService.completedMilestone ?? Milestone(
-                    id: "",
-                    title: "",
-                    subtitle: "",
-                    icon: "",
-                    category: .beginner,
-                    isCompleted: false
-                ),
-                isPresented: $milestoneService.showMilestoneNotification
-            )
+            Group {
+                if milestoneService.showMilestoneNotification {
+                    MilestoneNotificationView(
+                        milestone: milestoneService.completedMilestone ?? Milestone(
+                            id: "",
+                            title: "",
+                            subtitle: "",
+                            icon: "",
+                            category: .beginner,
+                            isCompleted: false
+                        ),
+                        isPresented: $milestoneService.showMilestoneNotification
+                    )
+                    .zIndex(9999)
+                    .allowsHitTesting(true)
+                }
+            }
         )
         .onAppear {
             UITabBar.appearance().unselectedItemTintColor = UIColor(themeManager.colors.textLight.opacity(0.7))

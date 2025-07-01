@@ -143,6 +143,8 @@ class CoachService {
         ])
         
         // Check milestones after coach conversation
+        // Add a small delay to ensure the coach history is properly saved
+        try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
         await MilestoneService.shared.checkFirstCoach()
         
         // Create and return the user message with its document ID

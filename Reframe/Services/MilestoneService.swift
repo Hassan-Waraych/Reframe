@@ -137,6 +137,8 @@ class MilestoneService: ObservableObject {
                         // Trigger notification
                         completedMilestone = milestones[index]
                         showMilestoneNotification = true
+                        
+                        print("🎉 Milestone unlocked: \(milestone.title)")
                     }
                     
                     try? await saveMilestones(userId: userId)
@@ -152,11 +154,22 @@ class MilestoneService: ObservableObject {
             let snapshot = try await db.collection("reframes")
                 .whereField("userId", isEqualTo: userId)
                 .whereField("category", isNotEqualTo: "Reflection")
-                .limit(to: 1)
+                .limit(to: 10) // Get a few documents to filter in memory
                 .getDocuments()
             
-            return !snapshot.documents.isEmpty
+            // Filter out Nonsense category in memory
+            let validReframes = snapshot.documents.filter { document in
+                if let category = document.data()["category"] as? String {
+                    return category != "Nonsense"
+                }
+                return false
+            }
+            
+            let hasReframe = !validReframes.isEmpty
+            print("🔍 Checking first reframe: \(hasReframe ? "Found" : "Not found")")
+            return hasReframe
         } catch {
+            print("❌ Error checking first reframe: \(error)")
             return false
         }
     }
@@ -218,8 +231,11 @@ class MilestoneService: ObservableObject {
                 .limit(to: 1)
                 .getDocuments()
             
-            return !snapshot.documents.isEmpty
+            let hasCoach = !snapshot.documents.isEmpty
+            print("🔍 Checking first coach: \(hasCoach ? "Found" : "Not found")")
+            return hasCoach
         } catch {
+            print("❌ Error checking first coach: \(error)")
             return false
         }
     }
@@ -268,8 +284,19 @@ class MilestoneService: ObservableObject {
                 .whereField("category", isNotEqualTo: "Reflection")
                 .getDocuments()
             
-            return snapshot.documents.count
+            // Filter out Nonsense category in memory
+            let validReframes = snapshot.documents.filter { document in
+                if let category = document.data()["category"] as? String {
+                    return category != "Nonsense"
+                }
+                return false
+            }
+            
+            let count = validReframes.count
+            print("🔍 Reframe count: \(count)")
+            return count
         } catch {
+            print("❌ Error getting reframe count: \(error)")
             return 0
         }
     }
@@ -333,6 +360,23 @@ class MilestoneService: ObservableObject {
         await checkStreakMilestones()
         await checkReframeCountMilestones()
         await checkReflectionCountMilestones()
+    }
+    
+    // MARK: - Debug Methods
+    
+    @MainActor
+    func forceCheckMilestones() async {
+        print("🔍 Force checking all milestones...")
+        await checkAllMilestones()
+    }
+    
+    @MainActor
+    func testNotification() {
+        if let firstMilestone = milestones.first {
+            completedMilestone = firstMilestone
+            showMilestoneNotification = true
+            print("🧪 Test notification triggered")
+        }
     }
     
     func trackBreathingExercise() async {

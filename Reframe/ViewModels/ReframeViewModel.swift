@@ -118,6 +118,13 @@ class ReframeViewModel: ObservableObject {
                 
                 await loadReframes()
                 
+                // Force check milestones after a short delay
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    Task {
+                        await MilestoneService.shared.forceCheckMilestones()
+                    }
+                }
+                
             case .positive:
                 state = .generating
                 let affirmation = try await aiService.generateAffirmation(for: originalThought)
@@ -140,6 +147,13 @@ class ReframeViewModel: ObservableObject {
                 }
                 
                 await loadReframes()
+                
+                // Force check milestones after a short delay
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    Task {
+                        await MilestoneService.shared.forceCheckMilestones()
+                    }
+                }
                 
             case .nonsense:
                 do {

@@ -209,6 +209,9 @@ class ReframeService: ObservableObject {
     }
     
     private func checkMilestonesAfterReframe(category: String?) async {
+        // Add a small delay to ensure the reframe is properly saved
+        try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+        
         let milestoneService = MilestoneService.shared
         
         if category == "Reflection" {
