@@ -2,21 +2,10 @@ import SwiftUI
 
 struct CalendarGridView: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @StateObject private var calendarDataService = CalendarDataService.shared
     @State private var currentDate = Date()
     @State private var selectedDate: Date?
     @State private var showDayDetail = false
-    
-    // Mock data for demonstration
-    private let mockEntries: [CalendarEntry] = [
-        CalendarEntry(date: Calendar.current.date(byAdding: .day, value: -5, to: Date())!, type: .reframe),
-        CalendarEntry(date: Calendar.current.date(byAdding: .day, value: -4, to: Date())!, type: .reflection),
-        CalendarEntry(date: Calendar.current.date(byAdding: .day, value: -3, to: Date())!, type: .coach),
-        CalendarEntry(date: Calendar.current.date(byAdding: .day, value: -2, to: Date())!, type: .guided),
-        CalendarEntry(date: Calendar.current.date(byAdding: .day, value: -1, to: Date())!, type: .reframe),
-        CalendarEntry(date: Calendar.current.date(byAdding: .day, value: -1, to: Date())!, type: .reflection), // Multiple entries on same day
-        CalendarEntry(date: Date(), type: .reflection),
-        CalendarEntry(date: Date(), type: .coach) // Multiple entries on same day
-    ]
     
     var body: some View {
         VStack(spacing: 16) {
@@ -54,7 +43,7 @@ struct CalendarGridView: View {
             VStack(spacing: 8) {
                 // Day headers
                 HStack(spacing: 0) {
-                    ForEach(["S", "M", "T", "W", "T", "F", "S"], id: \.self) { day in
+                    ForEach(Array(["S", "M", "T", "W", "T", "F", "S"].enumerated()), id: \.offset) { index, day in
                         Text(day)
                             .font(.custom("Nunito-Medium", size: 12))
                             .foregroundColor(themeManager.colors.textLight)
@@ -62,22 +51,60 @@ struct CalendarGridView: View {
                     }
                 }
                 
-                // Calendar days
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 8) {
-                    ForEach(calendarDays, id: \.self) { date in
-                        if let date = date {
-                            CalendarDayView(
-                                date: date,
-                                isSelected: Calendar.current.isDate(date, inSameDayAs: selectedDate ?? Date()),
-                                hasEntries: hasEntries(for: date),
-                                entryTypes: entryTypes(for: date)
-                            ) {
-                                selectedDate = date
-                                showDayDetail = true
+                if calendarDataService.isLoading {
+                    // Loading state
+                    VStack(spacing: 12) {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                        Text("Loading calendar data...")
+                            .font(.custom("Nunito-Regular", size: 14))
+                            .foregroundColor(themeManager.colors.textLight)
+                    }
+                    .frame(height: 200)
+                } else if let errorMessage = calendarDataService.errorMessage {
+                    // Error state
+                    VStack(spacing: 12) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.system(size: 24))
+                            .foregroundColor(themeManager.colors.error)
+                        Text("Error loading data")
+                            .font(.custom("Nunito-Medium", size: 16))
+                            .foregroundColor(themeManager.colors.text)
+                        Text(errorMessage)
+                            .font(.custom("Nunito-Regular", size: 14))
+                            .foregroundColor(themeManager.colors.textLight)
+                            .multilineTextAlignment(.center)
+                        Button("Retry") {
+                            Task {
+                                await calendarDataService.loadCalendarDataAsync()
                             }
-                        } else {
-                            Color.clear
-                                .frame(height: 32)
+                        }
+                        .font(.custom("Nunito-SemiBold", size: 14))
+                        .foregroundColor(themeManager.colors.primary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(themeManager.colors.primary.opacity(0.1))
+                        .cornerRadius(8)
+                    }
+                    .frame(height: 200)
+                } else {
+                    // Calendar days
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 8) {
+                        ForEach(Array(calendarDays.enumerated()), id: \.offset) { index, date in
+                            if let date = date {
+                                CalendarDayView(
+                                    date: date,
+                                    isSelected: Calendar.current.isDate(date, inSameDayAs: selectedDate ?? Date()),
+                                    hasEntries: hasEntries(for: date),
+                                    entryTypes: entryTypes(for: date)
+                                ) {
+                                    selectedDate = date
+                                    showDayDetail = true
+                                }
+                            } else {
+                                Color.clear
+                                    .frame(height: 32)
+                            }
                         }
                     }
                 }
@@ -92,6 +119,9 @@ struct CalendarGridView: View {
                 DayDetailView(date: selectedDate, entries: entries(for: selectedDate))
                     .environmentObject(themeManager)
             }
+        }
+        .task {
+            await calendarDataService.loadCalendarDataAsync()
         }
     }
     
@@ -125,17 +155,15 @@ struct CalendarGridView: View {
     }
     
     private func hasEntries(for date: Date) -> Bool {
-        mockEntries.contains { Calendar.current.isDate($0.date, inSameDayAs: date) }
+        calendarDataService.hasEntriesForDate(date)
     }
     
     private func entryTypes(for date: Date) -> [EntryType] {
-        mockEntries
-            .filter { Calendar.current.isDate($0.date, inSameDayAs: date) }
-            .map { $0.type }
+        calendarDataService.getEntryTypesForDate(date)
     }
     
     private func entries(for date: Date) -> [CalendarEntry] {
-        mockEntries.filter { Calendar.current.isDate($0.date, inSameDayAs: date) }
+        calendarDataService.getEntriesForDate(date)
     }
     
     private func previousMonth() {
@@ -168,7 +196,7 @@ struct CalendarDayView: View {
                 
                 if hasEntries {
                     HStack(spacing: 1) {
-                        ForEach(entryTypes.prefix(3), id: \.self) { type in
+                        ForEach(Array(entryTypes.prefix(3).enumerated()), id: \.offset) { index, type in
                             Circle()
                                 .fill(colorForEntryType(type))
                                 .frame(width: 4, height: 4)
@@ -282,7 +310,7 @@ struct EntryRowView: View {
                     .font(.custom("Nunito-SemiBold", size: 16))
                     .foregroundColor(themeManager.colors.text)
                 
-                Text(entry.description)
+                Text(truncatedDescription)
                     .font(.custom("Nunito-Regular", size: 14))
                     .foregroundColor(themeManager.colors.textLight)
                     .lineLimit(2)
@@ -297,6 +325,14 @@ struct EntryRowView: View {
         .padding(16)
         .background(themeManager.colors.surface)
         .cornerRadius(12)
+    }
+    
+    private var truncatedDescription: String {
+        let maxLength = 60
+        if entry.description.count > maxLength {
+            return String(entry.description.prefix(maxLength)) + "..."
+        }
+        return entry.description
     }
     
     private var timeString: String {
@@ -319,26 +355,7 @@ struct EntryRowView: View {
     }
 }
 
-// Data models
-struct CalendarEntry: Identifiable {
-    let id = UUID()
-    let date: Date
-    let type: EntryType
-    let description: String
-    
-    init(date: Date, type: EntryType) {
-        self.date = date
-        self.type = type
-        self.description = "Sample entry for \(type.rawValue)"
-    }
-}
 
-enum EntryType: String, CaseIterable {
-    case reframe = "reframe"
-    case reflection = "reflection"
-    case coach = "coach"
-    case guided = "guided"
-}
 
 #Preview {
     CalendarGridView()
