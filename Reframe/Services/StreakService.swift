@@ -31,6 +31,9 @@ class StreakService {
                         "count": streak.count + 1,
                         "lastUpdated": Timestamp(date: Date())
                     ])
+                    
+                    // Check streak milestones
+                    await MilestoneService.shared.checkStreakMilestones()
                 } else {
                     // Streak broken, reset to 1
                     try await streakRef.updateData([
@@ -46,6 +49,9 @@ class StreakService {
                     lastUpdated: Date()
                 )
                 try await streakRef.setData(from: newStreak)
+                
+                // Check streak milestones
+                await MilestoneService.shared.checkStreakMilestones()
             }
         } catch {
             throw error

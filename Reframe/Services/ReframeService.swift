@@ -198,9 +198,25 @@ class ReframeService: ObservableObject {
             let docRef = try await db.collection("reframes").addDocument(from: reframe)
             var savedReframe = reframe
             savedReframe.id = docRef.documentID
+            
+            // Check milestones after creating reframe
+            await checkMilestonesAfterReframe(category: category)
+            
             return savedReframe
         } catch {
             throw error
+        }
+    }
+    
+    private func checkMilestonesAfterReframe(category: String?) async {
+        let milestoneService = MilestoneService.shared
+        
+        if category == "Reflection" {
+            await milestoneService.checkFirstReflection()
+            await milestoneService.checkReflectionCountMilestones()
+        } else {
+            await milestoneService.checkFirstReframe()
+            await milestoneService.checkReframeCountMilestones()
         }
     }
     

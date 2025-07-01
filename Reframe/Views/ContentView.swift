@@ -4,6 +4,7 @@ struct ContentView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var authService: AuthService
     @StateObject private var coordinator = OnboardingCoordinator()
+    @StateObject private var milestoneService = MilestoneService.shared
     @State private var selectedTab = 0
     
     init() {
@@ -85,6 +86,20 @@ struct ContentView: View {
         }
         .environmentObject(themeManager)
         .environmentObject(coordinator)
+        .environmentObject(milestoneService)
+        .overlay(
+            MilestoneNotificationView(
+                milestone: milestoneService.completedMilestone ?? Milestone(
+                    id: "",
+                    title: "",
+                    subtitle: "",
+                    icon: "",
+                    category: .beginner,
+                    isCompleted: false
+                ),
+                isPresented: $milestoneService.showMilestoneNotification
+            )
+        )
         .onAppear {
             UITabBar.appearance().unselectedItemTintColor = UIColor(themeManager.colors.textLight.opacity(0.7))
             UITabBar.appearance().backgroundColor = .clear

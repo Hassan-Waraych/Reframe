@@ -81,6 +81,11 @@ class JournalService: ObservableObject {
         
         do {
             try await db.collection("journal_entries").addDocument(from: entry)
+            
+            // Check milestones after adding journal entry
+            if category == "Guided Prompt" {
+                await MilestoneService.shared.checkFirstGuidedJournal()
+            }
         } catch {
             throw error
         }
@@ -232,6 +237,9 @@ class JournalService: ObservableObject {
         
         do {
             try await db.collection("journal_entries").addDocument(from: entry)
+            
+            // Check milestone for guided prompt
+            await MilestoneService.shared.checkFirstGuidedJournal()
         } catch {
             throw error
         }

@@ -142,6 +142,9 @@ class CoachService {
             "isSavedToJournal": false
         ])
         
+        // Check milestones after coach conversation
+        await MilestoneService.shared.checkFirstCoach()
+        
         // Create and return the user message with its document ID
         return CoachMessage(
             id: userMessageRef.documentID,
@@ -206,7 +209,7 @@ class CoachService {
         }
         
         // Create a journal entry
-        try await db.collection("journal").addDocument(data: [
+        try await db.collection("journal_entries").addDocument(data: [
             "userId": userId,
             "content": data["userMessage"] as? String ?? "",
             "coachResponse": data["coachResponse"] as? String ?? "",

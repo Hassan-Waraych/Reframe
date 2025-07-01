@@ -11,6 +11,8 @@ struct BreathingExerciseView: View {
     @State private var progress: CGFloat = 0
     @State private var timer: Timer?
     @State private var isActive = false
+    @State private var cycleCount = 0
+    @State private var hasTrackedMilestone = false
     
     private var totalDuration: Int {
         inhale + hold + exhale + holdAfter
@@ -154,6 +156,15 @@ struct BreathingExerciseView: View {
             case .hold: currentPhase = .exhale
             case .exhale: currentPhase = .holdAfter
             case .holdAfter: currentPhase = .inhale
+            }
+            cycleCount += 1
+            if !hasTrackedMilestone {
+                hasTrackedMilestone = true
+                // Track milestone for first breathing exercise
+                Task {
+                    await MilestoneService.shared.trackBreathingExercise()
+                    await MilestoneService.shared.checkFirstBreathing()
+                }
             }
         }
     }

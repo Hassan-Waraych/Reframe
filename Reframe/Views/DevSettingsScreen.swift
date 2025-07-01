@@ -34,6 +34,7 @@ struct DevSettingsScreen: View {
                 userStatusSection
                 journalSection
                 coachSection
+                milestoneSection
                 dailyWisdomPreviewSection
             }
             .padding(.vertical)
@@ -313,6 +314,11 @@ struct DevSettingsScreen: View {
             "userStatus": status.rawValue
         ])
         authService.userStatus = status
+        
+        // Check premium milestone if status is set to premium
+        if status == .premium {
+            await MilestoneService.shared.checkPremiumExplorer()
+        }
     }
     
     private var journalSection: some View {
@@ -381,6 +387,39 @@ struct DevSettingsScreen: View {
             }
         }
         .padding(.horizontal)
+    }
+    
+    private var milestoneSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Milestones")
+                .font(.system(size: themeManager.typography.fontSize.h3, weight: .bold))
+                .foregroundColor(themeManager.colors.text)
+            
+            Button(action: { Task { await resetAllMilestones() } }) {
+                Text("Reset All Milestones")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 48)
+                    .background(themeManager.colors.error)
+                    .cornerRadius(12)
+            }
+            
+            LazyVGrid(columns: [
+                GridItem(.flexible()),
+                GridItem(.flexible())
+            ], spacing: 12) {
+                ForEach(MilestoneService.shared.milestones) { milestone in
+                    MilestoneTestCard(milestone: milestone)
+                }
+            }
+        }
+        .padding(.horizontal)
+    }
+    
+    @MainActor
+    private func resetAllMilestones() async {
+        await MilestoneService.shared.resetAllMilestones()
     }
     
     private func runTests() {
@@ -552,6 +591,63 @@ fileprivate struct RoundedCorner: Shape {
     func path(in rect: CGRect) -> Path {
         let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
         return Path(path.cgPath)
+    }
+}
+
+struct MilestoneTestCard: View {
+    let milestone: Milestone
+    @EnvironmentObject var themeManager: ThemeManager
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            HStack {
+                Image(systemName: milestone.icon)
+                    .font(.system(size: 16))
+                    .foregroundColor(milestone.isCompleted ? milestone.category.color : themeManager.colors.textLight)
+                
+                Text(milestone.title)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(themeManager.colors.text)
+                    .lineLimit(1)
+                
+                Spacer()
+            }
+            
+            HStack(spacing: 8) {
+                Button(action: { Task { await completeMilestone() } }) {
+                    Text("Complete")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 32)
+                        .background(milestone.isCompleted ? Color.gray : milestone.category.color)
+                        .cornerRadius(8)
+                }
+                .disabled(milestone.isCompleted)
+                
+                Button(action: { Task { await uncompleteMilestone() } }) {
+                    Text("Reset")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 32)
+                        .background(milestone.isCompleted ? Color.red : Color.gray)
+                        .cornerRadius(8)
+                }
+                .disabled(!milestone.isCompleted)
+            }
+        }
+        .padding(8)
+        .background(themeManager.colors.surface)
+        .cornerRadius(8)
+    }
+    
+    private func completeMilestone() async {
+        await MilestoneService.shared.completeMilestone(id: milestone.id)
+    }
+    
+    private func uncompleteMilestone() async {
+        await MilestoneService.shared.uncompleteMilestone(id: milestone.id)
     }
 }
 

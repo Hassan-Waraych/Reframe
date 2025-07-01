@@ -2,7 +2,8 @@ import SwiftUI
 
 struct AchievementsScreen: View {
     @EnvironmentObject var themeManager: ThemeManager
-    @State private var selectedAchievement: Achievement?
+    @StateObject private var milestoneService = MilestoneService.shared
+    @State private var selectedMilestone: Milestone?
     @State private var showDetail = false
     
     private let columns = [
@@ -23,38 +24,66 @@ struct AchievementsScreen: View {
                 }
                 .padding(.horizontal)
                 
-                // Achievements Grid
+                // Milestones Grid
+                if milestoneService.isLoading {
+                    HStack {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                        Text("Loading milestones...")
+                            .font(.custom("Nunito-Regular", size: 14))
+                            .foregroundColor(themeManager.colors.textLight)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                } else {
                 LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(Achievement.mockAchievements) { achievement in
-                        AchievementCard(achievement: achievement)
+                        ForEach(milestoneService.milestones) { milestone in
+                            MilestoneCard(milestone: milestone)
                             .onTapGesture {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                    selectedAchievement = achievement
+                                        selectedMilestone = milestone
                                     showDetail = true
                                 }
                             }
                     }
                 }
                 .padding(.horizontal)
+                }
             }
             .padding(.vertical, 24)
         }
         .background(themeManager.colors.background)
         .navigationBarTitleDisplayMode(.inline)
         .overlay {
-            if showDetail, let achievement = selectedAchievement {
-                AchievementDetailView(
-                    achievement: achievement,
+            if showDetail, let milestone = selectedMilestone {
+                MilestoneDetailView(
+                    milestone: milestone,
                     isPresented: $showDetail
                 )
                 .transition(.opacity.combined(with: .scale))
             }
+        }
+        .task {
+            await milestoneService.checkAllMilestones()
         }
     }
 }
 
 struct ProgressOverviewCard: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @StateObject private var milestoneService = MilestoneService.shared
+    
+    private var completedCount: Int {
+        milestoneService.milestones.filter { $0.isCompleted }.count
+    }
+    
+    private var totalCount: Int {
+        milestoneService.milestones.count
+    }
+    
+    private var progressPercentage: Double {
+        totalCount > 0 ? Double(completedCount) / Double(totalCount) : 0.0
+    }
     
     var body: some View {
         VStack(spacing: 16) {
@@ -64,16 +93,14 @@ struct ProgressOverviewCard: View {
                         .font(.custom("Quicksand-SemiBold", size: 16))
                         .foregroundColor(themeManager.colors.text)
                     
-                    Text("\(Int(Achievement.mockAchievements.filter { !$0.isLocked }.count * 100 / Achievement.mockAchievements.count))% Complete")
+                    Text("\(Int(progressPercentage * 100))% Complete")
                         .font(.custom("Nunito-Bold", size: 24))
                         .foregroundColor(themeManager.colors.primary)
                 }
                 
                 Spacer()
                 
-                CircularProgressView(
-                    progress: Double(Achievement.mockAchievements.filter { !$0.isLocked }.count) / Double(Achievement.mockAchievements.count)
-                )
+                CircularProgressView(progress: progressPercentage)
                 .frame(width: 60, height: 60)
             }
             
@@ -155,28 +182,28 @@ struct ProgressGraphView: View {
     }
 }
 
-struct AchievementCard: View {
-    let achievement: Achievement
+struct MilestoneCard: View {
+    let milestone: Milestone
     @EnvironmentObject var themeManager: ThemeManager
     
     var body: some View {
         VStack(spacing: 12) {
             ZStack {
                 Circle()
-                    .fill(achievement.isLocked ? themeManager.colors.surface : achievement.category.color.opacity(0.2))
+                    .fill(milestone.isCompleted ? milestone.category.color.opacity(0.2) : themeManager.colors.surface)
                     .frame(width: 60, height: 60)
                 
-                Image(systemName: achievement.icon)
+                Image(systemName: milestone.icon)
                     .font(.system(size: 24))
-                    .foregroundColor(achievement.isLocked ? themeManager.colors.textLight : achievement.category.color)
+                    .foregroundColor(milestone.isCompleted ? milestone.category.color : themeManager.colors.textLight)
             }
             
-            Text(achievement.title)
+            Text(milestone.title)
                 .font(.custom("Quicksand-SemiBold", size: 14))
-                .foregroundColor(achievement.isLocked ? themeManager.colors.textLight : themeManager.colors.text)
+                .foregroundColor(milestone.isCompleted ? themeManager.colors.text : themeManager.colors.textLight)
                 .multilineTextAlignment(.center)
             
-            ProgressBar(progress: achievement.progress)
+            ProgressBar(progress: milestone.isCompleted ? 1.0 : 0.0)
                 .frame(height: 4)
         }
         .padding()
@@ -215,8 +242,8 @@ struct ProgressBar: View {
     }
 }
 
-struct AchievementDetailView: View {
-    let achievement: Achievement
+struct MilestoneDetailView: View {
+    let milestone: Milestone
     @Binding var isPresented: Bool
     @EnvironmentObject var themeManager: ThemeManager
     
@@ -233,32 +260,32 @@ struct AchievementDetailView: View {
             VStack(spacing: 24) {
                 ZStack {
                     Circle()
-                        .fill(achievement.isLocked ? themeManager.colors.surface : achievement.category.color.opacity(0.2))
+                        .fill(milestone.isCompleted ? milestone.category.color.opacity(0.2) : themeManager.colors.surface)
                         .frame(width: 100, height: 100)
                     
-                    Image(systemName: achievement.icon)
+                    Image(systemName: milestone.icon)
                         .font(.system(size: 40))
-                        .foregroundColor(achievement.isLocked ? themeManager.colors.textLight : achievement.category.color)
+                        .foregroundColor(milestone.isCompleted ? milestone.category.color : themeManager.colors.textLight)
                 }
                 
                 VStack(spacing: 8) {
-                    Text(achievement.title)
+                    Text(milestone.title)
                         .font(.custom("Quicksand-Bold", size: 24))
-                        .foregroundColor(achievement.isLocked ? themeManager.colors.textLight : themeManager.colors.text)
+                        .foregroundColor(milestone.isCompleted ? themeManager.colors.text : themeManager.colors.textLight)
                     
-                    Text(achievement.subtitle)
+                    Text(milestone.subtitle)
                         .font(.custom("Nunito-Regular", size: 16))
                         .foregroundColor(themeManager.colors.textLight)
                         .multilineTextAlignment(.center)
                 }
                 
-                if let dateEarned = achievement.dateEarned {
-                    Text("Earned on \(dateEarned.formatted(date: .abbreviated, time: .omitted))")
+                if let dateCompleted = milestone.dateCompleted {
+                    Text("Earned on \(dateCompleted.formatted(date: .abbreviated, time: .omitted))")
                         .font(.custom("Nunito-Medium", size: 14))
                         .foregroundColor(themeManager.colors.textLight)
                 }
                 
-                ProgressBar(progress: achievement.progress)
+                ProgressBar(progress: milestone.isCompleted ? 1.0 : 0.0)
                     .frame(height: 6)
                     .padding(.horizontal, 40)
             }
