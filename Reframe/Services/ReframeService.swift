@@ -15,7 +15,6 @@ class ReframeService: ObservableObject {
     @Published var nonsenseTracker: NonsenseTracker?
     
     // MARK: - Constants
-    private let DAILY_LIMIT = 5
     private let NONSENSE_LIMIT = 10
     private let NONSENSE_COOLDOWN: TimeInterval = 24 * 3600 // 24 hours
     
@@ -134,12 +133,14 @@ class ReframeService: ObservableObject {
     // MARK: - Public Methods
     func canCreateReframe() -> Bool {
         guard Auth.auth().currentUser != nil else { return false }
-        return dailyReframeCount < DAILY_LIMIT
+        let limit = AuthService.shared.isPremiumUser() ? Int.max : 2
+        return dailyReframeCount < limit
     }
     
     func remainingReframes() -> Int {
         guard Auth.auth().currentUser != nil else { return 0 }
-        return max(0, DAILY_LIMIT - dailyReframeCount)
+        let limit = AuthService.shared.isPremiumUser() ? Int.max : 2
+        return max(0, limit - dailyReframeCount)
     }
     
     func canSubmitNonsense() -> Bool {

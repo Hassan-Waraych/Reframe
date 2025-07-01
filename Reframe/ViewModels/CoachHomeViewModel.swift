@@ -59,11 +59,18 @@ class CoachHomeViewModel: ObservableObject {
             
             let snapshot = try await db.collection("coachMessages")
                 .whereField("userId", isEqualTo: userId)
-                .whereField("timestamp", isGreaterThanOrEqualTo: startDate)
                 .whereField("isFromUser", isEqualTo: true)
                 .getDocuments()
             
-            coachUsageCount = snapshot.documents.count
+            // Filter by date in memory
+            let userMessages = snapshot.documents.filter { document in
+                if let timestamp = document.data()["timestamp"] as? Timestamp {
+                    return timestamp.dateValue() >= startDate
+                }
+                return false
+            }
+            
+            coachUsageCount = userMessages.count
         } catch {
             errorMessage = error.localizedDescription
             showError = true
