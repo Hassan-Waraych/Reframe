@@ -8,9 +8,11 @@ struct SettingsScreen: View {
     @State private var showDevSettings = false
     @State private var showSignInSheet = false
     @State private var showAccountOptions = false
+    @State private var showFeedbackEmail = false
     @State private var isRemindersEnabled = false
     @State private var selectedTime = Date()
     @State private var selectedDays: Set<Int> = [1, 2, 3, 4, 5] // Monday to Friday
+    @State private var showHelpCenter = false
     let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
     
     var body: some View {
@@ -240,13 +242,19 @@ struct SettingsScreen: View {
                         SupportButton(
                             icon: "envelope.fill",
                             title: "Send Feedback",
-                            color: themeManager.colors.primary
+                            color: themeManager.colors.primary,
+                            action: {
+                                showFeedbackEmail = true
+                            }
                         )
                         
                         SupportButton(
                             icon: "questionmark.circle.fill",
                             title: "Help Center",
-                            color: themeManager.colors.secondary
+                            color: themeManager.colors.secondary,
+                            action: {
+                                showHelpCenter = true
+                            }
                         )
                     }
                 }
@@ -302,6 +310,14 @@ struct SettingsScreen: View {
                 .environmentObject(themeManager)
                 .environmentObject(authService)
         }
+        .sheet(isPresented: $showFeedbackEmail) {
+            FeedbackEmailView()
+                .environmentObject(themeManager)
+        }
+        .sheet(isPresented: $showHelpCenter) {
+            HelpCenterView()
+                .environmentObject(themeManager)
+        }
         .confirmationDialog("Account Options", isPresented: $showAccountOptions) {
             Button("Sign Out", role: .destructive) {
                 do {
@@ -319,10 +335,11 @@ struct SupportButton: View {
     let icon: String
     let title: String
     let color: Color
+    let action: () -> Void
     @EnvironmentObject var themeManager: ThemeManager
     
     var body: some View {
-        Button(action: {}) {
+        Button(action: action) {
             HStack {
                 Image(systemName: icon)
                     .font(.system(size: 20))
