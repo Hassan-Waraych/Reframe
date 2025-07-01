@@ -17,7 +17,7 @@ class CoachHomeViewModel: ObservableObject {
     private let authService = AuthService.shared
     
     var remainingCoachSessions: Int {
-        let limit = authService.isPremiumUser() ? 25 : 1
+        let limit = authService.isPremiumUser() ? 25 : 3
         return limit - coachUsageCount
     }
     
@@ -44,14 +44,23 @@ class CoachHomeViewModel: ObservableObject {
             // Load available coaches
             availableCoaches = Coach.coaches
             
-            // Load today's coach usage count
+            // Load coach usage count (daily for premium, weekly for free)
             let db = Firestore.firestore()
             let calendar = Calendar.current
-            let startOfDay = calendar.startOfDay(for: Date())
+            
+            let startDate: Date
+            if authService.isPremiumUser() {
+                // Premium users: daily limit
+                startDate = calendar.startOfDay(for: Date())
+            } else {
+                // Free users: weekly limit
+                startDate = calendar.dateInterval(of: .weekOfYear, for: Date())?.start ?? Date()
+            }
             
             let snapshot = try await db.collection("coachMessages")
                 .whereField("userId", isEqualTo: userId)
-                .whereField("timestamp", isGreaterThanOrEqualTo: startOfDay)
+                .whereField("timestamp", isGreaterThanOrEqualTo: startDate)
+                .whereField("isFromUser", isEqualTo: true)
                 .getDocuments()
             
             coachUsageCount = snapshot.documents.count
@@ -66,9 +75,13 @@ class CoachHomeViewModel: ObservableObject {
     func submitMessage(_ content: String) async {
         guard let coach = currentCoach else { return }
         
-        // Check if user has reached their daily limit
+        // Check if user has reached their limit
         if !canUseCoach {
-            errorMessage = "You've reached your daily coach session limit. Upgrade to premium for 25 sessions per day."
+            if authService.isPremiumUser() {
+                errorMessage = "You've reached your daily coach session limit."
+            } else {
+                errorMessage = "You've reached your weekly coach session limit. Upgrade to premium for 25 sessions per day."
+            }
             showError = true
             return
         }

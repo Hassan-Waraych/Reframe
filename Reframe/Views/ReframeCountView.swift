@@ -17,7 +17,7 @@ struct ReframeCountView: View {
                         .font(.custom("Quicksand-Bold", size: 24))
                         .foregroundColor(themeManager.colors.primary)
                     
-                    Text("/ 3")
+                    Text("/ 2")
                         .font(.custom("Nunito-Regular", size: 16))
                         .foregroundColor(themeManager.colors.textLight)
                 }

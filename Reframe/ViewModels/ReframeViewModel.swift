@@ -64,10 +64,8 @@ class ReframeViewModel: ObservableObject {
     
     // MARK: - Computed Properties
     var remainingReframes: Int {
-        // Only count non-reflection entries
-        let usedReframes = reframes.filter { $0.category != "Reflection" }.count
-        let limit = authService.isPremiumUser() ? Int.max : 3
-        return limit - usedReframes
+        let limit = authService.isPremiumUser() ? Int.max : 2
+        return limit - reframeService.dailyReframeCount
     }
     
     var canCreateReframe: Bool {

@@ -3,22 +3,10 @@ import SwiftUI
 struct FirstThoughtScreen: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var coordinator: OnboardingCoordinator
-    @State private var thought = ""
-    @State private var selectedOption: ThoughtOption = .reframe
+    @StateObject private var viewModel = ReframeViewModel()
+    @State private var selectedOption: HomeOption = .reframe
     @State private var isAnimating = false
-    @State private var isLoading = false
-    @State private var errorMessage: String?
-    
-    enum ThoughtOption: String, Codable {
-        case reframe
-        case reflect
-    }
-    
-    var gradientColors: [Color] {
-        selectedOption == .reframe ? 
-            [themeManager.colors.primary, themeManager.colors.primaryDark] :
-            [themeManager.colors.secondary, Color(hex: "7B4B8E")]
-    }
+    @State private var showReframeResult = false
     
     var body: some View {
         VStack(spacing: 24) {
@@ -44,6 +32,7 @@ struct FirstThoughtScreen: View {
                 ) {
                     withAnimation(.spring()) {
                         selectedOption = .reframe
+                        viewModel.selectedMode = .reframe
                     }
                 }
                 
@@ -54,37 +43,19 @@ struct FirstThoughtScreen: View {
                 ) {
                     withAnimation(.spring()) {
                         selectedOption = .reflect
+                        viewModel.selectedMode = .reflect
                     }
                 }
             }
             
-            // Thought Input
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(spacing: 8) {
-                    Image(systemName: "bubble.left")
-                        .font(.system(size: 22))
-                        .foregroundColor(themeManager.colors.textLight)
-                    
-                    Text(selectedOption == .reframe ? "e.g., I'm not good enough for this job" : "Reflect on your thought...")
-                        .font(.custom("Nunito-Regular", size: 16))
-                        .foregroundColor(themeManager.colors.textLight)
-                }
-                
-                TextEditor(text: $thought)
-                    .font(.custom("Nunito-Regular", size: 18))
-                    .foregroundColor(themeManager.colors.text)
-                    .frame(minHeight: 140, maxHeight: 220)
-                    .padding(16)
-                    .background(themeManager.colors.surface)
-                    .cornerRadius(18)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 18)
-                            .stroke(themeManager.colors.border, lineWidth: 1.5)
-                    )
-                    .scrollContentBackground(.hidden)
-            }
+            // Use existing ReframeInputView
+            ReframeInputView(
+                viewModel: viewModel,
+                selectedMode: selectedOption,
+                showReframeResult: $showReframeResult
+            )
             
-            if let error = errorMessage {
+            if let error = viewModel.errorMessage {
                 Text(error)
                     .font(.custom("Nunito-Regular", size: 14))
                     .foregroundColor(.red)
@@ -94,43 +65,15 @@ struct FirstThoughtScreen: View {
             
             Spacer()
             
-            // Action Buttons
-            VStack(spacing: 16) {
-                Button(action: handleThoughtSubmission) {
-                    Text(isLoading ? "Processing..." : (selectedOption == .reframe ? "Reframe My Thought" : "Reflect"))
-                        .font(.custom("Nunito-SemiBold", size: 18))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                        .background(
-                            LinearGradient(
-                                gradient: Gradient(colors: gradientColors),
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .cornerRadius(26)
-                        .shadow(
-                            color: selectedOption == .reframe ? 
-                                themeManager.colors.primary.opacity(0.3) : 
-                                themeManager.colors.secondary.opacity(0.3),
-                            radius: 12,
-                            x: 0,
-                            y: 6
-                        )
-                }
-                .disabled(isLoading || thought.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                .opacity((isLoading || thought.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) ? 0.5 : 1)
-                
-                Button(action: {
-                    coordinator.next()
-                }) {
-                    Text("Skip for now")
-                        .font(.custom("Nunito-Medium", size: 16))
-                        .foregroundColor(themeManager.colors.textLight)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 44)
-                }
+            // Skip Button
+            Button(action: {
+                coordinator.completeOnboarding()
+            }) {
+                Text("Skip for now")
+                    .font(.custom("Nunito-Medium", size: 16))
+                    .foregroundColor(themeManager.colors.textLight)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 44)
             }
             .padding(.bottom, UIDevice.current.userInterfaceIdiom == .pad ? 32 : 16)
         }
@@ -143,55 +86,35 @@ struct FirstThoughtScreen: View {
                 isAnimating = true
             }
         }
-    }
-    
-    private func handleThoughtSubmission() {
-        isLoading = true
-        errorMessage = nil
-        
-        // Simulate network delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            isLoading = false
-            // Save the thought if needed
-            if !thought.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                UserDefaults.standard.set(thought, forKey: "firstThought")
+        .onChange(of: showReframeResult) { showResult in
+            if showResult {
+                // Show result for a moment, then complete onboarding
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                    coordinator.completeOnboarding()
+                }
             }
-            // Complete onboarding and redirect to home
-            coordinator.completeOnboarding()
         }
-    }
-}
-
-struct OptionButton: View {
-    let title: String
-    let isSelected: Bool
-    let color: Color
-    let action: () -> Void
-    @EnvironmentObject var themeManager: ThemeManager
-    
-    var gradientColors: [Color] {
-        isSelected ? [color, color.opacity(0.8)] : [themeManager.colors.surface, themeManager.colors.surface]
-    }
-    
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.custom("Nunito-SemiBold", size: 16))
-                .foregroundColor(isSelected ? .white : themeManager.colors.text)
-                .frame(maxWidth: .infinity)
-                .frame(height: 44)
-                .background(
-                    LinearGradient(
-                        gradient: Gradient(colors: gradientColors),
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .cornerRadius(22)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 22)
-                        .stroke(isSelected ? color : themeManager.colors.border, lineWidth: 2)
-                )
+        .overlay(
+            Group {
+                if showReframeResult, let reframe = viewModel.currentReframe {
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                        .transition(.opacity)
+                    
+                    ReframeResultView(reframe: reframe, viewModel: viewModel) {
+                        withAnimation(.spring()) {
+                            showReframeResult = false
+                            viewModel.resetState()
+                        }
+                    }
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
+        )
+        .alert("Error", isPresented: $viewModel.showError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(viewModel.errorMessage ?? "An unknown error occurred")
         }
     }
 }

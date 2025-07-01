@@ -3,11 +3,6 @@ import Combine
 import FirebaseFirestore
 import FirebaseAuth
 
-enum HomeOption {
-    case reframe
-    case reflect
-}
-
 struct HomeScreen: View {
     @EnvironmentObject var themeManager: ThemeManager
     @Binding var selectedTab: Int
@@ -82,7 +77,7 @@ struct HomeScreen: View {
                                     .font(.custom("Quicksand-SemiBold", size: 16))
                                     .foregroundColor(themeManager.colors.text)
                                 Spacer()
-                                Text("\(3 - viewModel.remainingReframes)/3")
+                                Text("\(2 - viewModel.remainingReframes)/2")
                                     .font(.custom("Nunito-Medium", size: 16))
                                     .foregroundColor(themeManager.colors.textLight)
                             }
@@ -102,7 +97,7 @@ struct HomeScreen: View {
                                                 endPoint: .trailing
                                             )
                                         )
-                                        .frame(width: geometry.size.width * CGFloat(3 - viewModel.remainingReframes) / 3, height: 12)
+                                        .frame(width: geometry.size.width * CGFloat(2 - viewModel.remainingReframes) / 2, height: 12)
                                 }
                             }
                             .frame(height: 12)

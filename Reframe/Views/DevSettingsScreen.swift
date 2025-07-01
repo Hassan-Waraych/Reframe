@@ -54,7 +54,7 @@ struct DevSettingsScreen: View {
                 ReframeService.shared.resetDailyCount()
             }
         } message: {
-            Text("This will reset your daily reframe limit. You'll be able to create 5 new reframes today.")
+            Text("This will reset your daily reframe limit. You'll be able to create 2 new reframes today.")
         }
         .alert("Clear All Reframes", isPresented: $showClearReframesAlert) {
             Button("Cancel", role: .cancel) { }

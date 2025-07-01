@@ -80,18 +80,18 @@ struct CoachHomeView: View {
                     if !authService.isPremiumUser() {
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
-                                Text("Coach Sessions Used")
+                                Text("Coach Sessions Used (This Week)")
                                     .font(.custom("Quicksand-SemiBold", size: 16))
                                     .foregroundColor(themeManager.colors.text)
                                 Spacer()
-                                let maxCount = 1
+                                let maxCount = 3
                                 let displayCount = min(viewModel.coachUsageCount, maxCount)
                                 Text("\(displayCount)/\(maxCount)")
                                     .font(.custom("Nunito-Medium", size: 16))
                                     .foregroundColor(themeManager.colors.textLight)
                             }
                             GeometryReader { geometry in
-                                let maxCount = 1
+                                let maxCount = 3
                                 let displayCount = min(viewModel.coachUsageCount, maxCount)
                                 ZStack(alignment: .leading) {
                                     RoundedRectangle(cornerRadius: 8)
@@ -125,7 +125,7 @@ struct CoachHomeView: View {
                     } else {
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
-                                Text("Coach Sessions Used")
+                                Text("Coach Sessions Used (Today)")
                                     .font(.custom("Quicksand-SemiBold", size: 16))
                                     .foregroundColor(themeManager.colors.text)
                                 Spacer()

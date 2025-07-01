@@ -197,7 +197,7 @@ struct GettingStartedContent: View {
                 color: .orange
             ) {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Free users get 3 reframes per day to encourage mindful usage. Premium users get unlimited reframes.")
+                    Text("Free users get 2 reframes per day to encourage mindful usage. Premium users get unlimited reframes.")
                     
                     Text("**Why limits?** We believe in quality over quantity. Taking time to reflect on each reframe helps you get more value from the experience.")
                 }
@@ -400,7 +400,7 @@ struct CoachContent: View {
                 color: .orange
             ) {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("**Free Users**: 1 coach session per day")
+                    Text("**Free Users**: 3 coach sessions per week")
                     Text("**Premium Users**: 25 coach sessions per day")
                     
                     Text("**What counts as a session:**")
