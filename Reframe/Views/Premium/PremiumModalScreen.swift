@@ -19,7 +19,7 @@ struct PremiumModalScreen: View {
             VStack(spacing: 0) {
                 // Header
                 PremiumHeader()
-                    .padding(.top, 16)
+                    .padding(.top, 20)
                 
                 // Features List
                 VStack(spacing: 12) {
@@ -39,8 +39,9 @@ struct PremiumModalScreen: View {
                         )
                         
                         CoachCarousel()
-                            .frame(height: 90)
+                            .frame(height: 80)
                             .padding(.horizontal, -20)
+                            .padding(.vertical, 4)
                     }
                     
                     // Coach Sessions
@@ -79,7 +80,7 @@ struct PremiumModalScreen: View {
                 Spacer()
                 
                 // Subscribe Buttons
-                VStack(spacing: 12) {
+                VStack(spacing: 8) {
                     // Monthly Subscription
                     if let monthlyProduct = storeKitService.getMonthlyProduct() {
                         Button(action: {
@@ -91,19 +92,19 @@ struct PremiumModalScreen: View {
                             HStack {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text("Monthly Premium")
-                                        .font(.custom("Quicksand-Bold", size: 16))
+                                        .font(.custom("Quicksand-Bold", size: 14))
                                     Text(monthlyProduct.displayPrice + "/month")
-                                        .font(.custom("Nunito-Regular", size: 12))
+                                        .font(.custom("Nunito-Regular", size: 11))
                                         .opacity(0.8)
                                 }
                                 Spacer()
                                 Image(systemName: "sparkles")
-                                    .font(.system(size: 16, weight: .semibold))
+                                    .font(.system(size: 14, weight: .semibold))
                             }
                             .foregroundColor(.white)
-                            .padding(.horizontal, 20)
+                            .padding(.horizontal, 16)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 56)
+                            .frame(height: 48)
                             .background(
                                 LinearGradient(
                                     gradient: Gradient(colors: [
@@ -114,8 +115,8 @@ struct PremiumModalScreen: View {
                                     endPoint: .trailing
                                 )
                             )
-                            .cornerRadius(16)
-                            .shadow(color: themeManager.colors.primary.opacity(0.3), radius: 12, x: 0, y: 6)
+                            .cornerRadius(14)
+                            .shadow(color: themeManager.colors.primary.opacity(0.3), radius: 10, x: 0, y: 4)
                         }
                         .disabled(storeKitService.isLoading)
                     }
@@ -132,27 +133,27 @@ struct PremiumModalScreen: View {
                                 VStack(alignment: .leading, spacing: 2) {
                                     HStack(spacing: 4) {
                                         Text("Yearly Premium")
-                                            .font(.custom("Quicksand-Bold", size: 16))
+                                            .font(.custom("Quicksand-Bold", size: 14))
                                         Text("SAVE 50%")
-                                            .font(.custom("Nunito-Bold", size: 10))
-                                            .padding(.horizontal, 6)
-                                            .padding(.vertical, 2)
+                                            .font(.custom("Nunito-Bold", size: 9))
+                                            .padding(.horizontal, 4)
+                                            .padding(.vertical, 1)
                                             .background(Color.yellow)
                                             .foregroundColor(.black)
-                                            .cornerRadius(4)
+                                            .cornerRadius(3)
                                     }
                                     Text(yearlyProduct.displayPrice + "/year")
-                                        .font(.custom("Nunito-Regular", size: 12))
+                                        .font(.custom("Nunito-Regular", size: 11))
                                         .opacity(0.8)
                                 }
                                 Spacer()
                                 Image(systemName: "crown.fill")
-                                    .font(.system(size: 16, weight: .semibold))
+                                    .font(.system(size: 14, weight: .semibold))
                             }
                             .foregroundColor(.white)
-                            .padding(.horizontal, 20)
+                            .padding(.horizontal, 16)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 56)
+                            .frame(height: 48)
                             .background(
                                 LinearGradient(
                                     gradient: Gradient(colors: [
@@ -163,8 +164,8 @@ struct PremiumModalScreen: View {
                                     endPoint: .trailing
                                 )
                             )
-                            .cornerRadius(16)
-                            .shadow(color: Color.orange.opacity(0.3), radius: 12, x: 0, y: 6)
+                            .cornerRadius(14)
+                            .shadow(color: Color.orange.opacity(0.3), radius: 10, x: 0, y: 4)
                         }
                         .disabled(storeKitService.isLoading)
                     }
@@ -176,7 +177,7 @@ struct PremiumModalScreen: View {
                         }
                     }) {
                         Text("Restore Purchases")
-                            .font(.custom("Nunito-SemiBold", size: 14))
+                            .font(.custom("Nunito-SemiBold", size: 12))
                             .foregroundColor(themeManager.colors.textLight)
                     }
                     .disabled(storeKitService.isLoading)
@@ -186,7 +187,7 @@ struct PremiumModalScreen: View {
                         dismiss()
                     }) {
                         Text("Maybe Later")
-                            .font(.custom("Nunito-SemiBold", size: 16))
+                            .font(.custom("Nunito-SemiBold", size: 14))
                             .foregroundColor(themeManager.colors.textLight)
                     }
                 }
@@ -238,14 +239,13 @@ struct PremiumModalScreen: View {
             }
         }
     }
-    }
 }
 
 struct PremiumHeader: View {
     @EnvironmentObject var themeManager: ThemeManager
     
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 6) {
             // Placeholder for Lottie animation
             Circle()
                 .fill(
@@ -258,20 +258,20 @@ struct PremiumHeader: View {
                         endPoint: .bottomTrailing
                     )
                 )
-                .frame(width: 80, height: 80)
+                .frame(width: 60, height: 60)
                 .overlay(
                     Image(systemName: "sparkles")
-                        .font(.system(size: 32, weight: .semibold))
+                        .font(.system(size: 24, weight: .semibold))
                         .foregroundColor(.white)
                 )
             
-            VStack(spacing: 4) {
+            VStack(spacing: 3) {
                 Text("Upgrade to Premium")
-                    .font(.custom("Quicksand-Bold", size: 24))
+                    .font(.custom("Quicksand-Bold", size: 20))
                     .foregroundColor(themeManager.colors.text)
                 
                 Text("Unlock the full potential of Reframe")
-                    .font(.custom("Nunito-Regular", size: 14))
+                    .font(.custom("Nunito-Regular", size: 12))
                     .foregroundColor(themeManager.colors.textLight)
                     .multilineTextAlignment(.center)
             }
@@ -286,25 +286,25 @@ struct FeatureCard: View {
     let description: String
     
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 10) {
             Text(icon)
-                .font(.system(size: 24))
+                .font(.system(size: 20))
             
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 1) {
                 Text(title)
-                    .font(.custom("Quicksand-SemiBold", size: 16))
+                    .font(.custom("Quicksand-SemiBold", size: 14))
                     .foregroundColor(themeManager.colors.text)
                 
                 Text(description)
-                    .font(.custom("Nunito-Regular", size: 13))
+                    .font(.custom("Nunito-Regular", size: 11))
                     .foregroundColor(themeManager.colors.textLight)
             }
             
             Spacer()
         }
-        .padding(10)
+        .padding(8)
         .background(themeManager.colors.surface)
-        .cornerRadius(16)
+        .cornerRadius(12)
     }
 }
 

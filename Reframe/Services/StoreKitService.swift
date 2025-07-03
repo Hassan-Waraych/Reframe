@@ -48,6 +48,10 @@ class StoreKitService: ObservableObject {
         isLoading = true
         errorMessage = nil
         
+        defer {
+            isLoading = false
+        }
+        
         do {
             let result = try await product.purchase()
             
@@ -73,8 +77,6 @@ class StoreKitService: ObservableObject {
         } catch {
             errorMessage = error.localizedDescription
             throw error
-        } finally {
-            isLoading = false
         }
     }
     
@@ -82,14 +84,16 @@ class StoreKitService: ObservableObject {
         isLoading = true
         errorMessage = nil
         
+        defer {
+            isLoading = false
+        }
+        
         do {
             try await AppStore.sync()
             await updatePurchasedProducts()
         } catch {
             errorMessage = "Failed to restore purchases: \(error.localizedDescription)"
             throw error
-        } finally {
-            isLoading = false
         }
     }
     
@@ -98,7 +102,9 @@ class StoreKitService: ObservableObject {
     func manageSubscriptions() {
         Task {
             do {
-                try await AppStore.showManageSubscriptions()
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                    try await AppStore.showManageSubscriptions(in: windowScene)
+                }
             } catch {
                 errorMessage = "Failed to open subscription management: \(error.localizedDescription)"
             }
@@ -110,7 +116,7 @@ class StoreKitService: ObservableObject {
     private func updatePurchasedProducts() async {
         var purchasedProductIDs = Set<String>()
         
-        for await result in Transaction.currentEntitlements {
+        for await result in StoreKit.Transaction.currentEntitlements {
             switch result {
             case .verified(let transaction):
                 purchasedProductIDs.insert(transaction.productID)
@@ -124,7 +130,7 @@ class StoreKitService: ObservableObject {
     
     private func listenForTransactions() -> Task<Void, Error> {
         return Task.detached {
-            for await result in Transaction.updates {
+            for await result in StoreKit.Transaction.updates {
                 switch result {
                 case .verified(let transaction):
                     // Deliver content to the user
@@ -139,7 +145,7 @@ class StoreKitService: ObservableObject {
         }
     }
     
-    private func syncPurchaseWithFirebase(transaction: Transaction) async {
+    private func syncPurchaseWithFirebase(transaction: StoreKit.Transaction) async {
         guard let userId = Auth.auth().currentUser?.uid else { return }
         
         let db = Firestore.firestore()

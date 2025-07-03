@@ -13,6 +13,7 @@ struct SettingsScreen: View {
     @State private var selectedTime = Date()
     @State private var selectedDays: Set<Int> = [1, 2, 3, 4, 5] // Monday to Friday
     @State private var showHelpCenter = false
+    @State private var showPremiumModal = false
     let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
     
     var body: some View {
@@ -89,40 +90,24 @@ struct SettingsScreen: View {
                         .foregroundColor(themeManager.colors.text)
                         .padding(.horizontal)
                     
-                    Button(action: {
-                        withAnimation(.spring()) {
-                            themeManager.toggleTheme()
-                        }
-                    }) {
-                        HStack {
-                            Image(systemName: themeManager.isDark ? "moon.fill" : "sun.max.fill")
-                                .font(.system(size: 20))
-                                .foregroundColor(themeManager.colors.primary)
-                                .frame(width: 32)
-                            
-                            Text("Dark Mode")
-                                .font(.custom("Nunito-Medium", size: 16))
-                                .foregroundColor(themeManager.colors.text)
-                            
-                            Spacer()
-                            
-                            // Custom Toggle
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 16)
-                                    .fill(themeManager.isDark ? themeManager.colors.primary : themeManager.colors.border)
-                                    .frame(width: 50, height: 28)
-                                
-                                Circle()
-                                    .fill(themeManager.colors.background)
-                                    .frame(width: 24, height: 24)
-                                    .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-                                    .offset(x: themeManager.isDark ? 11 : -11)
+                    // Theme Selection
+                    VStack(alignment: .leading, spacing: 12) {
+                        VStack(spacing: 8) {
+                            ForEach(ThemeType.allCases, id: \.self) { theme in
+                                ThemeOptionButton(
+                                    theme: theme,
+                                    isSelected: themeManager.selectedTheme == theme,
+                                    isPremiumUser: authService.isPremiumUser(),
+                                    action: {
+                                        if themeManager.canSelectTheme(theme, isPremiumUser: authService.isPremiumUser()) {
+                                            themeManager.setTheme(theme)
+                                        } else {
+                                            showPremiumModal = true
+                                        }
+                                    }
+                                )
                             }
                         }
-                        .padding(20)
-                        .background(themeManager.colors.surface)
-                        .cornerRadius(16)
-                        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
                     }
                 }
                 .padding(.horizontal)
@@ -312,7 +297,7 @@ struct SettingsScreen: View {
             }
             .padding(.vertical)
         }
-        .background(themeManager.colors.background)
+        .background(themeManager.customBackground())
         .navigationBarHidden(true)
         .sheet(isPresented: $showDevSettings) {
             DevSettingsScreen()
@@ -328,6 +313,10 @@ struct SettingsScreen: View {
         }
         .sheet(isPresented: $showHelpCenter) {
             HelpCenterView()
+                .environmentObject(themeManager)
+        }
+        .sheet(isPresented: $showPremiumModal) {
+            PremiumModalScreen()
                 .environmentObject(themeManager)
         }
         .confirmationDialog("Account Options", isPresented: $showAccountOptions) {
@@ -445,6 +434,118 @@ struct CategoryToggle: View {
             .background(themeManager.colors.surface)
             .cornerRadius(16)
             .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
+        }
+    }
+}
+
+struct ThemeOptionButton: View {
+    let theme: ThemeType
+    let isSelected: Bool
+    let isPremiumUser: Bool
+    let action: () -> Void
+    @EnvironmentObject var themeManager: ThemeManager
+    @State private var animateGradient = false
+    
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Image(systemName: theme.icon)
+                    .font(.system(size: 20))
+                    .foregroundColor(isSelected ? .white : themeManager.colors.primary)
+                    .frame(width: 32)
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 6) {
+                        Text(theme.displayName)
+                            .font(.custom("Nunito-Medium", size: 16))
+                            .foregroundColor(isSelected ? .white : themeManager.colors.text)
+                        
+                        if theme.isPremium && !isPremiumUser {
+                            Image(systemName: "crown.fill")
+                                .font(.system(size: 12))
+                                .foregroundColor(.yellow)
+                        }
+                    }
+                    
+                    if theme.isPremium && !isPremiumUser {
+                        Text("Premium")
+                            .font(.custom("Nunito-Regular", size: 11))
+                            .foregroundColor(isSelected ? .white.opacity(0.8) : themeManager.colors.textLight)
+                    }
+                }
+                
+                Spacer()
+                
+                if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(.white)
+                } else if theme.isPremium && !isPremiumUser {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 16))
+                        .foregroundColor(themeManager.colors.textLight)
+                }
+            }
+            .padding(20)
+            .background(
+                Group {
+                    if isSelected {
+                        if theme == .sunsetSerenity {
+                            LinearGradient.sunsetGradient()
+                        } else {
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    themeManager.colors.primary,
+                                    themeManager.colors.primaryDark
+                                ]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        }
+                    } else {
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                themeManager.colors.surface,
+                                themeManager.colors.surface
+                            ]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    }
+                }
+            )
+            .cornerRadius(16)
+            .shadow(color: isSelected ? themeManager.colors.primary.opacity(0.3) : Color.black.opacity(0.05), 
+                   radius: isSelected ? 8 : 5, 
+                   x: 0, 
+                   y: isSelected ? 4 : 2)
+            .opacity(theme.isPremium && !isPremiumUser ? 0.7 : 1.0)
+            .overlay(
+                // Special sunset effect for Sunset Serenity theme
+                Group {
+                    if theme == .sunsetSerenity && isSelected {
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        Color(hex: "FF6B35").opacity(0.6),
+                                        Color(hex: "9B5DE5").opacity(0.6),
+                                        Color(hex: "FF6B35").opacity(0.6)
+                                    ]),
+                                    startPoint: animateGradient ? .topLeading : .bottomTrailing,
+                                    endPoint: animateGradient ? .bottomTrailing : .topLeading
+                                ),
+                                lineWidth: 2
+                            )
+                            .animation(.easeInOut(duration: 3).repeatForever(autoreverses: true), value: animateGradient)
+                    }
+                }
+            )
+            .onAppear {
+                if theme == .sunsetSerenity {
+                    animateGradient = true
+                }
+            }
         }
     }
 }

@@ -17,6 +17,9 @@ struct HomeScreen: View {
     
     var body: some View {
         ZStack {
+            // Special effects for Sunset Serenity theme
+            themeManager.sunsetParticles()
+            
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     // Greeting and Streak aligned left
@@ -138,7 +141,7 @@ struct HomeScreen: View {
                 }
                 .padding(.vertical, 24)
             }
-            .background(themeManager.colors.background)
+            .background(themeManager.customBackground())
             .navigationBarHidden(true)
             
             // Reframe Result Overlay
