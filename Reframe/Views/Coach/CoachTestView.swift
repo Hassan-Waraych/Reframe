@@ -136,7 +136,7 @@ struct CoachTestView: View {
             assignedCoach = try await CoachService.shared.assignCoach(for: userId)
             showAssignmentResult = true
         } catch {
-            print("Error assigning coach: \(error)")
+            // Handle error silently in production
         }
     }
     
@@ -222,9 +222,9 @@ struct CoachTestView: View {
                     for document in snapshot.documents {
                         try await document.reference.delete()
                     }
-                } catch {
-                    print("Error resetting coach usage: \(error)")
-                }
+                        } catch {
+            // Handle error silently in production
+        }
             }
         }
     }

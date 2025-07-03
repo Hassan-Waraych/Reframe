@@ -354,7 +354,7 @@ class ReframeViewModel: ObservableObject {
         do {
             currentStreak = try await streakService.getCurrentStreak()
         } catch {
-            print("Error loading streak: \(error.localizedDescription)")
+            // Handle error silently in production
         }
     }
 } 

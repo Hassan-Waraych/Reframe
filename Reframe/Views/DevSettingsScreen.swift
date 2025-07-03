@@ -521,9 +521,9 @@ struct DevSettingsScreen: View {
                     for document in snapshot.documents {
                         try await document.reference.delete()
                     }
-                } catch {
-                    print("Error clearing coach messages: \(error)")
-                }
+                        } catch {
+            // Handle error silently in production
+        }
             }
         }
     }
@@ -540,9 +540,9 @@ struct DevSettingsScreen: View {
                     for document in snapshot.documents {
                         try await document.reference.delete()
                     }
-                } catch {
-                    print("Error clearing coach history: \(error)")
-                }
+                        } catch {
+            // Handle error silently in production
+        }
             }
         }
     }

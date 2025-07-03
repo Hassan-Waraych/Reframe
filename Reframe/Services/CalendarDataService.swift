@@ -104,17 +104,7 @@ class CalendarDataService: ObservableObject {
             let allEntries = reframeEntries + journalEntries
             calendarEntries = allEntries.sorted { $0.date > $1.date }
             
-            // Debug logging
-            print("📅 Calendar Data Loaded:")
-            print("   - Reframe entries: \(reframeEntries.count)")
-            print("   - Journal entries: \(journalEntries.count)")
-            print("   - Total entries: \(calendarEntries.count)")
-            
-            // Log entries by type for debugging
-            let entriesByType = Dictionary(grouping: calendarEntries) { $0.type }
-            for (type, entries) in entriesByType {
-                print("   - \(type.rawValue): \(entries.count) entries")
-            }
+            // Calendar data loaded successfully
             
         } catch {
             errorMessage = error.localizedDescription
@@ -146,13 +136,7 @@ class CalendarDataService: ObservableObject {
             return index1 < index2
         }
         
-        // Debug logging for specific dates
-        if !entries.isEmpty {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "MMM d"
-            let dateString = formatter.string(from: date)
-            print("📅 \(dateString): \(entries.count) entries, \(uniqueTypes.count) unique types: \(uniqueTypes.map { $0.rawValue })")
-        }
+        // Get entries for specific date
         
         return uniqueTypes
     }

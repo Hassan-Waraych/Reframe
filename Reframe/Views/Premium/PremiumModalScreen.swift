@@ -77,7 +77,7 @@ struct PremiumModalScreen: View {
                 // Subscribe Button
                 VStack(spacing: 8) {
                     Button(action: {
-                        // TODO: Handle subscription
+                        // Subscription handling will be implemented
                     }) {
                         HStack {
                             Text("Upgrade to Premium")

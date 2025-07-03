@@ -98,7 +98,7 @@ class CoachService {
                 )
                 messages.append(message)
             } catch {
-                print("Error decoding message: \(error)")
+                // Handle error silently in production
             }
         }
         
@@ -186,7 +186,7 @@ class CoachService {
                 )
                 items.append(item)
             } catch {
-                print("Error decoding history item: \(error)")
+                // Handle error silently in production
             }
         }
         

@@ -138,7 +138,7 @@ class MilestoneService: ObservableObject {
                         completedMilestone = milestones[index]
                         showMilestoneNotification = true
                         
-                        print("🎉 Milestone unlocked: \(milestone.title)")
+                        // Milestone unlocked
                     }
                     
                     try? await saveMilestones(userId: userId)
@@ -166,10 +166,8 @@ class MilestoneService: ObservableObject {
             }
             
             let hasReframe = !validReframes.isEmpty
-            print("🔍 Checking first reframe: \(hasReframe ? "Found" : "Not found")")
             return hasReframe
         } catch {
-            print("❌ Error checking first reframe: \(error)")
             return false
         }
     }
@@ -232,10 +230,8 @@ class MilestoneService: ObservableObject {
                 .getDocuments()
             
             let hasCoach = !snapshot.documents.isEmpty
-            print("🔍 Checking first coach: \(hasCoach ? "Found" : "Not found")")
             return hasCoach
         } catch {
-            print("❌ Error checking first coach: \(error)")
             return false
         }
     }
@@ -293,10 +289,8 @@ class MilestoneService: ObservableObject {
             }
             
             let count = validReframes.count
-            print("🔍 Reframe count: \(count)")
             return count
         } catch {
-            print("❌ Error getting reframe count: \(error)")
             return 0
         }
     }
@@ -366,7 +360,6 @@ class MilestoneService: ObservableObject {
     
     @MainActor
     func forceCheckMilestones() async {
-        print("🔍 Force checking all milestones...")
         await checkAllMilestones()
     }
     
@@ -375,7 +368,6 @@ class MilestoneService: ObservableObject {
         if let firstMilestone = milestones.first {
             completedMilestone = firstMilestone
             showMilestoneNotification = true
-            print("🧪 Test notification triggered")
         }
     }
     
@@ -392,7 +384,7 @@ class MilestoneService: ObservableObject {
         do {
             try await db.collection("calming_tool_usage").addDocument(data: usageData)
         } catch {
-            print("Error tracking breathing exercise: \(error)")
+            // Handle error silently in production
         }
     }
 }

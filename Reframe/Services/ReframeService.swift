@@ -84,7 +84,7 @@ class ReframeService: ObservableObject {
                     do {
                         self?.nonsenseTracker = try snapshot?.data(as: NonsenseTracker.self)
                     } catch {
-                        print("Error decoding nonsense tracker: \(error)")
+                        // Handle error silently in production
                     }
                 }
             }

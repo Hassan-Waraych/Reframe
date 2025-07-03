@@ -135,7 +135,6 @@ class AIService {
     private func setupNetworkMonitoring() {
         monitor.pathUpdateHandler = { [weak self] path in
             self?.isConnected = path.status == .satisfied
-            print("Network status changed: \(path.status)")
         }
         monitor.start(queue: DispatchQueue.global())
     }
@@ -147,7 +146,7 @@ class AIService {
             throw AIServiceError.networkError(NSError(domain: "AIService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid response"]))
         }
         
-        print("Response status: \(httpResponse.statusCode)")
+        // Response received
         
         if httpResponse.statusCode == 401 {
             throw AIServiceError.invalidAPIKey
@@ -162,7 +161,6 @@ class AIService {
     
     private func checkConnectivity() async throws {
         guard isConnected else {
-            print("No internet connection available")
             throw AIServiceError.noInternetConnection
         }
         
@@ -174,7 +172,7 @@ class AIService {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         let response: ModelsResponse = try await makeRequest(request)
-        print("Successfully connected to OpenAI API. Available models: \(response.data.count)")
+        // Successfully connected to OpenAI API
     }
     
     private func performWithRetry<T>(_ operation: @escaping () async throws -> T) async throws -> T {
@@ -182,16 +180,12 @@ class AIService {
         
         for attempt in 1...maxRetries {
             do {
-                print("Attempt \(attempt) of \(maxRetries)")
-                
                 // Check connectivity before each attempt
                 try await checkConnectivity()
                 
                 return try await withTimeout(seconds: timeout, operation: operation)
             } catch let error as URLError {
                 lastError = error
-                print("Attempt \(attempt) failed with error: \(error.localizedDescription)")
-                print("Error code: \(error.code.rawValue)")
                 
                 // Handle specific network errors
                 switch error.code {
@@ -201,25 +195,20 @@ class AIService {
                         let baseDelay = retryDelay * pow(2.0, Double(attempt - 1))
                         let jitter = Double.random(in: 0...0.3) * baseDelay
                         let delay = baseDelay + jitter
-                        print("Retrying in \(delay) seconds...")
                         try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
                         continue
                     }
                 default:
-                    print("Unhandled network error: \(error.code)")
                     throw AIServiceError.networkError(error)
                 }
             } catch {
-                print("Non-network error: \(error)")
                 throw error
             }
         }
         
         if let lastError = lastError {
-            print("All retry attempts failed. Last error: \(lastError.localizedDescription)")
             throw AIServiceError.networkError(lastError)
         } else {
-            print("All retry attempts failed with unknown error")
             throw AIServiceError.networkError(NSError(domain: "AIService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unknown error"]))
         }
     }
@@ -248,11 +237,8 @@ class AIService {
     
     func classifyThought(_ thought: String) async throws -> ThoughtClassification {
         guard let openAI = openAI else {
-            print("OpenAI client not initialized")
             throw AIServiceError.invalidAPIKey
         }
-        
-        print("Classifying thought: \(thought)")
         let prompt = """
         Classify the following thought into one of these categories:
         - negative: A negative or challenging thought that needs reframing
@@ -265,7 +251,6 @@ class AIService {
         """
         
         return try await performWithRetry { [self] in
-            print("Making API call to classify thought...")
             let url = URL(string: "https://api.openai.com/v1/chat/completions")!
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
@@ -284,16 +269,11 @@ class AIService {
             
             request.httpBody = try JSONSerialization.data(withJSONObject: body)
             
-            print("Sending request to OpenAI API...")
             let response: ChatCompletionResponse = try await self.makeRequest(request)
-            print("Received response from OpenAI API")
             
             guard let classification = response.choices.first?.message.content.lowercased().trimmingCharacters(in: CharacterSet.whitespacesAndNewlines) else {
-                print("Failed to get classification from response")
                 throw AIServiceError.classificationFailed
             }
-            
-            print("Classification result: \(classification)")
             switch classification {
             case "negative":
                 return .negative
@@ -302,7 +282,6 @@ class AIService {
             case "nonsense":
                 return .nonsense
             default:
-                print("Invalid classification: \(classification)")
                 throw AIServiceError.classificationFailed
             }
         }
@@ -426,12 +405,8 @@ class AIService {
     
     func classifyCoachInput(_ input: String) async throws -> CoachInputType {
         guard let openAI = openAI else {
-            print("❌ Coach Input Classification: OpenAI client not initialized")
             throw AIServiceError.invalidAPIKey
         }
-        
-        print("\n🧠 Coach Input Classification")
-        print("Input: \"\(input)\"")
         
         let prompt = """
         Classify the following user input into one of these categories:
@@ -449,8 +424,7 @@ class AIService {
         - "Unclear / Nonsense"
         """
         
-        print("\n📝 Classification Prompt:")
-        print(prompt)
+        // Classification prompt prepared
         
         return try await performWithRetry { [self] in
             let url = URL(string: "https://api.openai.com/v1/chat/completions")!
@@ -471,16 +445,11 @@ class AIService {
             
             request.httpBody = try JSONSerialization.data(withJSONObject: body)
             
-            print("\n🚀 Sending classification request to OpenAI...")
             let response: ChatCompletionResponse = try await self.makeRequest(request)
-            print("✅ Received classification response")
             
             guard let classification = response.choices.first?.message.content.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines) else {
-                print("❌ Failed to get classification from response")
                 throw AIServiceError.classificationFailed
             }
-            
-            print("\n📊 Classification Result: \(classification)")
             
             // Remove any extra quotes or whitespace
             let cleanClassification = classification.replacingOccurrences(of: "\"", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
@@ -495,8 +464,6 @@ class AIService {
             case "Unclear / Nonsense":
                 return .unclear
             default:
-                print("❌ Invalid classification: \(classification)")
-                print("Expected one of: 'Venting / Emotional Expression', 'Seeking Advice', 'General Question', 'Unclear / Nonsense'")
                 throw AIServiceError.classificationFailed
             }
         }
@@ -504,18 +471,11 @@ class AIService {
     
     func generateCoachResponse(content: String, coach: Coach) async throws -> String {
         guard let openAI = openAI else {
-            print("❌ Coach Response Generation: OpenAI client not initialized")
             throw AIServiceError.invalidAPIKey
         }
         
-        print("\n👨‍🏫 Coach Response Generation")
-        print("Coach: \(coach.name) \(coach.emoji)")
-        print("User Input: \"\(content)\"")
-        
         // First classify the input
-        print("\n🔍 Classifying input type...")
         let inputType = try await classifyCoachInput(content)
-        print("✅ Input classified as: \(inputType.rawValue)")
         
         // If the input is unclear, return a fallback message
         if inputType == .unclear {
@@ -575,8 +535,7 @@ class AIService {
         REMEMBER: Respond with ONLY your natural, flowing conversation. No headers, titles, or extra text.
         """
         
-        print("\n📝 Response Generation Prompt:")
-        print(prompt)
+        // Response generation prompt prepared
         
         return try await performWithRetry { [self] in
             let url = URL(string: "https://api.openai.com/v1/chat/completions")!
@@ -597,18 +556,11 @@ class AIService {
             
             request.httpBody = try JSONSerialization.data(withJSONObject: body)
             
-            print("\n🚀 Sending response generation request to OpenAI...")
             let response: ChatCompletionResponse = try await self.makeRequest(request)
-            print("✅ Received response from OpenAI")
             
             guard let coachResponse = response.choices.first?.message.content.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines) else {
-                print("❌ Failed to get response from OpenAI")
                 throw AIServiceError.reframeFailed
             }
-            
-            print("\n💬 Generated Response:")
-            print(coachResponse)
-            print("\n✨ Response generation complete")
             
             return coachResponse
         }

@@ -56,7 +56,6 @@ class OnboardingCoordinator: ObservableObject {
                             currentStep = .coachIntro
                         }
                     } catch {
-                        print("Error assigning coach: \(error)")
                         await MainActor.run {
                             currentStep = .signUp
                         }

@@ -24,7 +24,7 @@ class QuoteService: ObservableObject {
                 self.currentQuote = quotes.randomElement()
                 self.isAnimating = true
             } catch {
-                print("Error loading quotes: \(error)")
+                // Handle error silently in production
             }
         }
     }

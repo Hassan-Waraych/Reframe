@@ -72,7 +72,7 @@ class MoodScoreService: ObservableObject {
             }
             try await docRef.setData(from: moodScore)
         } catch {
-            print("Error updating mood score: \(error)")
+            // Handle error silently in production
         }
     }
 
@@ -93,7 +93,6 @@ class MoodScoreService: ObservableObject {
             // Return in chronological order
             return dateStrings.reversed().compactMap { ds in scores.first(where: { $0.dateString == ds }) }
         } catch {
-            print("Error fetching mood scores: \(error)")
             return []
         }
     }

@@ -73,7 +73,6 @@ class AuthService: ObservableObject {
     private func getDeviceIdentifier() -> String {
         // Try to get existing device ID from Keychain
         if let existingId = getKeychainDeviceId() {
-            print("📱 Using existing device ID: \(existingId.prefix(8))...")
             return existingId
         }
         
@@ -92,7 +91,6 @@ class AuthService: ObservableObject {
         // Store in Keychain
         saveKeychainDeviceId(hashedId)
         
-        print("📱 Generated new device ID: \(hashedId.prefix(8))...")
         return hashedId
     }
     
@@ -147,10 +145,8 @@ class AuthService: ObservableObject {
             .getDocuments()
         
         let existingAccounts = querySnapshot.documents.count
-        print("📊 Found \(existingAccounts) existing accounts for this device")
         
         if existingAccounts >= MAX_ACCOUNTS_PER_DEVICE {
-            print("❌ Device limit reached: \(existingAccounts) accounts")
             throw NSError(domain: "AuthService", code: -1, 
                 userInfo: [NSLocalizedDescriptionKey: "Too many accounts created from this device. Please contact support if you believe this is an error."])
         }
@@ -165,17 +161,14 @@ class AuthService: ObservableObject {
             "deviceId": deviceId
         ])
         
-        print("📱 Recorded device association for user: \(userId)")
+        // Device association recorded
     }
     
     // MARK: - Authentication Methods
     
     func signUp(email: String, password: String) async throws {
-        print("🚀 Starting sign up process for: \(email)")
-        
         // Get device ID
         let deviceId = getDeviceIdentifier()
-        print("📱 Checking device ID: \(deviceId.prefix(8))...")
         
         // Check device limit
         let db = Firestore.firestore()
@@ -184,20 +177,16 @@ class AuthService: ObservableObject {
             .getDocuments()
         
         let existingAccounts = querySnapshot.documents.count
-        print("📊 Found \(existingAccounts) existing accounts for this device")
         
         if existingAccounts >= MAX_ACCOUNTS_PER_DEVICE {
-            print("❌ Device limit reached: \(existingAccounts) accounts")
             throw NSError(domain: "AuthService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Maximum number of accounts reached for this device"])
         }
         
         // Create Firebase Auth user
-        print("👤 Creating Firebase Auth user...")
         let authResult = try await Auth.auth().createUser(withEmail: email, password: password)
         let user = authResult.user
         
         // Create user document
-        print("📝 Creating user document...")
         let userData: [String: Any] = [
             "email": email,
             "createdAt": FieldValue.serverTimestamp(),
@@ -206,7 +195,6 @@ class AuthService: ObservableObject {
         ]
         
         try await db.collection("users").document(user.uid).setData(userData)
-        print("✅ User document created successfully")
         
         // Update local state
         await MainActor.run {
@@ -558,9 +546,6 @@ class AppleSignInDelegate: NSObject, ASAuthorizationControllerDelegate, ASAuthor
     }
     
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        // Handle error and resume continuation
-        print("Apple Sign-In error: \(error.localizedDescription)")
-        
         // Check if it's a cancellation error
         if let authError = error as? ASAuthorizationError {
             switch authError.code {
