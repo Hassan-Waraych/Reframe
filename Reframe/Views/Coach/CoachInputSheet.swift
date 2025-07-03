@@ -196,6 +196,24 @@ struct CoachInputSheet: View {
                             Task {
                                 isSending = true
                                 await viewModel.submitMessage(messageText)
+                                // Mood tracking: update mood score with selected emotion
+                                if let emotion = selectedEmotion {
+                                    let value: Int
+                                    switch emotion.name.lowercased() {
+                                    case "happy": value = 5
+                                    case "calm": value = 4
+                                    case "sad": value = 2
+                                    case "tired": value = 2
+                                    case "confused": value = 2
+                                    case "angry": value = 1
+                                    case "anxious": value = 1
+                                    case "frustrated": value = 1
+                                    default: value = 3
+                                    }
+                                    await MoodScoreService.shared.updateTodayMoodScore { breakdown in
+                                        breakdown.emotion = MoodEmotionBreakdown(label: emotion.name, value: value)
+                                    }
+                                }
                                 // Get the response from the first history item
                                 if let response = viewModel.historyItems.first?.coachResponse {
                                     coachResponse = response

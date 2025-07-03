@@ -570,6 +570,21 @@ struct FeaturesContent: View {
                     Text("• Visual progress indicators motivate continued use")
                 }
             }
+            // PLANNED FEATURES & ROADMAP
+            HelpSection(
+                title: "Planned Features & Roadmap",
+                icon: "calendar.badge.plus",
+                color: .blue
+            ) {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("We're always working to make Reframe better! Here's a sneak peek at what's coming soon:")
+                    Text("• **Insights & Analytics:** Track your mood, progress, and emotional trends over time with beautiful charts and personalized insights.")
+                    Text("• More guided journaling prompts and categories.")
+                    Text("• Deeper coach personalization and new AI coach personalities.")
+                    Text("• More calming tools and meditations.")
+                    Text("• And much more!")
+                }
+            }
         }
     }
 }
@@ -628,12 +643,8 @@ struct PremiumContent: View {
             ) {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("**Unlimited Reframes**: Create as many reframes as you need without worrying about daily limits")
-                    
                     Text("**Coach Switching**: Change coaches anytime to match your current needs")
-                    
                     Text("**Extended Sessions**: Have longer, more in-depth conversations with your coach")
-                    
-                    Text("**Advanced Insights**: Get deeper analysis and personalized recommendations")
                 }
             }
         }

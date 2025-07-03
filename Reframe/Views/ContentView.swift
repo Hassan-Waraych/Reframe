@@ -63,6 +63,7 @@ struct ContentView: View {
                     }
                     .tag(2)
                     
+                    /*
                     NavigationStack {
                         InsightsScreen(selectedTab: $selectedTab)
                     }
@@ -71,6 +72,7 @@ struct ContentView: View {
                         Text("Insights")
                     }
                     .tag(3)
+                    */
                     
                     NavigationStack {
                         SettingsScreen(selectedTab: $selectedTab)
