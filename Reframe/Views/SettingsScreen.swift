@@ -256,6 +256,18 @@ struct SettingsScreen: View {
                                 showHelpCenter = true
                             }
                         )
+                        
+                        // Subscription Management (only show for premium users)
+                        if authService.isPremiumUser() {
+                            SupportButton(
+                                icon: "creditcard.fill",
+                                title: "Manage Subscription",
+                                color: .orange,
+                                action: {
+                                    StoreKitService.shared.manageSubscriptions()
+                                }
+                            )
+                        }
                     }
                 }
                 .padding(.horizontal)

@@ -91,6 +91,14 @@ service cloud.firestore {
       allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
     
+    // Purchase tracking rules
+    match /purchases/{purchaseId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update: if false; // Purchases should not be updated after creation
+      allow delete: if false; // Purchases should not be deleted
+    }
+    
     // Default deny
     match /{document=**} {
       allow read, write: if false;

@@ -1,9 +1,13 @@
 import SwiftUI
+import StoreKit
 
 struct PremiumModalScreen: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var themeManager: ThemeManager
+    @StateObject private var storeKitService = StoreKitService.shared
     @State private var animateContent = false
+    @State private var selectedProduct: Product?
+    @State private var showError = false
     
     var body: some View {
         ZStack {
@@ -74,34 +78,110 @@ struct PremiumModalScreen: View {
                 
                 Spacer()
                 
-                // Subscribe Button
-                VStack(spacing: 8) {
-                    Button(action: {
-                        // Subscription handling will be implemented
-                    }) {
-                        HStack {
-                            Text("Upgrade to Premium")
-                                .font(.custom("Quicksand-Bold", size: 18))
-                            Image(systemName: "sparkles")
-                                .font(.system(size: 18, weight: .semibold))
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 48)
-                        .background(
-                            LinearGradient(
-                                gradient: Gradient(colors: [
-                                    themeManager.colors.primary,
-                                    themeManager.colors.primaryDark
-                                ]),
-                                startPoint: .leading,
-                                endPoint: .trailing
+                // Subscribe Buttons
+                VStack(spacing: 12) {
+                    // Monthly Subscription
+                    if let monthlyProduct = storeKitService.getMonthlyProduct() {
+                        Button(action: {
+                            selectedProduct = monthlyProduct
+                            Task {
+                                await purchaseProduct(monthlyProduct)
+                            }
+                        }) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Monthly Premium")
+                                        .font(.custom("Quicksand-Bold", size: 16))
+                                    Text(monthlyProduct.displayPrice + "/month")
+                                        .font(.custom("Nunito-Regular", size: 12))
+                                        .opacity(0.8)
+                                }
+                                Spacer()
+                                Image(systemName: "sparkles")
+                                    .font(.system(size: 16, weight: .semibold))
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 20)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 56)
+                            .background(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        themeManager.colors.primary,
+                                        themeManager.colors.primaryDark
+                                    ]),
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
                             )
-                        )
-                        .cornerRadius(16)
-                        .shadow(color: themeManager.colors.primary.opacity(0.3), radius: 12, x: 0, y: 6)
+                            .cornerRadius(16)
+                            .shadow(color: themeManager.colors.primary.opacity(0.3), radius: 12, x: 0, y: 6)
+                        }
+                        .disabled(storeKitService.isLoading)
                     }
                     
+                    // Yearly Subscription (with savings)
+                    if let yearlyProduct = storeKitService.getYearlyProduct() {
+                        Button(action: {
+                            selectedProduct = yearlyProduct
+                            Task {
+                                await purchaseProduct(yearlyProduct)
+                            }
+                        }) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    HStack(spacing: 4) {
+                                        Text("Yearly Premium")
+                                            .font(.custom("Quicksand-Bold", size: 16))
+                                        Text("SAVE 50%")
+                                            .font(.custom("Nunito-Bold", size: 10))
+                                            .padding(.horizontal, 6)
+                                            .padding(.vertical, 2)
+                                            .background(Color.yellow)
+                                            .foregroundColor(.black)
+                                            .cornerRadius(4)
+                                    }
+                                    Text(yearlyProduct.displayPrice + "/year")
+                                        .font(.custom("Nunito-Regular", size: 12))
+                                        .opacity(0.8)
+                                }
+                                Spacer()
+                                Image(systemName: "crown.fill")
+                                    .font(.system(size: 16, weight: .semibold))
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 20)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 56)
+                            .background(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        Color.orange,
+                                        Color.yellow
+                                    ]),
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .cornerRadius(16)
+                            .shadow(color: Color.orange.opacity(0.3), radius: 12, x: 0, y: 6)
+                        }
+                        .disabled(storeKitService.isLoading)
+                    }
+                    
+                    // Restore Purchases
+                    Button(action: {
+                        Task {
+                            await restorePurchases()
+                        }
+                    }) {
+                        Text("Restore Purchases")
+                            .font(.custom("Nunito-SemiBold", size: 14))
+                            .foregroundColor(themeManager.colors.textLight)
+                    }
+                    .disabled(storeKitService.isLoading)
+                    
+                    // Maybe Later
                     Button(action: {
                         dismiss()
                     }) {
@@ -122,6 +202,42 @@ struct PremiumModalScreen: View {
                 animateContent = true
             }
         }
+        .alert("Purchase Error", isPresented: $showError) {
+            Button("OK") { }
+        } message: {
+            Text(storeKitService.errorMessage ?? "An error occurred during purchase")
+        }
+    }
+    
+    // MARK: - Purchase Methods
+    
+    private func purchaseProduct(_ product: Product) async {
+        do {
+            try await storeKitService.purchase(product)
+            // Purchase successful, dismiss the modal
+            await MainActor.run {
+                dismiss()
+            }
+        } catch {
+            await MainActor.run {
+                showError = true
+            }
+        }
+    }
+    
+    private func restorePurchases() async {
+        do {
+            try await storeKitService.restorePurchases()
+            // Restore successful, dismiss the modal
+            await MainActor.run {
+                dismiss()
+            }
+        } catch {
+            await MainActor.run {
+                showError = true
+            }
+        }
+    }
     }
 }
 
