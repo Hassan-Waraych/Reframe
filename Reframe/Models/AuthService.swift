@@ -31,6 +31,8 @@ class AuthService: ObservableObject {
     private let MAX_ACCOUNTS_PER_DEVICE = 3
     private let DEVICE_ID_KEY = "com.reframe.deviceId"
     
+    private var authStateListenerHandle: AuthStateDidChangeListenerHandle?
+    
     private init() {
         // Ensure Firebase is initialized
         if FirebaseApp.app() == nil {
@@ -40,7 +42,7 @@ class AuthService: ObservableObject {
     }
     
     private func setupAuthStateListener() {
-        Auth.auth().addStateDidChangeListener { [weak self] _, user in
+        authStateListenerHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             DispatchQueue.main.async {
                 self?.currentUser = user
                 self?.isAuthenticated = user != nil
@@ -171,65 +173,14 @@ class AuthService: ObservableObject {
     
     // MARK: - Authentication Methods
     
+    // Email/password authentication is disabled - only social sign-in is available
     func signUp(email: String, password: String) async throws {
-        // Get device ID
-        let deviceId = getDeviceIdentifier()
-        
-        // Check device limit
-        let db = Firestore.firestore()
-        let querySnapshot = try await db.collection("users")
-            .whereField("deviceId", isEqualTo: deviceId)
-            .getDocuments()
-        
-        let existingAccounts = querySnapshot.documents.count
-        
-        if existingAccounts >= MAX_ACCOUNTS_PER_DEVICE {
-            throw NSError(domain: "AuthService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Maximum number of accounts reached for this device"])
-        }
-        
-        // Create Firebase Auth user
-        let authResult = try await Auth.auth().createUser(withEmail: email, password: password)
-        let user = authResult.user
-        
-        // Create user document
-        let userData: [String: Any] = [
-            "email": email,
-            "createdAt": FieldValue.serverTimestamp(),
-            "status": UserStatus.free.rawValue,
-            "deviceId": deviceId
-        ]
-        
-        try await db.collection("users").document(user.uid).setData(userData)
-        
-        // Update local state
-        await MainActor.run {
-            self.currentUser = user
-            self.isAuthenticated = true
-            self.userStatus = .free
-        }
+        throw NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Email/password sign up is not available. Please use Google or Apple Sign-In."])
     }
     
+    // Email/password authentication is disabled - only social sign-in is available
     func signIn(email: String, password: String) async throws {
-        await MainActor.run {
-            isLoading = true
-            errorMessage = nil
-        }
-        
-        do {
-            let result = try await Auth.auth().signIn(withEmail: email, password: password)
-            await MainActor.run {
-                self.currentUser = result.user
-                self.isAuthenticated = true
-                self.errorMessage = nil
-                self.isLoading = false
-            }
-        } catch {
-            await MainActor.run {
-                self.errorMessage = error.localizedDescription
-                self.isLoading = false
-            }
-            throw error
-        }
+        throw NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Email/password sign in is not available. Please use Google or Apple Sign-In."])
     }
     
     func signOut() throws {
@@ -248,25 +199,9 @@ class AuthService: ObservableObject {
         }
     }
     
+    // Email/password authentication is disabled - only social sign-in is available
     func resetPassword(email: String) async throws {
-        await MainActor.run {
-            isLoading = true
-            errorMessage = nil
-        }
-        
-        do {
-            try await Auth.auth().sendPasswordReset(withEmail: email)
-            await MainActor.run {
-                self.errorMessage = nil
-                self.isLoading = false
-            }
-        } catch {
-            await MainActor.run {
-                self.errorMessage = error.localizedDescription
-                self.isLoading = false
-            }
-            throw error
-        }
+        throw NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Password reset is not available. Please use Google or Apple Sign-In."])
     }
     
     // MARK: - Social Sign In Methods
@@ -281,30 +216,32 @@ class AuthService: ObservableObject {
             // Check device account limit before proceeding
             try await checkDeviceAccountLimit()
             
-            // Get the current view controller
-            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                  let window = windowScene.windows.first,
-                  let rootViewController = window.rootViewController else {
-                throw NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unable to present sign-in view"])
+            // Get the current view controller and configure Google Sign-In on the main thread
+            let rootViewController = await MainActor.run { () -> UIViewController in
+                guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                      let window = windowScene.windows.first,
+                      let rootViewController = window.rootViewController else {
+                    fatalError("Unable to present sign-in view")
+                }
+                guard let clientID = FirebaseApp.app()?.options.clientID else {
+                    fatalError("Google Sign-In configuration error")
+                }
+                let config = GIDConfiguration(clientID: clientID)
+                GIDSignIn.sharedInstance.configuration = config
+                return rootViewController
             }
             
-            // Configure Google Sign-In
-            guard let clientID = FirebaseApp.app()?.options.clientID else {
-                throw NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Google Sign-In configuration error"])
-            }
-            
-            let config = GIDConfiguration(clientID: clientID)
-            GIDSignIn.sharedInstance.configuration = config
-            
-            // Perform Google Sign-In
+            // Perform Google Sign-In on the main thread
             let result = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<GIDSignInResult, Error>) in
-                GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController) { result, error in
-                    if let error = error {
-                        continuation.resume(throwing: error)
-                    } else if let result = result {
-                        continuation.resume(returning: result)
-                    } else {
-                        continuation.resume(throwing: NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Google Sign-In failed"]))
+                Task { @MainActor in
+                    GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController) { result, error in
+                        if let error = error {
+                            continuation.resume(throwing: error)
+                        } else if let result = result {
+                            continuation.resume(returning: result)
+                        } else {
+                            continuation.resume(throwing: NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Google Sign-In failed"]))
+                        }
                     }
                 }
             }
@@ -353,7 +290,27 @@ class AuthService: ObservableObject {
             
         } catch {
             await MainActor.run {
-                self.errorMessage = error.localizedDescription
+                // Provide more user-friendly error messages for Google Sign-In
+                let userFriendlyMessage: String
+                if let nsError = error as NSError? {
+                    switch nsError.code {
+                    case -1:
+                        if nsError.localizedDescription.contains("main thread") {
+                            userFriendlyMessage = "Unable to start Google Sign-In. Please try again."
+                        } else {
+                            userFriendlyMessage = "Google Sign-In failed. Please try again."
+                        }
+                    case 17020:
+                        userFriendlyMessage = "Network error. Please check your internet connection and try again."
+                    case 17011:
+                        userFriendlyMessage = "Google Sign-In was canceled."
+                    default:
+                        userFriendlyMessage = error.localizedDescription
+                    }
+                } else {
+                    userFriendlyMessage = error.localizedDescription
+                }
+                self.errorMessage = userFriendlyMessage
                 self.isLoading = false
             }
             throw error
@@ -379,23 +336,24 @@ class AuthService: ObservableObject {
             setCurrentNonce(nonce)
             request.nonce = sha256(nonce)
             
-            // Perform Apple Sign-In
+            // Perform Apple Sign-In on the main thread
             let result = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<AppleSignInResult, Error>) in
-                let controller = ASAuthorizationController(authorizationRequests: [request])
-                let delegate = AppleSignInDelegate { result in
-                    switch result {
-                    case .success(let appleSignInResult):
-                        continuation.resume(returning: appleSignInResult)
-                    case .failure(let error):
-                        continuation.resume(throwing: error)
+                Task { @MainActor in
+                    let controller = ASAuthorizationController(authorizationRequests: [request])
+                    let delegate = AppleSignInDelegate { result in
+                        switch result {
+                        case .success(let appleSignInResult):
+                            continuation.resume(returning: appleSignInResult)
+                        case .failure(let error):
+                            continuation.resume(throwing: error)
+                        }
                     }
+                    // Store delegate to prevent deallocation
+                    objc_setAssociatedObject(controller, "delegate", delegate, .OBJC_ASSOCIATION_RETAIN)
+                    controller.delegate = delegate
+                    controller.presentationContextProvider = delegate
+                    controller.performRequests()
                 }
-                
-                // Store delegate to prevent deallocation
-                objc_setAssociatedObject(controller, "delegate", delegate, .OBJC_ASSOCIATION_RETAIN)
-                controller.delegate = delegate
-                controller.presentationContextProvider = delegate
-                controller.performRequests()
             }
             
             // Clear the nonce after use
@@ -408,8 +366,8 @@ class AuthService: ObservableObject {
                 throw NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unable to get Apple ID token"])
             }
             
-            // Create Firebase credential
-            let credential = OAuthProvider.credential(withProviderID: "apple.com", idToken: idTokenString, rawNonce: result.nonce)
+            // Create Firebase credential (use new method signature)
+            let credential = OAuthProvider.credential(providerID: AuthProviderID.apple, idToken: idTokenString, rawNonce: result.nonce)
             
             // Sign in to Firebase
             let authResult = try await Auth.auth().signIn(with: credential)

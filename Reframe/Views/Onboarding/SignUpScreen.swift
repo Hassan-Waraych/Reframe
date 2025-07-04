@@ -10,10 +10,7 @@ struct SignUpScreen: View {
     
     let isFromSettings: Bool
     
-    @State private var email = ""
-    @State private var password = ""
     @State private var isAnimating = false
-    @State private var isLoginMode = false
     @State private var keyboardHeight: CGFloat = 0
     
     init(isFromSettings: Bool = false) {
@@ -44,165 +41,104 @@ struct SignUpScreen: View {
                     .padding(.horizontal)
                     
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(isLoginMode ? "Welcome back" : "Create your account")
+                        Text("Welcome to Reframe")
                             .font(.custom("Quicksand-Bold", size: 28))
                             .foregroundColor(themeManager.colors.text)
                         
-                        Text(isLoginMode ? "Sign in to continue your journey" : "Start your journey to better mental clarity")
+                        Text("Sign in to continue your journey to better mental clarity")
                             .font(.custom("Nunito-Regular", size: 16))
                             .foregroundColor(themeManager.colors.textLight)
                     }
                     
-                    // Form
-                    VStack(spacing: 16) {
-                        // Email Input
-                        HStack(spacing: 12) {
-                            Image(systemName: "envelope")
-                                .font(.system(size: 20))
-                                .foregroundColor(themeManager.colors.textLight)
-                            
-                            TextField("Email", text: $email)
-                                .font(.custom("Nunito-Regular", size: 16))
-                                .foregroundColor(themeManager.colors.text)
-                                .textContentType(.emailAddress)
-                                .keyboardType(.emailAddress)
-                                .autocapitalization(.none)
-                                .disabled(authService.isLoading)
-                        }
-                        .padding(16)
-                        .background(themeManager.colors.surface)
-                        .cornerRadius(12)
-                        
-                        // Password Input
-                        HStack(spacing: 12) {
-                            Image(systemName: "lock")
-                                .font(.system(size: 20))
-                                .foregroundColor(themeManager.colors.textLight)
-                            
-                            SecureField("Password", text: $password)
-                                .font(.custom("Nunito-Regular", size: 16))
-                                .foregroundColor(themeManager.colors.text)
-                                .textContentType(isLoginMode ? .password : .newPassword)
-                                .disabled(authService.isLoading)
-                        }
-                        .padding(16)
-                        .background(themeManager.colors.surface)
-                        .cornerRadius(12)
-                        
+                    // Social Sign In Section
+                    VStack(spacing: 24) {
                         // Error Message
                         if let errorMessage = authService.errorMessage {
                             Text(errorMessage)
                                 .font(.custom("Nunito-Regular", size: 14))
                                 .foregroundColor(.red)
                                 .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal)
                         }
                         
-                        // Action Button
-                        Button(action: handleAuthAction) {
-                            ZStack {
-                                LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        themeManager.colors.primary,
-                                        themeManager.colors.primaryDark
-                                    ]),
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                                .cornerRadius(16)
-                                
-                                if authService.isLoading {
-                                    ProgressView()
-                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                } else {
-                                    Text(isLoginMode ? "Sign In" : "Create Account")
-                                        .font(.custom("Nunito-SemiBold", size: 18))
-                                        .foregroundColor(.white)
-                                }
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 56)
-                        .shadow(color: themeManager.colors.primary.opacity(0.3), radius: 12, x: 0, y: 6)
-                        .disabled(authService.isLoading || email.isEmpty || password.isEmpty)
-                        .opacity((authService.isLoading || email.isEmpty || password.isEmpty) ? 0.5 : 1)
-                        
-                        // Toggle between Sign Up and Login
-                        Button(action: {
-                            withAnimation {
-                                isLoginMode.toggle()
-                                authService.errorMessage = nil
-                            }
-                        }) {
-                            Text(isLoginMode ? "Don't have an account? Sign Up" : "Already have an account? Sign In")
-                                .font(.custom("Nunito-Medium", size: 16))
+                        // Social Sign In Buttons
+                        VStack(spacing: 16) {
+                            Text("Sign in with")
+                                .font(.custom("Nunito-Regular", size: 16))
                                 .foregroundColor(themeManager.colors.textLight)
+                            
+                            VStack(spacing: 12) {
+                                Button(action: handleGoogleSignIn) {
+                                    HStack {
+                                        Image("google_logo")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 20, height: 20)
+                                        
+                                        Text("Continue with Google")
+                                            .font(.custom("Nunito-Medium", size: 16))
+                                            .foregroundColor(themeManager.colors.text)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 56)
+                                    .background(themeManager.colors.surface)
+                                    .cornerRadius(12)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(themeManager.colors.border, lineWidth: 1)
+                                    )
+                                }
+                                .disabled(authService.isLoading)
+                                
+                                Button(action: handleAppleSignIn) {
+                                    HStack {
+                                        Image(systemName: "apple.logo")
+                                            .font(.system(size: 20))
+                                            .foregroundColor(themeManager.colors.text)
+                                        
+                                        Text("Continue with Apple")
+                                            .font(.custom("Nunito-Medium", size: 16))
+                                            .foregroundColor(themeManager.colors.text)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 56)
+                                    .background(themeManager.colors.surface)
+                                    .cornerRadius(12)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(themeManager.colors.border, lineWidth: 1)
+                                    )
+                                }
+                                .disabled(authService.isLoading)
+                            }
                         }
                         
-                        // Social Sign In Buttons (only show for sign up)
-                        if !isLoginMode {
-                            VStack(spacing: 16) {
-                                HStack {
-                                    Rectangle()
-                                        .frame(height: 1)
-                                        .foregroundColor(themeManager.colors.border)
-                                    
-                                    Text("Or sign up with")
-                                        .font(.custom("Nunito-Regular", size: 14))
-                                        .foregroundColor(themeManager.colors.textLight)
-                                        .padding(.horizontal, 16)
-                                    
-                                    Rectangle()
-                                        .frame(height: 1)
-                                        .foregroundColor(themeManager.colors.border)
+                        // Info Text
+                        VStack(spacing: 8) {
+                            Text("By continuing, you agree to our")
+                                .font(.custom("Nunito-Regular", size: 12))
+                                .foregroundColor(themeManager.colors.textLight)
+                            
+                            HStack(spacing: 4) {
+                                Button("Terms of Service") {
+                                    // Handle terms of service
                                 }
+                                .font(.custom("Nunito-Medium", size: 12))
+                                .foregroundColor(themeManager.colors.primary)
                                 
-                                HStack(spacing: 16) {
-                                    Button(action: handleGoogleSignIn) {
-                                        HStack {
-                                            Image("google_logo")
-                                                .resizable()
-                                                .scaledToFit()
-                                                .frame(width: 20, height: 20)
-                                            
-                                            Text("Google")
-                                                .font(.custom("Nunito-Medium", size: 16))
-                                                .foregroundColor(themeManager.colors.text)
-                                        }
-                                        .frame(maxWidth: .infinity)
-                                        .frame(height: 48)
-                                        .background(themeManager.colors.surface)
-                                        .cornerRadius(12)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .stroke(themeManager.colors.border, lineWidth: 1)
-                                        )
-                                    }
-                                    .disabled(authService.isLoading)
-                                    
-                                    Button(action: handleAppleSignIn) {
-                                        HStack {
-                                            Image(systemName: "apple.logo")
-                                                .font(.system(size: 20))
-                                                .foregroundColor(themeManager.colors.text)
-                                            
-                                            Text("Apple")
-                                                .font(.custom("Nunito-Medium", size: 16))
-                                                .foregroundColor(themeManager.colors.text)
-                                        }
-                                        .frame(maxWidth: .infinity)
-                                        .frame(height: 48)
-                                        .background(themeManager.colors.surface)
-                                        .cornerRadius(12)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .stroke(themeManager.colors.border, lineWidth: 1)
-                                        )
-                                    }
-                                    .disabled(authService.isLoading)
+                                Text("and")
+                                    .font(.custom("Nunito-Regular", size: 12))
+                                    .foregroundColor(themeManager.colors.textLight)
+                                
+                                Button("Privacy Policy") {
+                                    // Handle privacy policy
                                 }
+                                .font(.custom("Nunito-Medium", size: 12))
+                                .foregroundColor(themeManager.colors.primary)
                             }
                         }
                     }
+                    .padding(.horizontal)
                 }
                 .padding(24)
                 .frame(minHeight: geometry.size.height)
@@ -216,29 +152,6 @@ struct SignUpScreen: View {
                 }
             }
             .ignoresSafeArea(.keyboard)
-        }
-    }
-    
-    private func handleAuthAction() {
-        Task {
-            do {
-                if isLoginMode {
-                    try await authService.signIn(email: email, password: password)
-                } else {
-                    try await authService.signUp(email: email, password: password)
-                    
-                    // Save coach to user's account
-                    try await coordinator.saveCoachToUserAccount()
-                }
-                
-                if isFromSettings {
-                    dismiss()
-                } else {
-                    coordinator.next()
-                }
-            } catch {
-                // Error is handled by the authService
-            }
         }
     }
     
