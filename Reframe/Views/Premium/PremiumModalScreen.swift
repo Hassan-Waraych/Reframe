@@ -64,13 +64,6 @@ struct PremiumModalScreen: View {
                         title: "All Themes",
                         description: "Customize the app to match your vibe"
                     )
-                    
-                    // Priority Access
-                    FeatureCard(
-                        icon: "🚀",
-                        title: "Priority Insights & Early Access",
-                        description: "Try upcoming features and view in-depth self trends"
-                    )
                 }
                 .padding(.horizontal)
                 .padding(.top, 12)

@@ -9,6 +9,7 @@ import Security
 import GoogleSignIn
 import AuthenticationServices
 import ObjectiveC
+import WidgetKit
 
 enum UserStatus: String {
     case free = "free"
@@ -20,7 +21,11 @@ class AuthService: ObservableObject {
     @Published var isAuthenticated = false
     @Published var errorMessage: String?
     @Published var isLoading = false
-    @Published var userStatus: UserStatus = .free
+    @Published var userStatus: UserStatus = .free {
+        didSet {
+            updatePremiumStatusForWidget(isPremium: userStatus == .premium)
+        }
+    }
     
     static let shared = AuthService()
     private let MAX_ACCOUNTS_PER_DEVICE = 3
@@ -501,6 +506,14 @@ class AuthService: ObservableObject {
     
     func getUserEmail() -> String? {
         return currentUser?.email
+    }
+    
+    /// Update premium status for widget
+    private func updatePremiumStatusForWidget(isPremium: Bool) {
+        let userDefaults = UserDefaults(suiteName: "group.com.reframeapp.shared")
+        userDefaults?.set(isPremium, forKey: "isPremiumUser")
+        userDefaults?.synchronize()
+        WidgetKit.WidgetCenter.shared.reloadAllTimelines()
     }
 }
 

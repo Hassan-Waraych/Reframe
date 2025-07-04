@@ -606,6 +606,8 @@ struct PremiumContent: View {
                     Text("♾️ **Unlimited Reframes**: No daily limits")
                     Text("🧠 **All Coaches**: Access to premium coaches (Rhea, Leo, Nova)")
                     Text("💬 **25 Coach Sessions**: More daily conversations")
+                    Text("🎨 **Premium Themes**: Access to exclusive app themes and color schemes")
+                    Text("📱 **Premium Widgets**: Beautiful home screen widgets")
                 }
             }
             
@@ -645,6 +647,8 @@ struct PremiumContent: View {
                     Text("**Unlimited Reframes**: Create as many reframes as you need without worrying about daily limits")
                     Text("**Coach Switching**: Change coaches anytime to match your current needs")
                     Text("**Extended Sessions**: Have longer, more in-depth conversations with your coach")
+                    Text("**Premium Themes**: Access to exclusive app themes and color schemes")
+                    Text("**Premium Widgets**: Beautiful home screen widgets")
                 }
             }
         }
