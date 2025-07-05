@@ -112,7 +112,8 @@ struct SettingsScreen: View {
                 }
                 .padding(.horizontal)
                 
-                // Reminders Section
+                // Reminders Section - Commented out for future implementation
+                /*
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Reminders")
                         .font(.custom("Quicksand-SemiBold", size: 20))
@@ -215,6 +216,7 @@ struct SettingsScreen: View {
                     }
                 }
                 .padding(.horizontal)
+                */
                 
                 // Support Section
                 VStack(alignment: .leading, spacing: 16) {
