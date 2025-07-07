@@ -44,7 +44,16 @@ struct Provider: TimelineProvider {
         // Seed for deterministic shuffle: year * 100 + month
         var rng = SeededGenerator(seed: UInt64(year * 100 + month))
         let shuffled = dailyBoostStrategies.shuffled(using: &rng)
+        
+        // Apply offset from DevSettings (only in DEBUG builds)
+        #if DEBUG
+        let userDefaults = UserDefaults(suiteName: "group.com.reframeapp.shared")
+        let offset = userDefaults?.integer(forKey: "dailyWisdomOffset") ?? 0
+        let adjustedDayOfCycle = (dayOfCycle + offset + dailyBoostStrategies.count) % dailyBoostStrategies.count
+        return shuffled[adjustedDayOfCycle]
+        #else
         return shuffled[dayOfCycle]
+        #endif
     }
 }
 

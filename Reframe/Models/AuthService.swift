@@ -199,6 +199,76 @@ class AuthService: ObservableObject {
         }
     }
     
+    func deleteAccount() async throws {
+        guard let user = Auth.auth().currentUser else {
+            throw NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "No user is currently signed in"])
+        }
+        
+        let userId = user.uid
+        let db = Firestore.firestore()
+        
+        // Delete all user data from Firestore
+        try await deleteUserData(userId: userId, db: db)
+        
+        // Delete the Firebase Auth user
+        try await user.delete()
+        
+        // Update local state
+        await MainActor.run {
+            self.currentUser = nil
+            self.isAuthenticated = false
+            self.errorMessage = nil
+            self.userStatus = .free
+        }
+    }
+    
+    private func deleteUserData(userId: String, db: Firestore) async throws {
+        // Delete all collections that contain user data
+        let collections = [
+            "journal_entries",
+            "reframes", 
+            "coachMessages",
+            "coachHistory",
+            "calming_tool_usage",
+            "mood_scores"
+        ]
+        
+        for collectionName in collections {
+            let snapshot = try await db.collection(collectionName)
+                .whereField("userId", isEqualTo: userId)
+                .getDocuments()
+            
+            for document in snapshot.documents {
+                try await document.reference.delete()
+            }
+        }
+        
+        // Delete user-specific documents
+        let userSpecificCollections = [
+            "users",
+            "milestones", 
+            "streaks",
+            "nonsense_tracking",
+            "coachAssignments"
+        ]
+        
+        for collectionName in userSpecificCollections {
+            try await db.collection(collectionName).document(userId).delete()
+        }
+        
+        // Delete purchases (these should not be deleted but we'll mark them as deleted)
+        let purchaseSnapshot = try await db.collection("purchases")
+            .whereField("userId", isEqualTo: userId)
+            .getDocuments()
+        
+        for document in purchaseSnapshot.documents {
+            try await document.reference.updateData([
+                "deletedAt": FieldValue.serverTimestamp(),
+                "isDeleted": true
+            ])
+        }
+    }
+    
     // Email/password authentication is disabled - only social sign-in is available
     func resetPassword(email: String) async throws {
         throw NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Password reset is not available. Please use Google or Apple Sign-In."])

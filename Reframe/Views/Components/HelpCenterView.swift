@@ -632,7 +632,7 @@ struct PremiumContent: View {
             ) {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("**Monthly Plan**: $9.99/month")
-                    Text("**Annual Plan**: $79.99/year (33% savings)")
+                    Text("**Annual Plan**: $59.99/year (50% savings)")
                     
                     Text("**Cancel Anytime**: No commitment required")
                 }

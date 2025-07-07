@@ -14,6 +14,8 @@ struct SettingsScreen: View {
     @State private var selectedDays: Set<Int> = [1, 2, 3, 4, 5] // Monday to Friday
     @State private var showHelpCenter = false
     @State private var showPremiumModal = false
+    @State private var showDeleteAccountConfirmation = false
+    @State private var isDeletingAccount = false
     let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
     
     var body: some View {
@@ -329,8 +331,45 @@ struct SettingsScreen: View {
                     // Error is handled by the authService
                 }
             }
+            Button("Delete My Account", role: .destructive) {
+                showDeleteAccountConfirmation = true
+            }
             Button("Cancel", role: .cancel) {}
         }
+        .confirmationDialog("Delete Account", isPresented: $showDeleteAccountConfirmation) {
+            if isDeletingAccount {
+                Button("Deleting Account...", role: .destructive) {
+                    // Disabled while deleting
+                }
+                .disabled(true)
+            } else {
+                Button("Delete My Account", role: .destructive) {
+                    Task {
+                        await deleteAccount()
+                    }
+                }
+            }
+            Button("Cancel", role: .cancel) {
+                // Only allow cancel if not currently deleting
+            }
+            .disabled(isDeletingAccount)
+        } message: {
+            Text("Are you sure? This will permanently delete your account and all data.")
+        }
+    }
+    
+    private func deleteAccount() async {
+        isDeletingAccount = true
+        
+        do {
+            try await authService.deleteAccount()
+            // Account deletion successful, user will be signed out automatically
+        } catch {
+            // Show error message
+            authService.errorMessage = error.localizedDescription
+        }
+        
+        isDeletingAccount = false
     }
 }
 

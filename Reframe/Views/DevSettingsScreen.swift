@@ -35,6 +35,7 @@ struct DevSettingsScreen: View {
                 journalSection
                 coachSection
                 milestoneSection
+                dailyWisdomTestingSection
                 dailyWisdomPreviewSection
             }
             .padding(.vertical)
@@ -545,6 +546,63 @@ struct DevSettingsScreen: View {
         }
             }
         }
+    }
+    
+
+    
+    private var dailyWisdomTestingSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Daily Wisdom Testing")
+                .font(.system(size: themeManager.typography.fontSize.h3, weight: .bold))
+                .foregroundColor(themeManager.colors.text)
+            
+            let userDefaults = UserDefaults(suiteName: "group.com.reframeapp.shared")
+            let currentOffset = userDefaults?.integer(forKey: "dailyWisdomOffset") ?? 0
+            Text("Current offset: \(currentOffset) days")
+                .font(.system(size: 14))
+                .foregroundColor(themeManager.colors.textLight)
+            
+            HStack(spacing: 12) {
+                Button(action: {
+                    let newOffset = currentOffset - 1
+                    userDefaults?.set(newOffset, forKey: "dailyWisdomOffset")
+                }) {
+                    Text("Previous Day")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                        .background(themeManager.colors.secondary)
+                        .cornerRadius(12)
+                }
+                
+                Button(action: {
+                    let newOffset = currentOffset + 1
+                    userDefaults?.set(newOffset, forKey: "dailyWisdomOffset")
+                }) {
+                    Text("Next Day")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                        .background(themeManager.colors.primary)
+                        .cornerRadius(12)
+                }
+            }
+            
+            Button(action: {
+                userDefaults?.set(0, forKey: "dailyWisdomOffset")
+            }) {
+                Text("Reset to Today")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 48)
+                    .background(themeManager.colors.accent)
+                    .cornerRadius(12)
+            }
+        }
+        .padding(.horizontal)
     }
     
     private var dailyWisdomPreviewSection: some View {
