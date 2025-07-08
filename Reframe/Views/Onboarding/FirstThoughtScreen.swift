@@ -94,6 +94,10 @@ struct FirstThoughtScreen: View {
                 }
             }
         }
+        .onTapGesture {
+            // Dismiss keyboard when tapping outside
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
         .overlay(
             Group {
                 if showReframeResult, let reframe = viewModel.currentReframe {

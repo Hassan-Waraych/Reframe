@@ -174,7 +174,7 @@ struct SignUpScreen: View {
                 if isFromSettings {
                     dismiss()
                 } else {
-                    coordinator.completeOnboarding()
+                    coordinator.next()
                 }
             } catch {
                 // Error is handled by the authService
@@ -201,7 +201,7 @@ struct SignUpScreen: View {
                 if isFromSettings {
                     dismiss()
                 } else {
-                    coordinator.completeOnboarding()
+                    coordinator.next()
                 }
             } catch {
                 // Error is handled by the authService

@@ -176,6 +176,9 @@ struct JournalEntryModal: View {
                     
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button("Save") {
+                            // Dismiss keyboard first
+                            isFocused = false
+                            
                             Task {
                                 await saveEntry()
                             }
@@ -201,6 +204,10 @@ struct JournalEntryModal: View {
         }
         .onAppear {
             isFocused = true
+        }
+        .onTapGesture {
+            // Dismiss keyboard when tapping outside
+            isFocused = false
         }
     }
     

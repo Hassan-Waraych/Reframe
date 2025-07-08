@@ -204,70 +204,39 @@ class AuthService: ObservableObject {
             throw NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "No user is currently signed in"])
         }
         
-        let userId = user.uid
-        let db = Firestore.firestore()
-        
-        // Delete all user data from Firestore
-        try await deleteUserData(userId: userId, db: db)
-        
-        // Delete the Firebase Auth user
-        try await user.delete()
-        
-        // Update local state
-        await MainActor.run {
-            self.currentUser = nil
-            self.isAuthenticated = false
-            self.errorMessage = nil
-            self.userStatus = .free
+        do {
+            // Just try to delete the user directly - if it fails with 17014, we'll handle it
+            try await user.delete()
+            print("User deletion successful")
+            
+            // Update local state
+            await MainActor.run {
+                self.currentUser = nil
+                self.isAuthenticated = false
+                self.errorMessage = nil
+                self.userStatus = .free
+            }
+        } catch {
+            print("User deletion failed with error: \(error)")
+            print("Error details: \(error.localizedDescription)")
+            
+            // Check if we need to re-authenticate
+            if let nsError = error as NSError? {
+                print("Error code: \(nsError.code)")
+                if nsError.code == 17014 {
+                    throw NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Account deletion requires recent authentication. Please sign out and sign back in, then try again."])
+                } else if nsError.code == 17020 {
+                    throw NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Network error. Please check your internet connection and try again."])
+                } else if nsError.code == 17011 {
+                    throw NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Authentication was canceled."])
+                }
+            }
+            
+            throw error
         }
     }
     
-    private func deleteUserData(userId: String, db: Firestore) async throws {
-        // Delete all collections that contain user data
-        let collections = [
-            "journal_entries",
-            "reframes", 
-            "coachMessages",
-            "coachHistory",
-            "calming_tool_usage",
-            "mood_scores"
-        ]
-        
-        for collectionName in collections {
-            let snapshot = try await db.collection(collectionName)
-                .whereField("userId", isEqualTo: userId)
-                .getDocuments()
-            
-            for document in snapshot.documents {
-                try await document.reference.delete()
-            }
-        }
-        
-        // Delete user-specific documents
-        let userSpecificCollections = [
-            "users",
-            "milestones", 
-            "streaks",
-            "nonsense_tracking",
-            "coachAssignments"
-        ]
-        
-        for collectionName in userSpecificCollections {
-            try await db.collection(collectionName).document(userId).delete()
-        }
-        
-        // Delete purchases (these should not be deleted but we'll mark them as deleted)
-        let purchaseSnapshot = try await db.collection("purchases")
-            .whereField("userId", isEqualTo: userId)
-            .getDocuments()
-        
-        for document in purchaseSnapshot.documents {
-            try await document.reference.updateData([
-                "deletedAt": FieldValue.serverTimestamp(),
-                "isDeleted": true
-            ])
-        }
-    }
+
     
     // Email/password authentication is disabled - only social sign-in is available
     func resetPassword(email: String) async throws {
@@ -287,7 +256,7 @@ class AuthService: ObservableObject {
             try await checkDeviceAccountLimit()
             
             // Get the current view controller and configure Google Sign-In on the main thread
-            let rootViewController = await MainActor.run { () -> UIViewController in
+            let rootViewController = await MainActor.run {
                 guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                       let window = windowScene.windows.first,
                       let rootViewController = window.rootViewController else {

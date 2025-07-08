@@ -10,8 +10,11 @@ class OnboardingCoordinator: ObservableObject {
     enum OnboardingStep {
         case welcome
         case emotionalFraming
+        case motivationPrompt
         case coachIntro
+        case valuePitch
         case signUp
+        case premiumPaywall
         case firstThought
     }
     
@@ -25,6 +28,8 @@ class OnboardingCoordinator: ObservableObject {
         case .welcome:
             currentStep = .emotionalFraming
         case .emotionalFraming:
+            currentStep = .motivationPrompt
+        case .motivationPrompt:
             // Assign coach based on emotional needs
             if let savedNeeds = UserDefaults.standard.data(forKey: "selectedEmotionalNeeds"),
                let decoded = try? JSONDecoder().decode([String].self, from: savedNeeds) {
@@ -57,16 +62,20 @@ class OnboardingCoordinator: ObservableObject {
                         }
                     } catch {
                         await MainActor.run {
-                            currentStep = .signUp
+                            currentStep = .valuePitch
                         }
                     }
                 }
             } else {
-                currentStep = .signUp
+                currentStep = .valuePitch
             }
         case .coachIntro:
+            currentStep = .valuePitch
+        case .valuePitch:
             currentStep = .signUp
         case .signUp:
+            currentStep = .premiumPaywall
+        case .premiumPaywall:
             currentStep = .firstThought
         case .firstThought:
             completeOnboarding()
@@ -76,10 +85,16 @@ class OnboardingCoordinator: ObservableObject {
     func skip() {
         switch currentStep {
         case .emotionalFraming:
-            currentStep = .signUp
+            currentStep = .motivationPrompt
+        case .motivationPrompt:
+            currentStep = .valuePitch
         case .coachIntro:
+            currentStep = .valuePitch
+        case .valuePitch:
             currentStep = .signUp
         case .signUp:
+            currentStep = .premiumPaywall
+        case .premiumPaywall:
             currentStep = .firstThought
         case .firstThought:
             completeOnboarding()
@@ -133,6 +148,12 @@ struct OnboardingView: View {
                         insertion: .move(edge: .trailing),
                         removal: .move(edge: .leading)
                     ))
+            case .motivationPrompt:
+                MotivationPromptScreen()
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing),
+                        removal: .move(edge: .leading)
+                    ))
             case .coachIntro:
                 if let coach = coordinator.assignedCoach {
                     CoachIntroScreen(coach: coach)
@@ -141,8 +162,20 @@ struct OnboardingView: View {
                             removal: .move(edge: .leading)
                         ))
                 }
+            case .valuePitch:
+                ValuePitchScreen()
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing),
+                        removal: .move(edge: .leading)
+                    ))
             case .signUp:
                 SignUpScreen()
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing),
+                        removal: .move(edge: .leading)
+                    ))
+            case .premiumPaywall:
+                OnboardingPaywallScreen()
                     .transition(.asymmetric(
                         insertion: .move(edge: .trailing),
                         removal: .move(edge: .leading)

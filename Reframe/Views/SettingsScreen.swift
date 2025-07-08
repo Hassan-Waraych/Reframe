@@ -16,6 +16,8 @@ struct SettingsScreen: View {
     @State private var showPremiumModal = false
     @State private var showDeleteAccountConfirmation = false
     @State private var isDeletingAccount = false
+    @State private var showDeleteError = false
+    @State private var deleteErrorMessage = ""
     let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
     
     var body: some View {
@@ -354,7 +356,18 @@ struct SettingsScreen: View {
             }
             .disabled(isDeletingAccount)
         } message: {
-            Text("Are you sure? This will permanently delete your account and all data.")
+            if isDeletingAccount {
+                Text("Please complete the re-authentication process to delete your account.")
+            } else {
+                Text("Are you sure? This will permanently delete your account and all data.")
+            }
+        }
+        .alert("Delete Account Error", isPresented: $showDeleteError) {
+            Button("OK") {
+                showDeleteError = false
+            }
+        } message: {
+            Text(deleteErrorMessage)
         }
     }
     
@@ -365,12 +378,19 @@ struct SettingsScreen: View {
             try await authService.deleteAccount()
             // Account deletion successful, user will be signed out automatically
         } catch {
-            // Show error message
-            authService.errorMessage = error.localizedDescription
+            // Show error message with better formatting
+            let errorMessage = error.localizedDescription
+            print("Delete account error in UI: \(errorMessage)")
+            await MainActor.run {
+                deleteErrorMessage = errorMessage
+                showDeleteError = true
+            }
         }
         
         isDeletingAccount = false
     }
+    
+
 }
 
 struct SupportButton: View {

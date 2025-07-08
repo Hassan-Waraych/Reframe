@@ -6,6 +6,7 @@ struct GroundingExerciseView: View {
     @State private var currentStep = 0
     @State private var responses: [String] = Array(repeating: "", count: 5)
     @State private var isCompleted = false
+    @FocusState private var isInputFocused: Bool
     
     private let steps = [
         (icon: "eye.fill", text: "Name 5 things you can see"),
@@ -26,6 +27,10 @@ struct GroundingExerciseView: View {
         .padding()
         .background(themeManager.colors.surface)
         .cornerRadius(16)
+        .onTapGesture {
+            // Dismiss keyboard when tapping outside
+            isInputFocused = false
+        }
     }
     
     private var exerciseView: some View {
@@ -55,12 +60,17 @@ struct GroundingExerciseView: View {
                     .padding()
                     .background(themeManager.colors.background)
                     .cornerRadius(12)
+                    .focused($isInputFocused)
             }
             
             // Navigation buttons
             HStack(spacing: 16) {
                 if currentStep > 0 {
-                    Button(action: { currentStep -= 1 }) {
+                    Button(action: { 
+                        // Dismiss keyboard first
+                        isInputFocused = false
+                        currentStep -= 1 
+                    }) {
                         Text("Previous")
                             .font(.custom("Poppins-Bold", size: 16))
                             .foregroundColor(themeManager.colors.text)
@@ -72,6 +82,9 @@ struct GroundingExerciseView: View {
                 }
                 
                 Button(action: {
+                    // Dismiss keyboard first
+                    isInputFocused = false
+                    
                     if currentStep < 4 {
                         currentStep += 1
                     } else {
@@ -118,7 +131,11 @@ struct GroundingExerciseView: View {
             .background(themeManager.colors.background)
             .cornerRadius(16)
             
-            Button(action: resetExercise) {
+            Button(action: {
+                // Dismiss keyboard first
+                isInputFocused = false
+                resetExercise()
+            }) {
                 Text("Start Over")
                     .font(.custom("Poppins-Bold", size: 16))
                     .foregroundColor(.white)

@@ -40,6 +40,9 @@ struct ReframeInputView: View {
             }
             
             Button(action: {
+                // Dismiss keyboard first
+                isInputFocused = false
+                
                 Task {
                     if selectedMode == .reframe {
                         await viewModel.createReframe()

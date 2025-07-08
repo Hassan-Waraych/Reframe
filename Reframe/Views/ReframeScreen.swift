@@ -5,6 +5,7 @@ struct ReframeScreen: View {
     @StateObject private var viewModel = ReframeViewModel()
     @State private var showDeleteConfirmation = false
     @State private var reframeToDelete: Reframe?
+    @FocusState private var isInputFocused: Bool
     
     var body: some View {
         ScrollView {
@@ -31,9 +32,13 @@ struct ReframeScreen: View {
                         .cornerRadius(12)
                         .lineLimit(3...6)
                         .disabled(!viewModel.canCreateReframe || viewModel.state == .classifying || viewModel.state == .generating)
+                        .focused($isInputFocused)
                     
                     // Submit Button
                     Button {
+                        // Dismiss keyboard first
+                        isInputFocused = false
+                        
                         Task {
                             await viewModel.createReframe()
                         }
@@ -230,6 +235,10 @@ struct ReframeScreen: View {
         }
         .task {
             await viewModel.loadReframes()
+        }
+        .onTapGesture {
+            // Dismiss keyboard when tapping outside
+            isInputFocused = false
         }
     }
 }

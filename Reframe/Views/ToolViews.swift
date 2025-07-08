@@ -113,6 +113,7 @@ struct GratitudeView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @State private var gratitudeItems: [String] = ["", "", ""]
     @State private var isSubmitted = false
+    @FocusState private var isInputFocused: Bool
     
     private let prompts = [
         "What made you smile today?",
@@ -129,6 +130,10 @@ struct GratitudeView: View {
             }
         }
         .padding()
+        .onTapGesture {
+            // Dismiss keyboard when tapping outside
+            isInputFocused = false
+        }
     }
     
     private var inputView: some View {
@@ -151,6 +156,7 @@ struct GratitudeView: View {
                                 RoundedRectangle(cornerRadius: 8)
                                     .stroke(themeManager.colors.text.opacity(0.2), lineWidth: 1)
                             )
+                            .focused($isInputFocused)
                     }
                 }
             }
@@ -160,6 +166,9 @@ struct GratitudeView: View {
             
             // Submit Button
             Button(action: {
+                // Dismiss keyboard first
+                isInputFocused = false
+                
                 if !gratitudeItems.contains(where: { $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) {
                     isSubmitted = true
                 }
@@ -212,6 +221,8 @@ struct GratitudeView: View {
             .cornerRadius(16)
             
             Button(action: {
+                // Dismiss keyboard first
+                isInputFocused = false
                 isSubmitted = false
                 gratitudeItems = ["", "", ""]
             }) {

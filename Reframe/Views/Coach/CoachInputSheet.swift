@@ -10,6 +10,7 @@ struct CoachInputSheet: View {
     @State private var isSending = false
     @State private var showResponse = false
     @State private var coachResponse = ""
+    @FocusState private var isInputFocused: Bool
     
     private let emotions: [Emotion] = [
         Emotion(emoji: "😊", name: "Happy"),
@@ -65,6 +66,7 @@ struct CoachInputSheet: View {
                                         .foregroundColor(themeManager.colors.text)
                                         .frame(minHeight: 120)
                                         .scrollContentBackground(.hidden)
+                                        .focused($isInputFocused)
                                 }
                                 .background(themeManager.colors.surface)
                                 .cornerRadius(16)
@@ -193,6 +195,9 @@ struct CoachInputSheet: View {
                     
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button("Send") {
+                            // Dismiss keyboard first
+                            isInputFocused = false
+                            
                             Task {
                                 isSending = true
                                 await viewModel.submitMessage(messageText)
@@ -260,6 +265,10 @@ struct CoachInputSheet: View {
                             .blur(radius: 2)
                     )
                 }
+            }
+            .onTapGesture {
+                // Dismiss keyboard when tapping outside
+                isInputFocused = false
             }
         }
     }
