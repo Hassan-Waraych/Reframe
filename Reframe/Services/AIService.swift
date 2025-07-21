@@ -295,17 +295,19 @@ class AIService {
         }
         
         let prompt = """
-        Reframe the following negative thought into a more positive and constructive perspective. 
+        Reframe the following emotional thought into a comforting, realistic perspective. 
         The reframe should be:
-        1. Empathetic and understanding
-        2. Realistic and practical
-        3. Focused on growth and possibility
-        4. Written in first person
-        5. No more than 2 sentences
-        
-        Original thought: "\(thought)"
-        
-        Provide ONLY the reframed thought, no additional text.
+        - Acknowledge the emotion behind the thought
+        - Offer a gentle, realistic perspective
+        - Deeply empathetic and emotionally attuned
+        - Grounded in emotional healing, not toxic positivity
+        - Encouraging while still validating the user's pain
+        - Written in the first person, like someone talking to themselves gently
+        - No more than 2 short sentences
+
+        Thought: "\(thought)"
+
+        Only return the reframed thought.
         """
         
         return try await performWithRetry { [self] in
@@ -316,13 +318,13 @@ class AIService {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             
             let body: [String: Any] = [
-                "model": "gpt-3.5-turbo",
+                "model": "gpt-4-turbo-preview",
                 "messages": [
                     ["role": "system", "content": "You are a compassionate thought reframing assistant. Provide ONLY the reframed thought."],
                     ["role": "user", "content": prompt]
                 ],
                 "max_tokens": 100,
-                "temperature": 0.7
+                "temperature": 0.9
             ]
             
             request.httpBody = try JSONSerialization.data(withJSONObject: body)
@@ -486,6 +488,11 @@ class AIService {
         
         let prompt = """
         You are \(coach.name) \(coach.emoji), an AI mental health coach. Your tone is \(coach.toneSummary). Your specialties include: \(coach.specialties.joined(separator: ", ")). Speak like a real, thoughtful human.
+        You must fully embody the identity, tone, and philosophy of \(coach.name). Do not sound generic or like other coaches.
+
+        You are a compassionate mental health coach. Here's how you respond:  
+        User: 'I feel like everything is falling apart'  
+        Coach: 'That sounds so overwhelming. It's okay to feel like that — you're doing your best in the middle of chaos. Let's start by finding one thing you *can* control today.'
 
         User's message: "\(content)"
 
@@ -545,13 +552,13 @@ class AIService {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             
             let body: [String: Any] = [
-                "model": "gpt-3.5-turbo",
+                "model": "gpt-4-turbo-preview",
                 "messages": [
                     ["role": "system", "content": "You are a compassionate mental health coach who provides personalized, supportive responses. Never use headers, titles, or section markers in your responses."],
                     ["role": "user", "content": prompt]
                 ],
                 "max_tokens": 400,
-                "temperature": 0.8
+                "temperature": 0.9
             ]
             
             request.httpBody = try JSONSerialization.data(withJSONObject: body)

@@ -309,7 +309,7 @@ struct SettingsScreen: View {
             DevSettingsScreen()
         }
         .sheet(isPresented: $showSignInSheet) {
-            SignUpScreen(isFromSettings: true)
+            SignUpScreen(isFromSettings: true, isMandatory: false)
                 .environmentObject(themeManager)
                 .environmentObject(authService)
         }

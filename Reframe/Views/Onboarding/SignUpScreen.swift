@@ -9,12 +9,14 @@ struct SignUpScreen: View {
     @Environment(\.dismiss) private var dismiss
     
     let isFromSettings: Bool
+    let isMandatory: Bool
     
     @State private var isAnimating = false
     @State private var keyboardHeight: CGFloat = 0
     
-    init(isFromSettings: Bool = false) {
+    init(isFromSettings: Bool = false, isMandatory: Bool = false) {
         self.isFromSettings = isFromSettings
+        self.isMandatory = isMandatory
     }
     
     var body: some View {
@@ -23,7 +25,7 @@ struct SignUpScreen: View {
                 VStack(spacing: 32) {
                     // Header
                     HStack {
-                        if isFromSettings {
+                        if isFromSettings && !isMandatory {
                             Button(action: {
                                 dismiss()
                             }) {
@@ -171,7 +173,7 @@ struct SignUpScreen: View {
                     }
                 }
                 
-                if isFromSettings {
+                if isFromSettings && !isMandatory {
                     dismiss()
                 } else {
                     coordinator.next()
@@ -198,7 +200,7 @@ struct SignUpScreen: View {
                     }
                 }
                 
-                if isFromSettings {
+                if isFromSettings && !isMandatory {
                     dismiss()
                 } else {
                     coordinator.next()

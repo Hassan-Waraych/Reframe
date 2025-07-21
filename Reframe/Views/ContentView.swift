@@ -32,7 +32,13 @@ struct ContentView: View {
     
     var body: some View {
         Group {
-            if !coordinator.hasCompletedOnboarding {
+            if !authService.isAuthenticated {
+                // Show mandatory signup screen when not authenticated
+                SignUpScreen(isFromSettings: false, isMandatory: true)
+                    .environmentObject(themeManager)
+                    .environmentObject(authService)
+                    .environmentObject(coordinator)
+            } else if !coordinator.hasCompletedOnboarding {
                 OnboardingView()
             } else {
                 TabView(selection: $selectedTab) {
