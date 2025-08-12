@@ -38,7 +38,7 @@ struct SettingsScreen: View {
                     }
                     
                     Text("Settings")
-                        .font(.custom("Quicksand-Bold", size: 28))
+                        .font(.system(size: 28, weight: .bold, design: .default))
                         .foregroundColor(themeManager.colors.text)
                     
                     Spacer()
@@ -60,16 +60,16 @@ struct SettingsScreen: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 if authService.isAuthenticated {
                                     Text(authService.getUserEmail() ?? "User")
-                                        .font(.custom("Quicksand-SemiBold", size: 20))
+                                        .font(.system(size: 20, weight: .semibold, design: .default))
                                         .foregroundColor(themeManager.colors.text)
                                 } else {
                                     Text("Sign In")
-                                        .font(.custom("Quicksand-SemiBold", size: 20))
+                                        .font(.system(size: 20, weight: .semibold, design: .default))
                                         .foregroundColor(themeManager.colors.primary)
                                 }
                                 
                                 Text(authService.isAuthenticated ? "Tap to manage account" : "Create an account or sign in")
-                                    .font(.custom("Nunito-Regular", size: 16))
+                                    .font(.system(size: 15, weight: .regular, design: .default))
                                     .foregroundColor(themeManager.colors.textLight)
                             }
                             
@@ -90,7 +90,7 @@ struct SettingsScreen: View {
                 // Preferences Section
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Preferences")
-                        .font(.custom("Quicksand-SemiBold", size: 20))
+                        .font(.system(size: 20, weight: .semibold, design: .default))
                         .foregroundColor(themeManager.colors.text)
                         .padding(.horizontal)
                     

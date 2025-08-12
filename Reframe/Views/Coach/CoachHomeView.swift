@@ -29,7 +29,7 @@ struct CoachHomeView: View {
                             .shadow(color: themeManager.colors.primary.opacity(0.1), radius: 8, x: 0, y: 4)
                     }
                     Text("Coach")
-                        .font(.custom("Quicksand-Bold", size: 28))
+                        .font(.system(size: 28, weight: .bold, design: .default))
                         .foregroundColor(themeManager.colors.text)
                     Spacer()
                 }
@@ -81,13 +81,13 @@ struct CoachHomeView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
                                 Text("Coach Sessions Used (This Week)")
-                                    .font(.custom("Quicksand-SemiBold", size: 16))
+                                    .font(.system(size: 16, weight: .semibold, design: .default))
                                     .foregroundColor(themeManager.colors.text)
                                 Spacer()
                                 let maxCount = 3
                                 let displayCount = min(viewModel.coachUsageCount, maxCount)
                                 Text("\(displayCount)/\(maxCount)")
-                                    .font(.custom("Nunito-Medium", size: 16))
+                                    .font(.system(size: 16, weight: .medium, design: .default))
                                     .foregroundColor(themeManager.colors.textLight)
                             }
                             GeometryReader { geometry in

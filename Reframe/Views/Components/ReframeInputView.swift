@@ -11,20 +11,20 @@ struct ReframeInputView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(selectedMode == .reframe ? "What's on your mind?" : "What would you like to reflect on?")
-                .font(.custom("Quicksand-SemiBold", size: 20))
+                .font(.system(size: 20, weight: .semibold, design: .default))
                 .foregroundColor(themeManager.colors.text)
             
             ZStack(alignment: .topLeading) {
                 if viewModel.originalThought.isEmpty {
                     Text(selectedMode == .reframe ? "Type your thoughts here..." : "Write your reflection here...")
-                        .font(.custom("Nunito-Regular", size: 16))
+                        .font(.system(size: 15, weight: .regular, design: .default))
                         .foregroundColor(themeManager.colors.textLight)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
                 }
                 
                 TextEditor(text: $viewModel.originalThought)
-                    .font(.custom("Nunito-Regular", size: 16))
+                    .font(.system(size: 15, weight: .regular, design: .default))
                     .foregroundColor(themeManager.colors.text)
                     .frame(height: 100)
                     .padding(4)
@@ -66,7 +66,7 @@ struct ReframeInputView: View {
                             .font(.system(size: 18, weight: .semibold))
                     }
                 }
-                .font(.custom("Nunito-SemiBold", size: 18))
+                .font(.system(size: 16, weight: .semibold, design: .default))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)

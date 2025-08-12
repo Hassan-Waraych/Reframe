@@ -41,4 +41,4 @@ public let dailyBoostStrategies: [DailyBoostStrategy] = [
     DailyBoostStrategy(title: "Reconnect with a Friend", description: "Send a message or call someone you care about. Connection heals."),
     DailyBoostStrategy(title: "Accept What Is", description: "Meet this moment as it is, without resistance. Acceptance brings peace."),
     DailyBoostStrategy(title: "Trust Your Journey", description: "You are exactly where you need to be. Trust the process of your growth.")
-] 
+]

@@ -14,12 +14,12 @@ struct QuoteCard: View {
                     .foregroundColor(themeManager.colors.primary)
                 
                 Text("Daily Quote")
-                    .font(.custom("Quicksand-SemiBold", size: 20))
+                    .font(.system(size: 20, weight: .semibold, design: .default))
                     .foregroundColor(themeManager.colors.text)
             }
             
             Text(quote)
-                .font(.custom("Nunito-Regular", size: 16))
+                .font(.system(size: 15, weight: .regular, design: .default))
                 .foregroundColor(themeManager.colors.textLight)
                 .multilineTextAlignment(.leading)
                 .lineSpacing(4)

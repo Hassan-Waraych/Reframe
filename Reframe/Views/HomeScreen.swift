@@ -25,7 +25,7 @@ struct HomeScreen: View {
                     // Greeting and Streak aligned left
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Good \(greeting())")
-                            .font(.custom("Quicksand-Bold", size: 28))
+                            .font(.system(size: 28, weight: .bold, design: .default))
                             .foregroundColor(themeManager.colors.text)
                         if viewModel.currentStreak > 0 {
                             StreakView(streakCount: viewModel.currentStreak)
@@ -76,13 +76,13 @@ struct HomeScreen: View {
                     if !viewModel.authService.isPremiumUser() {
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
-                                Text("Reframes Used")
-                                    .font(.custom("Quicksand-SemiBold", size: 16))
-                                    .foregroundColor(themeManager.colors.text)
-                                Spacer()
-                                Text("\(2 - viewModel.remainingReframes)/2")
-                                    .font(.custom("Nunito-Medium", size: 16))
-                                    .foregroundColor(themeManager.colors.textLight)
+                                                            Text("Reframes Used")
+                                .font(.system(size: 16, weight: .semibold, design: .default))
+                                .foregroundColor(themeManager.colors.text)
+                            Spacer()
+                            Text("\(2 - viewModel.remainingReframes)/2")
+                                .font(.system(size: 16, weight: .medium, design: .default))
+                                .foregroundColor(themeManager.colors.textLight)
                             }
                             GeometryReader { geometry in
                                 ZStack(alignment: .leading) {
@@ -109,7 +109,7 @@ struct HomeScreen: View {
                                 showPremiumModal = true
                             }) {
                                 Text("Upgrade for unlimited reframes")
-                                    .font(.custom("Nunito-SemiBold", size: 14))
+                                    .font(.system(size: 14, weight: .medium, design: .default))
                                     .foregroundColor(themeManager.colors.primary)
                             }
                         }
@@ -120,7 +120,7 @@ struct HomeScreen: View {
                     if let latestReframe = viewModel.reframes.first(where: { $0.category != "Reflection" }) {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Latest Reframe")
-                                .font(.custom("Quicksand-Bold", size: 20))
+                                .font(.system(size: 20, weight: .semibold, design: .default))
                                 .foregroundColor(themeManager.colors.text)
                                 .padding(.horizontal)
                             Button {
@@ -135,9 +135,7 @@ struct HomeScreen: View {
                         }
                     }
 
-                    // Feature Grid
-                    FeatureGrid()
-                        .padding(.top, 24)
+                    // Removed FeatureGrid - moved to Discover tab
                 }
                 .padding(.vertical, 24)
             }

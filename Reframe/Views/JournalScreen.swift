@@ -23,7 +23,7 @@ struct JournalScreen: View {
                     }
                     
                     Text("Journal")
-                        .font(.custom("Quicksand-Bold", size: 28))
+                        .font(.system(size: 28, weight: .bold, design: .default))
                         .foregroundColor(themeManager.colors.text)
                     
                     Spacer()
@@ -37,12 +37,11 @@ struct JournalScreen: View {
                             .foregroundColor(themeManager.colors.primary)
                         
                         Text("No Entries Yet")
-                            .font(.title)
-                            .fontWeight(.bold)
+                            .font(.system(size: 24, weight: .semibold, design: .default))
                             .foregroundColor(themeManager.colors.text)
                         
                         Text("Your reflections will appear here. Start by adding a reflection from the home screen!")
-                            .font(.body)
+                            .font(.system(size: 15, weight: .regular, design: .default))
                             .multilineTextAlignment(.center)
                             .foregroundColor(themeManager.colors.textLight)
                             .padding(.horizontal)
@@ -55,7 +54,7 @@ struct JournalScreen: View {
                         if !favorites.isEmpty {
                             VStack(alignment: .leading, spacing: 16) {
                                 Text("Favorites")
-                                    .font(.custom("Quicksand-Bold", size: 20))
+                                    .font(.system(size: 20, weight: .semibold, design: .default))
                                     .foregroundColor(themeManager.colors.text)
                                     .padding(.horizontal)
                                 
@@ -69,7 +68,7 @@ struct JournalScreen: View {
                         // All Entries Section
                         VStack(alignment: .leading, spacing: 16) {
                             Text("All Entries")
-                                .font(.custom("Quicksand-Bold", size: 20))
+                                .font(.system(size: 20, weight: .semibold, design: .default))
                                 .foregroundColor(themeManager.colors.text)
                                 .padding(.horizontal)
                             

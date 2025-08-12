@@ -52,13 +52,22 @@ struct ContentView: View {
                     .tag(0)
                     
                     NavigationStack {
+                        DiscoverScreen(selectedTab: $selectedTab)
+                    }
+                    .tabItem {
+                        Image(systemName: "sparkles")
+                        Text("Discover")
+                    }
+                    .tag(1)
+                    
+                    NavigationStack {
                         JournalScreen(selectedTab: $selectedTab)
                     }
                     .tabItem {
                         Image(systemName: "book.fill")
                         Text("Journal")
                     }
-                    .tag(1)
+                    .tag(2)
                     
                     NavigationStack {
                         CoachHomeView(selectedTab: $selectedTab)
@@ -67,7 +76,7 @@ struct ContentView: View {
                         Image(systemName: "bubble.left.and.bubble.right.fill")
                         Text("Coach")
                     }
-                    .tag(2)
+                    .tag(3)
                     
                     /*
                     NavigationStack {
@@ -77,7 +86,7 @@ struct ContentView: View {
                         Image(systemName: "chart.line.uptrend.xyaxis")
                         Text("Insights")
                     }
-                    .tag(3)
+                    .tag(4)
                     */
                     
                     NavigationStack {
