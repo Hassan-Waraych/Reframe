@@ -7,6 +7,7 @@ struct DiscoverScreen: View {
     @State private var showGuidedJournal = false
     @State private var showQuickCalm = false
     @State private var showDailyBoost = false
+    @State private var showCourses = false
     @State private var animateCards = false
     
     var body: some View {
@@ -77,96 +78,23 @@ struct DiscoverScreen: View {
                         .padding(.horizontal)
                     }
                     
-                    // New Features Section
+                    // Additional Features Section
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Coming Soon")
-                            .font(.system(size: 22, weight: .semibold, design: .default))
-                            .foregroundColor(themeManager.colors.text)
-                            .padding(.horizontal)
-                        
                         LazyVGrid(columns: [
                             GridItem(.flexible(), spacing: 16),
                             GridItem(.flexible(), spacing: 16)
                         ], spacing: 16) {
                             DiscoverCard(
-                                title: "Mood Tracker",
-                                subtitle: "Track your emotions",
-                                icon: "chart.line.uptrend.xyaxis",
-                                gradient: [Color.indigo, Color.blue],
-                                delay: 0.5,
-                                isComingSoon: true
-                            ) {
-                                // Placeholder action
-                            }
-                            
-                            DiscoverCard(
-                                title: "Community",
-                                subtitle: "Connect with others",
-                                icon: "person.3.fill",
-                                gradient: [Color.teal, Color.cyan],
-                                delay: 0.6,
-                                isComingSoon: true
-                            ) {
-                                // Placeholder action
-                            }
-                            
-                            DiscoverCard(
-                                title: "Sleep Stories",
-                                subtitle: "Better rest",
-                                icon: "moon.stars.fill",
+                                title: "Courses",
+                                subtitle: "Learn & grow",
+                                icon: "book.closed.fill",
                                 gradient: [Color.purple, Color.indigo],
-                                delay: 0.7,
-                                isComingSoon: true
+                                delay: 0.5
                             ) {
-                                // Placeholder action
-                            }
-                            
-                            DiscoverCard(
-                                title: "Progress Reports",
-                                subtitle: "See your growth",
-                                icon: "chart.bar.fill",
-                                gradient: [Color.orange, Color.red],
-                                delay: 0.8,
-                                isComingSoon: true
-                            ) {
-                                // Placeholder action
+                                showCourses = true
                             }
                         }
                         .padding(.horizontal)
-                    }
-                    
-                    // Wellness Tips Section
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Wellness Tips")
-                            .font(.system(size: 22, weight: .semibold, design: .default))
-                            .foregroundColor(themeManager.colors.text)
-                            .padding(.horizontal)
-                        
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 16) {
-                                WellnessTipCard(
-                                    title: "Morning Routine",
-                                    tip: "Start your day with 5 minutes of mindful breathing",
-                                    icon: "sunrise.fill",
-                                    color: Color.orange
-                                )
-                                
-                                WellnessTipCard(
-                                    title: "Gratitude Practice",
-                                    tip: "Write down 3 things you're grateful for today",
-                                    icon: "heart.fill",
-                                    color: Color.pink
-                                )
-                                
-                                WellnessTipCard(
-                                    title: "Digital Detox",
-                                    tip: "Take breaks from screens every hour",
-                                    icon: "iphone",
-                                    color: Color.blue
-                                )
-                            }
-                            .padding(.horizontal)
-                        }
                     }
                 }
                 .padding(.vertical, 24)
@@ -189,6 +117,9 @@ struct DiscoverScreen: View {
         }
         .sheet(isPresented: $showQuickCalm) {
             QuickCalmScreen()
+        }
+        .sheet(isPresented: $showCourses) {
+            CoursesScreen()
         }
         .fullScreenCover(isPresented: $showDailyBoost) {
             // Deterministic shuffle based on month/year, then pick for the day
@@ -346,41 +277,7 @@ struct DiscoverCardButtonStyle: ButtonStyle {
     }
 }
 
-struct WellnessTipCard: View {
-    let title: String
-    let tip: String
-    let icon: String
-    let color: Color
-    
-    @EnvironmentObject var themeManager: ThemeManager
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: icon)
-                    .font(.system(size: 20))
-                    .foregroundColor(color)
-                
-                Text(title)
-                    .font(.system(size: 16, weight: .semibold, design: .default))
-                    .foregroundColor(themeManager.colors.text)
-                
-                Spacer()
-            }
-            
-            Text(tip)
-                .font(.system(size: 14, weight: .regular, design: .default))
-                .foregroundColor(themeManager.colors.textLight)
-                .multilineTextAlignment(.leading)
-                .lineLimit(3)
-        }
-        .padding(16)
-        .frame(width: 200)
-        .background(themeManager.colors.surface)
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
-    }
-}
+
 
 #Preview {
     DiscoverScreen(selectedTab: .constant(1))

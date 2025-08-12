@@ -1,0 +1,331 @@
+import SwiftUI
+
+struct CoursesScreen: View {
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var authService: AuthService
+    @State private var searchText = ""
+    @State private var showPaywall = false
+    
+    var filteredCategories: [CourseCategory] {
+        if searchText.isEmpty {
+            return allCategories
+        } else {
+            return allCategories.compactMap { category in
+                let filteredCourses = category.courses.filter { course in
+                    course.title.localizedCaseInsensitiveContains(searchText)
+                }
+                if filteredCourses.isEmpty {
+                    return nil
+                } else {
+                    return CourseCategory(
+                        title: category.title,
+                        courses: filteredCourses,
+                        color: category.color,
+                        isPremium: category.isPremium
+                    )
+                }
+            }
+        }
+    }
+    
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Search Bar
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(themeManager.colors.textLight)
+                            .font(.system(size: 16, weight: .medium))
+                        
+                        TextField("Search courses...", text: $searchText)
+                            .font(.system(size: 16, weight: .regular, design: .default))
+                            .foregroundColor(themeManager.colors.text)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(themeManager.colors.surface)
+                    .cornerRadius(12)
+                    .padding(.horizontal)
+                    
+                    // Course Categories
+                    LazyVStack(spacing: 32) {
+                        ForEach(filteredCategories, id: \.title) { category in
+                            CourseCategoryView(
+                                title: category.title,
+                                courses: category.courses,
+                                categoryColor: category.color,
+                                isPremium: category.isPremium
+                            )
+                        }
+                    }
+                }
+                .padding(.vertical, 24)
+            }
+            .background(themeManager.colors.background)
+            .navigationTitle("Courses")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(themeManager.colors.text.opacity(0.7))
+                            .font(.system(size: 24))
+                    }
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $showPaywall) {
+            PremiumModalScreen()
+        }
+    }
+}
+
+struct CourseCategoryView: View {
+    let title: String
+    let courses: [Course]
+    let categoryColor: Color
+    let isPremium: Bool
+    
+    @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var authService: AuthService
+    @State private var showPaywall = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // Category Title
+            HStack {
+                Text(title)
+                    .font(.system(size: 22, weight: .semibold, design: .default))
+                    .foregroundColor(themeManager.colors.text)
+                
+                Spacer()
+                
+                if isPremium && !authService.isPremiumUser() {
+                    Image(systemName: "crown.fill")
+                        .foregroundColor(.yellow)
+                        .font(.system(size: 16))
+                }
+            }
+            .padding(.horizontal)
+            
+            // Course Cards
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 16) {
+                    ForEach(courses) { course in
+                        CourseCard(
+                            course: course,
+                            categoryColor: categoryColor,
+                            isPremium: isPremium
+                        ) {
+                            if isPremium && !authService.isPremiumUser() {
+                                showPaywall = true
+                            } else {
+                                // Course action (placeholder for now)
+                                print("Selected course: \(course.title)")
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal)
+            }
+        }
+        .fullScreenCover(isPresented: $showPaywall) {
+            PremiumModalScreen()
+        }
+    }
+}
+
+struct CourseCard: View {
+    let course: Course
+    let categoryColor: Color
+    let isPremium: Bool
+    let action: () -> Void
+    
+    @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var authService: AuthService
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 12) {
+                // Course Image
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(
+                            LinearGradient(
+                                colors: [categoryColor.opacity(0.8), categoryColor.opacity(0.6)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 160, height: 100)
+                    
+                    Image(systemName: course.icon)
+                        .font(.system(size: 32, weight: .medium))
+                        .foregroundColor(.white)
+                    
+                    // Lock icon for premium courses
+                    if isPremium && !authService.isPremiumUser() {
+                        VStack {
+                            HStack {
+                                Spacer()
+                                Image(systemName: "lock.fill")
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .padding(8)
+                                    .background(Color.black.opacity(0.3))
+                                    .clipShape(Circle())
+                            }
+                            Spacer()
+                        }
+                        .frame(width: 160, height: 100)
+                    }
+                }
+                
+                // Course Info
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(course.title)
+                        .font(.system(size: 14, weight: .semibold, design: .default))
+                        .foregroundColor(themeManager.colors.text)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                    
+                    Text(course.duration)
+                        .font(.system(size: 12, weight: .regular, design: .default))
+                        .foregroundColor(themeManager.colors.textLight)
+                }
+            }
+            .frame(width: 160)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+// MARK: - Data Models
+
+struct Course: Identifiable {
+    let id = UUID()
+    let title: String
+    let duration: String
+    let icon: String
+}
+
+struct CourseCategory {
+    let title: String
+    let courses: [Course]
+    let color: Color
+    let isPremium: Bool
+}
+
+// MARK: - Sample Data
+
+let stressCourses: [Course] = [
+    Course(title: "Understanding Stress", duration: "3 min", icon: "brain.head.profile"),
+    Course(title: "Stress Response", duration: "2 min", icon: "heart.fill"),
+    Course(title: "Managing Anxiety", duration: "4 min", icon: "lungs.fill"),
+    Course(title: "Calm Your Mind", duration: "3 min", icon: "leaf.fill"),
+    Course(title: "Stress Relief", duration: "2 min", icon: "wind")
+]
+
+let relationshipCourses: [Course] = [
+    Course(title: "Healthy Boundaries", duration: "4 min", icon: "person.2.fill"),
+    Course(title: "Communication Skills", duration: "3 min", icon: "bubble.left.and.bubble.right.fill"),
+    Course(title: "Conflict Resolution", duration: "5 min", icon: "hand.raised.fill"),
+    Course(title: "Building Trust", duration: "3 min", icon: "heart.circle.fill"),
+    Course(title: "Emotional Support", duration: "2 min", icon: "person.fill.checkmark")
+]
+
+let cognitiveCourses: [Course] = [
+    Course(title: "Cognitive Distortions", duration: "4 min", icon: "brain"),
+    Course(title: "All-or-Nothing Thinking", duration: "3 min", icon: "arrow.left.and.right"),
+    Course(title: "Challenging Your Thoughts", duration: "5 min", icon: "lightbulb.fill"),
+    Course(title: "Mental Filters", duration: "3 min", icon: "camera.filters"),
+    Course(title: "Overgeneralization", duration: "2 min", icon: "arrow.triangle.branch")
+]
+
+let mindfulnessCourses: [Course] = [
+    Course(title: "Present Moment", duration: "3 min", icon: "clock.fill"),
+    Course(title: "Body Awareness", duration: "4 min", icon: "figure.mind.and.body"),
+    Course(title: "Breathing Techniques", duration: "2 min", icon: "wind"),
+    Course(title: "Mindful Walking", duration: "3 min", icon: "figure.walk"),
+    Course(title: "Meditation Basics", duration: "5 min", icon: "sparkles")
+]
+
+let growthCourses: [Course] = [
+    Course(title: "Self-Compassion", duration: "4 min", icon: "heart.fill"),
+    Course(title: "Goal Setting", duration: "3 min", icon: "target"),
+    Course(title: "Building Confidence", duration: "4 min", icon: "star.fill"),
+    Course(title: "Overcoming Fear", duration: "3 min", icon: "shield.fill"),
+    Course(title: "Personal Values", duration: "2 min", icon: "diamond.fill")
+]
+
+// Additional Categories
+let sleepCourses: [Course] = [
+    Course(title: "Sleep Hygiene", duration: "3 min", icon: "bed.double.fill"),
+    Course(title: "Relaxation Techniques", duration: "4 min", icon: "moon.stars.fill"),
+    Course(title: "Mindful Sleep", duration: "2 min", icon: "zzz"),
+    Course(title: "Sleep Anxiety", duration: "3 min", icon: "brain.head.profile"),
+    Course(title: "Evening Routine", duration: "4 min", icon: "sunset.fill")
+]
+
+let emotionCourses: [Course] = [
+    Course(title: "Emotional Awareness", duration: "3 min", icon: "heart.circle.fill"),
+    Course(title: "Managing Anger", duration: "4 min", icon: "flame.fill"),
+    Course(title: "Dealing with Sadness", duration: "3 min", icon: "cloud.rain.fill"),
+    Course(title: "Joy & Happiness", duration: "2 min", icon: "sun.max.fill"),
+    Course(title: "Emotional Balance", duration: "4 min", icon: "scalemass.fill")
+]
+
+let workCourses: [Course] = [
+    Course(title: "Work-Life Balance", duration: "4 min", icon: "briefcase.fill"),
+    Course(title: "Dealing with Burnout", duration: "3 min", icon: "exclamationmark.triangle.fill"),
+    Course(title: "Productivity Tips", duration: "3 min", icon: "bolt.fill"),
+    Course(title: "Workplace Stress", duration: "4 min", icon: "building.2.fill"),
+    Course(title: "Career Growth", duration: "3 min", icon: "chart.line.uptrend.xyaxis")
+]
+
+let socialCourses: [Course] = [
+    Course(title: "Social Anxiety", duration: "4 min", icon: "person.3.fill"),
+    Course(title: "Making Friends", duration: "3 min", icon: "person.badge.plus.fill"),
+    Course(title: "Public Speaking", duration: "5 min", icon: "megaphone.fill"),
+    Course(title: "Social Confidence", duration: "3 min", icon: "person.fill.checkmark"),
+    Course(title: "Group Dynamics", duration: "4 min", icon: "person.2.circle.fill")
+]
+
+let habitCourses: [Course] = [
+    Course(title: "Building Good Habits", duration: "4 min", icon: "checkmark.circle.fill"),
+    Course(title: "Breaking Bad Habits", duration: "3 min", icon: "xmark.circle.fill"),
+    Course(title: "Habit Tracking", duration: "2 min", icon: "chart.bar.fill"),
+    Course(title: "Morning Routines", duration: "3 min", icon: "sunrise.fill"),
+    Course(title: "Consistency", duration: "4 min", icon: "repeat.circle.fill")
+]
+
+let selfCareCourses: [Course] = [
+    Course(title: "Self-Care Basics", duration: "3 min", icon: "heart.fill"),
+    Course(title: "Physical Wellness", duration: "4 min", icon: "figure.walk"),
+    Course(title: "Mental Health", duration: "3 min", icon: "brain.head.profile"),
+    Course(title: "Spiritual Growth", duration: "4 min", icon: "sparkles"),
+    Course(title: "Creative Expression", duration: "3 min", icon: "paintbrush.fill")
+]
+
+// All Categories Array
+let allCategories: [CourseCategory] = [
+    CourseCategory(title: "Understanding Stress", courses: stressCourses, color: Color.orange, isPremium: false),
+    CourseCategory(title: "Relationships", courses: relationshipCourses, color: Color.pink, isPremium: false),
+    CourseCategory(title: "Sleep & Rest", courses: sleepCourses, color: Color.indigo, isPremium: false),
+    CourseCategory(title: "Emotional Health", courses: emotionCourses, color: Color.red, isPremium: true),
+    CourseCategory(title: "Work & Career", courses: workCourses, color: Color.teal, isPremium: true),
+    CourseCategory(title: "Social Skills", courses: socialCourses, color: Color.cyan, isPremium: true),
+    CourseCategory(title: "Habits & Routines", courses: habitCourses, color: Color.mint, isPremium: true),
+    CourseCategory(title: "Self-Care", courses: selfCareCourses, color: Color.yellow, isPremium: true),
+    CourseCategory(title: "Cognitive Patterns", courses: cognitiveCourses, color: Color.purple, isPremium: true),
+    CourseCategory(title: "Mindfulness", courses: mindfulnessCourses, color: Color.green, isPremium: true),
+    CourseCategory(title: "Personal Growth", courses: growthCourses, color: Color.blue, isPremium: true)
+]
+
+#Preview {
+    CoursesScreen()
+        .environmentObject(ThemeManager())
+        .environmentObject(AuthService.shared)
+} 
