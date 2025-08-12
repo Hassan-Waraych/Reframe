@@ -6,6 +6,8 @@ struct CoursesScreen: View {
     @EnvironmentObject var authService: AuthService
     @State private var searchText = ""
     @State private var showPaywall = false
+    @State private var showCourseViewer = false
+    @State private var selectedCourse: Course?
     
     var filteredCategories: [CourseCategory] {
         if searchText.isEmpty {
@@ -49,35 +51,53 @@ struct CoursesScreen: View {
                     .cornerRadius(12)
                     .padding(.horizontal)
                     
-                    // Course Categories
-                    LazyVStack(spacing: 32) {
-                        ForEach(filteredCategories, id: \.title) { category in
-                            CourseCategoryView(
-                                title: category.title,
-                                courses: category.courses,
-                                categoryColor: category.color,
-                                isPremium: category.isPremium
-                            )
-                        }
-                    }
+                    
+                           
+                           // Course Categories
+                           LazyVStack(spacing: 32) {
+                               ForEach(filteredCategories, id: \.title) { category in
+                                   CourseCategoryView(
+                                       title: category.title,
+                                       courses: category.courses,
+                                       categoryColor: category.color,
+                                       isPremium: category.isPremium,
+                                                                          onCourseSelected: { course in
+                                       print("Main screen received course: \(course.title)")
+                                       selectedCourse = course
+                                       showCourseViewer = true
+                                   }
+                                   )
+                               }
+                           }
                 }
                 .padding(.vertical, 24)
             }
             .background(themeManager.colors.background)
             .navigationTitle("Courses")
             .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(themeManager.colors.text.opacity(0.7))
-                            .font(.system(size: 24))
-                    }
-                }
-            }
+                               .toolbar {
+                                               ToolbarItem(placement: .navigationBarLeading) {
+                            Button("Test") {
+                                selectedCourse = Course(id: "understanding_stress", title: "Understanding Stress", duration: "3 min", icon: "brain.head.profile")
+                                showCourseViewer = true
+                            }
+                        }
+                       ToolbarItem(placement: .navigationBarTrailing) {
+                           Button(action: { dismiss() }) {
+                               Image(systemName: "xmark.circle.fill")
+                                   .foregroundColor(themeManager.colors.text.opacity(0.7))
+                                   .font(.system(size: 24))
+                           }
+                       }
+                   }
         }
         .fullScreenCover(isPresented: $showPaywall) {
             PremiumModalScreen()
+        }
+        .sheet(isPresented: $showCourseViewer) {
+            if let course = selectedCourse {
+                CourseViewerScreen(course: course)
+            }
         }
     }
 }
@@ -87,6 +107,7 @@ struct CourseCategoryView: View {
     let courses: [Course]
     let categoryColor: Color
     let isPremium: Bool
+    let onCourseSelected: (Course) -> Void
     
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var authService: AuthService
@@ -122,8 +143,9 @@ struct CourseCategoryView: View {
                             if isPremium && !authService.isPremiumUser() {
                                 showPaywall = true
                             } else {
-                                // Course action (placeholder for now)
-                                print("Selected course: \(course.title)")
+                                // Launch course viewer
+                                print("Course selected: \(course.title)")
+                                onCourseSelected(course)
                             }
                         }
                     }
@@ -205,7 +227,7 @@ struct CourseCard: View {
 // MARK: - Data Models
 
 struct Course: Identifiable {
-    let id = UUID()
+    let id: String
     let title: String
     let duration: String
     let icon: String
@@ -221,92 +243,92 @@ struct CourseCategory {
 // MARK: - Sample Data
 
 let stressCourses: [Course] = [
-    Course(title: "Understanding Stress", duration: "3 min", icon: "brain.head.profile"),
-    Course(title: "Stress Response", duration: "2 min", icon: "heart.fill"),
-    Course(title: "Managing Anxiety", duration: "4 min", icon: "lungs.fill"),
-    Course(title: "Calm Your Mind", duration: "3 min", icon: "leaf.fill"),
-    Course(title: "Stress Relief", duration: "2 min", icon: "wind")
+    Course(id: "understanding_stress", title: "Understanding Stress", duration: "3 min", icon: "brain.head.profile"),
+    Course(id: "stress_response", title: "Stress Response", duration: "2 min", icon: "heart.fill"),
+    Course(id: "managing_anxiety", title: "Managing Anxiety", duration: "4 min", icon: "lungs.fill"),
+    Course(id: "calm_your_mind", title: "Calm Your Mind", duration: "3 min", icon: "leaf.fill"),
+    Course(id: "stress_relief", title: "Stress Relief", duration: "2 min", icon: "wind")
 ]
 
 let relationshipCourses: [Course] = [
-    Course(title: "Healthy Boundaries", duration: "4 min", icon: "person.2.fill"),
-    Course(title: "Communication Skills", duration: "3 min", icon: "bubble.left.and.bubble.right.fill"),
-    Course(title: "Conflict Resolution", duration: "5 min", icon: "hand.raised.fill"),
-    Course(title: "Building Trust", duration: "3 min", icon: "heart.circle.fill"),
-    Course(title: "Emotional Support", duration: "2 min", icon: "person.fill.checkmark")
+    Course(id: "healthy_boundaries", title: "Healthy Boundaries", duration: "4 min", icon: "person.2.fill"),
+    Course(id: "communication_skills", title: "Communication Skills", duration: "3 min", icon: "bubble.left.and.bubble.right.fill"),
+    Course(id: "conflict_resolution", title: "Conflict Resolution", duration: "5 min", icon: "hand.raised.fill"),
+    Course(id: "building_trust", title: "Building Trust", duration: "3 min", icon: "heart.circle.fill"),
+    Course(id: "emotional_support", title: "Emotional Support", duration: "2 min", icon: "person.fill.checkmark")
 ]
 
 let cognitiveCourses: [Course] = [
-    Course(title: "Cognitive Distortions", duration: "4 min", icon: "brain"),
-    Course(title: "All-or-Nothing Thinking", duration: "3 min", icon: "arrow.left.and.right"),
-    Course(title: "Challenging Your Thoughts", duration: "5 min", icon: "lightbulb.fill"),
-    Course(title: "Mental Filters", duration: "3 min", icon: "camera.filters"),
-    Course(title: "Overgeneralization", duration: "2 min", icon: "arrow.triangle.branch")
+    Course(id: "cognitive_distortions", title: "Cognitive Distortions", duration: "4 min", icon: "brain"),
+    Course(id: "all_or_nothing_thinking", title: "All-or-Nothing Thinking", duration: "3 min", icon: "arrow.left.and.right"),
+    Course(id: "challenging_thoughts", title: "Challenging Your Thoughts", duration: "5 min", icon: "lightbulb.fill"),
+    Course(id: "mental_filters", title: "Mental Filters", duration: "3 min", icon: "camera.filters"),
+    Course(id: "overgeneralization", title: "Overgeneralization", duration: "2 min", icon: "arrow.triangle.branch")
 ]
 
 let mindfulnessCourses: [Course] = [
-    Course(title: "Present Moment", duration: "3 min", icon: "clock.fill"),
-    Course(title: "Body Awareness", duration: "4 min", icon: "figure.mind.and.body"),
-    Course(title: "Breathing Techniques", duration: "2 min", icon: "wind"),
-    Course(title: "Mindful Walking", duration: "3 min", icon: "figure.walk"),
-    Course(title: "Meditation Basics", duration: "5 min", icon: "sparkles")
+    Course(id: "present_moment", title: "Present Moment", duration: "3 min", icon: "clock.fill"),
+    Course(id: "body_awareness", title: "Body Awareness", duration: "4 min", icon: "figure.mind.and.body"),
+    Course(id: "breathing_techniques", title: "Breathing Techniques", duration: "2 min", icon: "wind"),
+    Course(id: "mindful_walking", title: "Mindful Walking", duration: "3 min", icon: "figure.walk"),
+    Course(id: "meditation_basics", title: "Meditation Basics", duration: "5 min", icon: "sparkles")
 ]
 
 let growthCourses: [Course] = [
-    Course(title: "Self-Compassion", duration: "4 min", icon: "heart.fill"),
-    Course(title: "Goal Setting", duration: "3 min", icon: "target"),
-    Course(title: "Building Confidence", duration: "4 min", icon: "star.fill"),
-    Course(title: "Overcoming Fear", duration: "3 min", icon: "shield.fill"),
-    Course(title: "Personal Values", duration: "2 min", icon: "diamond.fill")
+    Course(id: "self_compassion", title: "Self-Compassion", duration: "4 min", icon: "heart.fill"),
+    Course(id: "goal_setting", title: "Goal Setting", duration: "3 min", icon: "target"),
+    Course(id: "building_confidence", title: "Building Confidence", duration: "4 min", icon: "star.fill"),
+    Course(id: "overcoming_fear", title: "Overcoming Fear", duration: "3 min", icon: "shield.fill"),
+    Course(id: "personal_values", title: "Personal Values", duration: "2 min", icon: "diamond.fill")
 ]
 
 // Additional Categories
 let sleepCourses: [Course] = [
-    Course(title: "Sleep Hygiene", duration: "3 min", icon: "bed.double.fill"),
-    Course(title: "Relaxation Techniques", duration: "4 min", icon: "moon.stars.fill"),
-    Course(title: "Mindful Sleep", duration: "2 min", icon: "zzz"),
-    Course(title: "Sleep Anxiety", duration: "3 min", icon: "brain.head.profile"),
-    Course(title: "Evening Routine", duration: "4 min", icon: "sunset.fill")
+    Course(id: "sleep_hygiene", title: "Sleep Hygiene", duration: "3 min", icon: "bed.double.fill"),
+    Course(id: "relaxation_techniques", title: "Relaxation Techniques", duration: "4 min", icon: "moon.stars.fill"),
+    Course(id: "mindful_sleep", title: "Mindful Sleep", duration: "2 min", icon: "zzz"),
+    Course(id: "sleep_anxiety", title: "Sleep Anxiety", duration: "3 min", icon: "brain.head.profile"),
+    Course(id: "evening_routine", title: "Evening Routine", duration: "4 min", icon: "sunset.fill")
 ]
 
 let emotionCourses: [Course] = [
-    Course(title: "Emotional Awareness", duration: "3 min", icon: "heart.circle.fill"),
-    Course(title: "Managing Anger", duration: "4 min", icon: "flame.fill"),
-    Course(title: "Dealing with Sadness", duration: "3 min", icon: "cloud.rain.fill"),
-    Course(title: "Joy & Happiness", duration: "2 min", icon: "sun.max.fill"),
-    Course(title: "Emotional Balance", duration: "4 min", icon: "scalemass.fill")
+    Course(id: "emotional_awareness", title: "Emotional Awareness", duration: "3 min", icon: "heart.circle.fill"),
+    Course(id: "managing_anger", title: "Managing Anger", duration: "4 min", icon: "flame.fill"),
+    Course(id: "dealing_with_sadness", title: "Dealing with Sadness", duration: "3 min", icon: "cloud.rain.fill"),
+    Course(id: "joy_happiness", title: "Joy & Happiness", duration: "2 min", icon: "sun.max.fill"),
+    Course(id: "emotional_balance", title: "Emotional Balance", duration: "4 min", icon: "scalemass.fill")
 ]
 
 let workCourses: [Course] = [
-    Course(title: "Work-Life Balance", duration: "4 min", icon: "briefcase.fill"),
-    Course(title: "Dealing with Burnout", duration: "3 min", icon: "exclamationmark.triangle.fill"),
-    Course(title: "Productivity Tips", duration: "3 min", icon: "bolt.fill"),
-    Course(title: "Workplace Stress", duration: "4 min", icon: "building.2.fill"),
-    Course(title: "Career Growth", duration: "3 min", icon: "chart.line.uptrend.xyaxis")
+    Course(id: "work_life_balance", title: "Work-Life Balance", duration: "4 min", icon: "briefcase.fill"),
+    Course(id: "dealing_with_burnout", title: "Dealing with Burnout", duration: "3 min", icon: "exclamationmark.triangle.fill"),
+    Course(id: "productivity_tips", title: "Productivity Tips", duration: "3 min", icon: "bolt.fill"),
+    Course(id: "workplace_stress", title: "Workplace Stress", duration: "4 min", icon: "building.2.fill"),
+    Course(id: "career_growth", title: "Career Growth", duration: "3 min", icon: "chart.line.uptrend.xyaxis")
 ]
 
 let socialCourses: [Course] = [
-    Course(title: "Social Anxiety", duration: "4 min", icon: "person.3.fill"),
-    Course(title: "Making Friends", duration: "3 min", icon: "person.badge.plus.fill"),
-    Course(title: "Public Speaking", duration: "5 min", icon: "megaphone.fill"),
-    Course(title: "Social Confidence", duration: "3 min", icon: "person.fill.checkmark"),
-    Course(title: "Group Dynamics", duration: "4 min", icon: "person.2.circle.fill")
+    Course(id: "social_anxiety", title: "Social Anxiety", duration: "4 min", icon: "person.3.fill"),
+    Course(id: "making_friends", title: "Making Friends", duration: "3 min", icon: "person.badge.plus.fill"),
+    Course(id: "public_speaking", title: "Public Speaking", duration: "5 min", icon: "megaphone.fill"),
+    Course(id: "social_confidence", title: "Social Confidence", duration: "3 min", icon: "person.fill.checkmark"),
+    Course(id: "group_dynamics", title: "Group Dynamics", duration: "4 min", icon: "person.2.circle.fill")
 ]
 
 let habitCourses: [Course] = [
-    Course(title: "Building Good Habits", duration: "4 min", icon: "checkmark.circle.fill"),
-    Course(title: "Breaking Bad Habits", duration: "3 min", icon: "xmark.circle.fill"),
-    Course(title: "Habit Tracking", duration: "2 min", icon: "chart.bar.fill"),
-    Course(title: "Morning Routines", duration: "3 min", icon: "sunrise.fill"),
-    Course(title: "Consistency", duration: "4 min", icon: "repeat.circle.fill")
+    Course(id: "building_good_habits", title: "Building Good Habits", duration: "4 min", icon: "checkmark.circle.fill"),
+    Course(id: "breaking_bad_habits", title: "Breaking Bad Habits", duration: "3 min", icon: "xmark.circle.fill"),
+    Course(id: "habit_tracking", title: "Habit Tracking", duration: "2 min", icon: "chart.bar.fill"),
+    Course(id: "morning_routines", title: "Morning Routines", duration: "3 min", icon: "sunrise.fill"),
+    Course(id: "consistency", title: "Consistency", duration: "4 min", icon: "repeat.circle.fill")
 ]
 
 let selfCareCourses: [Course] = [
-    Course(title: "Self-Care Basics", duration: "3 min", icon: "heart.fill"),
-    Course(title: "Physical Wellness", duration: "4 min", icon: "figure.walk"),
-    Course(title: "Mental Health", duration: "3 min", icon: "brain.head.profile"),
-    Course(title: "Spiritual Growth", duration: "4 min", icon: "sparkles"),
-    Course(title: "Creative Expression", duration: "3 min", icon: "paintbrush.fill")
+    Course(id: "self_care_basics", title: "Self-Care Basics", duration: "3 min", icon: "heart.fill"),
+    Course(id: "physical_wellness", title: "Physical Wellness", duration: "4 min", icon: "figure.walk"),
+    Course(id: "mental_health", title: "Mental Health", duration: "3 min", icon: "brain.head.profile"),
+    Course(id: "spiritual_growth", title: "Spiritual Growth", duration: "4 min", icon: "sparkles"),
+    Course(id: "creative_expression", title: "Creative Expression", duration: "3 min", icon: "paintbrush.fill")
 ]
 
 // All Categories Array
