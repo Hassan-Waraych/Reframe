@@ -582,6 +582,1473 @@ let courseContentData: [CourseContent] = [
         ],
         category: "Sleep & Rest",
         isPremium: false
+    ),
+    
+    // All-or-Nothing Thinking Course (Premium)
+    CourseContent(
+        courseId: "all_or_nothing_thinking",
+        title: "All-or-Nothing Thinking",
+        icon: "arrow.left.and.right",
+        duration: "3 min",
+        pages: [
+            CoursePage(
+                title: "Understanding All-or-Nothing Thinking",
+                content: "All-or-nothing thinking, also called black-and-white thinking, is when you see things as completely good or bad, with no middle ground. It's like having only two options: perfect or failure. This thinking pattern can make you feel like you're either succeeding completely or failing completely.\n\nThis type of thinking often leads to unnecessary stress and disappointment because life rarely works in absolutes. Most situations have shades of gray and multiple possible outcomes.",
+                visualElement: .icon("arrow.left.and.right", .purple),
+                tips: [
+                    "Life rarely works in absolutes",
+                    "There's usually a middle ground",
+                    "Progress is more important than perfection"
+                ]
+            ),
+            CoursePage(
+                title: "Recognizing the Pattern",
+                content: "All-or-nothing thinking often shows up in words like 'always,' 'never,' 'perfect,' 'failure,' 'success,' or 'disaster.' When you catch yourself using these extreme words, it's a sign that you might be thinking in black and white.\n\nNotice when you're setting unrealistic standards for yourself or others. If you find yourself thinking 'I have to do this perfectly or it's not worth doing,' that's all-or-nothing thinking.",
+                visualElement: .comparison("All-or-Nothing: 'I failed this test, so I'm a complete failure'", "Balanced: 'I didn't do well on this test, but I can learn from it'")
+            ),
+            CoursePage(
+                title: "Finding the Middle Ground",
+                content: "Instead of seeing only two extremes, try to identify the middle ground. Ask yourself: 'What's between perfect and failure?' or 'What would be good enough?'\n\nPractice using more flexible language. Instead of 'I always mess up,' try 'Sometimes I make mistakes, and that's okay.' Remember that most things in life exist on a spectrum, not as absolutes.",
+                visualElement: .tipBox("Progress, not perfection. Every step forward is valuable, no matter how small.", .green),
+                isLastPage: true
+            )
+        ],
+        category: "Cognitive Patterns",
+        isPremium: true
+    ),
+    
+    // Challenging Your Thoughts Course (Premium)
+    CourseContent(
+        courseId: "challenging_thoughts",
+        title: "Challenging Your Thoughts",
+        icon: "lightbulb.fill",
+        duration: "5 min",
+        pages: [
+            CoursePage(
+                title: "The Power of Thought Challenging",
+                content: "Your thoughts influence your emotions and actions more than you might realize. When you have negative or distorted thoughts, they can create unnecessary stress and anxiety. Learning to challenge these thoughts can help you develop more balanced, realistic perspectives.\n\nThought challenging isn't about forcing yourself to think positively. It's about examining your thoughts more objectively and considering alternative viewpoints.",
+                visualElement: .icon("lightbulb.fill", .yellow),
+                tips: [
+                    "Thoughts are not facts",
+                    "You can choose how to respond to your thoughts",
+                    "Practice makes this skill easier"
+                ]
+            ),
+            CoursePage(
+                title: "The Thought Challenging Process",
+                content: "When you notice a negative thought, pause and ask yourself these questions: Is this thought 100% true? What evidence supports this thought? What evidence contradicts it? What would I tell a friend who had this thought?\n\nThis process helps you step back from your thoughts and examine them more objectively. You might find that your initial thought was exaggerated or not entirely accurate.",
+                visualElement: .stepList([
+                    "Notice the negative thought",
+                    "Ask if it's 100% true",
+                    "Look for supporting evidence",
+                    "Look for contradicting evidence",
+                    "Consider alternative perspectives"
+                ])
+            ),
+            CoursePage(
+                title: "Developing Balanced Thoughts",
+                content: "After challenging a thought, try to develop a more balanced perspective. This might mean acknowledging both the challenges and the positive aspects of a situation.\n\nRemember that developing balanced thinking is a skill that takes practice. Be patient with yourself and celebrate small improvements. Over time, this process will become more natural and automatic.",
+                visualElement: .comparison("Unbalanced: 'This is a disaster'", "Balanced: 'This is challenging, but I can handle it'"),
+                isLastPage: true
+            )
+        ],
+        category: "Cognitive Patterns",
+        isPremium: true
+    ),
+    
+    // Mental Filters Course (Premium)
+    CourseContent(
+        courseId: "mental_filters",
+        title: "Mental Filters",
+        icon: "camera.filters",
+        duration: "3 min",
+        pages: [
+            CoursePage(
+                title: "Understanding Mental Filters",
+                content: "Mental filters are like wearing tinted glasses that only let you see certain colors. They cause you to focus on negative aspects while ignoring or minimizing positive ones. This can make you feel like everything is going wrong, even when good things are happening.\n\nMental filters often develop as a way to protect yourself from disappointment, but they can end up making you feel worse by distorting your view of reality.",
+                visualElement: .icon("camera.filters", .purple),
+                tips: [
+                    "Mental filters distort your view of reality",
+                    "They often focus on the negative",
+                    "You can learn to see the full picture"
+                ]
+            ),
+            CoursePage(
+                title: "Recognizing Your Filters",
+                content: "Mental filters often show up when you dismiss compliments, focus only on mistakes, or ignore positive feedback. You might find yourself saying things like 'That doesn't count' or 'It was just luck' when good things happen.\n\nNotice when you're only seeing part of a situation. Are you focusing on what went wrong while ignoring what went right? This is a sign that mental filters might be at work.",
+                visualElement: .comparison("Filtered: 'I only got 8 out of 10 right'", "Balanced: 'I got 8 out of 10 right, that's pretty good'")
+            ),
+            CoursePage(
+                title: "Removing the Filters",
+                content: "To counteract mental filters, make a conscious effort to notice positive aspects of situations. When something good happens, take a moment to acknowledge it. When you receive a compliment, try to accept it graciously.\n\nPractice looking for evidence that contradicts your negative thoughts. Ask yourself: 'What positive aspects am I ignoring?' or 'What would someone else see in this situation?'",
+                visualElement: .tipBox("Make a habit of noticing and acknowledging the positive aspects of your experiences.", .blue),
+                isLastPage: true
+            )
+        ],
+        category: "Cognitive Patterns",
+        isPremium: true
+    ),
+    
+    // Overgeneralization Course (Premium)
+    CourseContent(
+        courseId: "overgeneralization",
+        title: "Overgeneralization",
+        icon: "arrow.triangle.branch",
+        duration: "2 min",
+        pages: [
+            CoursePage(
+                title: "What is Overgeneralization?",
+                content: "Overgeneralization happens when you take one negative experience and apply it to everything. It's like saying 'I failed this test, so I'm bad at all tests' or 'This relationship didn't work, so all relationships will fail.'\n\nThis thinking pattern can make you feel hopeless and prevent you from trying new things. It's based on the false belief that one negative experience means all similar experiences will be negative.",
+                visualElement: .icon("arrow.triangle.branch", .orange)
+            ),
+            CoursePage(
+                title: "Breaking the Pattern",
+                content: "To overcome overgeneralization, look for exceptions to your negative beliefs. Ask yourself: 'Is this really true in all cases?' or 'What evidence contradicts this belief?'\n\nPractice being more specific about your experiences. Instead of 'I always mess up,' try 'I made a mistake this time, but I've succeeded before.'",
+                visualElement: .tipBox("One negative experience doesn't predict all future experiences. Look for exceptions to your negative beliefs.", .green),
+                isLastPage: true
+            )
+        ],
+        category: "Cognitive Patterns",
+        isPremium: true
+    ),
+    
+    // Body Awareness Course (Premium)
+    CourseContent(
+        courseId: "body_awareness",
+        title: "Body Awareness",
+        icon: "figure.mind.and.body",
+        duration: "4 min",
+        pages: [
+            CoursePage(
+                title: "Connecting with Your Body",
+                content: "Your body is constantly sending you signals about how you're feeling, but many of us have learned to ignore these signals. Body awareness is about learning to listen to and understand what your body is telling you.\n\nWhen you're more aware of your body, you can better understand your emotions, recognize stress early, and take care of yourself more effectively. Your body often knows what you need before your mind does.",
+                visualElement: .icon("figure.mind.and.body", .green),
+                tips: [
+                    "Your body sends important signals",
+                    "Body awareness helps with emotional regulation",
+                    "Practice listening to your body regularly"
+                ]
+            ),
+            CoursePage(
+                title: "Body Scanning Practice",
+                content: "Body scanning is a simple technique to increase your body awareness. Start by finding a comfortable position and taking a few deep breaths. Then, slowly bring your attention to different parts of your body, from your toes to your head.\n\nNotice any sensations you feel - tension, warmth, tingling, or relaxation. Don't try to change anything, just observe. This practice helps you become more familiar with your body's signals.",
+                visualElement: .stepList([
+                    "Find a comfortable position",
+                    "Take three deep breaths",
+                    "Start with your toes",
+                    "Move attention up your body",
+                    "Notice sensations without judgment"
+                ])
+            ),
+            CoursePage(
+                title: "Understanding Body Signals",
+                content: "Different emotions often show up in different parts of your body. Anxiety might feel like butterflies in your stomach or tension in your shoulders. Anger might feel like heat in your chest. Sadness might feel like heaviness in your heart area.\n\nLearning to recognize these signals can help you understand your emotions better and respond to them more skillfully. Your body is a valuable source of information about your emotional state.",
+                visualElement: .tipBox("Your body is wise. Learning to listen to it can help you understand yourself better.", .blue),
+                isLastPage: true
+            )
+        ],
+        category: "Mindfulness",
+        isPremium: true
+    ),
+    
+    // Breathing Techniques Course (Premium)
+    CourseContent(
+        courseId: "breathing_techniques",
+        title: "Breathing Techniques",
+        icon: "wind",
+        duration: "2 min",
+        pages: [
+            CoursePage(
+                title: "The Power of Breath",
+                content: "Your breath is one of the most powerful tools you have for managing stress and emotions. It's always with you, and you can use it anywhere, anytime. Different breathing techniques can help you calm down, energize yourself, or find focus.\n\nWhen you're stressed, your breathing becomes shallow and rapid. By consciously changing your breathing pattern, you can activate your body's natural relaxation response.",
+                visualElement: .icon("wind", .cyan)
+            ),
+            CoursePage(
+                title: "Simple Breathing Techniques",
+                content: "Try the 4-7-8 technique: Inhale for 4 counts, hold for 7, exhale for 8. This simple pattern can help calm your nervous system and reduce stress.\n\nOr try box breathing: Inhale for 4, hold for 4, exhale for 4, hold for 4. This creates a balanced, calming rhythm that can help you feel more centered.",
+                visualElement: .stepList([
+                    "Find a comfortable position",
+                    "Place one hand on your belly",
+                    "Inhale slowly through your nose",
+                    "Feel your belly expand",
+                    "Exhale slowly through your mouth"
+                ]),
+                isLastPage: true
+            )
+        ],
+        category: "Mindfulness",
+        isPremium: true
+    ),
+    
+    // Mindful Walking Course (Premium)
+    CourseContent(
+        courseId: "mindful_walking",
+        title: "Mindful Walking",
+        icon: "figure.walk",
+        duration: "3 min",
+        pages: [
+            CoursePage(
+                title: "Walking with Awareness",
+                content: "Mindful walking is a simple way to bring mindfulness into your daily life. Instead of walking on autopilot, you bring your full attention to the experience of walking. This can be done anywhere - in your home, at work, or outside.\n\nMindful walking helps you slow down, connect with your body, and become more present in the moment. It's a great way to take a mental break and reset your mind.",
+                visualElement: .icon("figure.walk", .green)
+            ),
+            CoursePage(
+                title: "How to Walk Mindfully",
+                content: "Start by walking slowly and deliberately. Notice the feeling of your feet touching the ground, the movement of your legs, and the rhythm of your steps. Pay attention to your surroundings - the sights, sounds, and sensations around you.\n\nIf your mind wanders, gently bring it back to the experience of walking. You don't need to walk for long - even just a few minutes of mindful walking can make a difference.",
+                visualElement: .stepList([
+                    "Walk slowly and deliberately",
+                    "Notice your feet touching the ground",
+                    "Feel the movement of your body",
+                    "Pay attention to your surroundings",
+                    "Bring your mind back when it wanders"
+                ])
+            ),
+            CoursePage(
+                title: "Making Walking a Practice",
+                content: "You can practice mindful walking during any walk - to your car, around your neighborhood, or even just around your home. Start with short periods and gradually increase the time.\n\nRemember that mindful walking isn't about achieving a particular state. It's about being present and aware of your experience, whatever that experience is.",
+                visualElement: .tipBox("Every step can be an opportunity for mindfulness. Start with just a few mindful steps each day.", .blue),
+                isLastPage: true
+            )
+        ],
+        category: "Mindfulness",
+        isPremium: true
+    ),
+    
+    // Meditation Basics Course (Premium)
+    CourseContent(
+        courseId: "meditation_basics",
+        title: "Meditation Basics",
+        icon: "sparkles",
+        duration: "5 min",
+        pages: [
+            CoursePage(
+                title: "What is Meditation?",
+                content: "Meditation is a practice of training your mind to focus and redirect your thoughts. It's not about stopping your thoughts or achieving a perfect state of calm. Instead, it's about learning to observe your thoughts without getting caught up in them.\n\nMeditation can help reduce stress, improve concentration, and increase self-awareness. It's a skill that anyone can learn, regardless of their background or beliefs.",
+                visualElement: .icon("sparkles", .purple),
+                tips: [
+                    "Meditation is a skill that can be learned",
+                    "It's not about stopping your thoughts",
+                    "Regular practice is more important than perfect sessions"
+                ]
+            ),
+            CoursePage(
+                title: "Getting Started with Meditation",
+                content: "Find a quiet, comfortable place where you won't be interrupted. Sit in a comfortable position with your back straight but relaxed. Close your eyes or keep them slightly open, whatever feels more comfortable.\n\nStart with just a few minutes each day. You can gradually increase the time as you become more comfortable with the practice. Remember that it's normal for your mind to wander - that's what minds do.",
+                visualElement: .stepList([
+                    "Find a quiet, comfortable place",
+                    "Sit with your back straight",
+                    "Close your eyes gently",
+                    "Focus on your breath",
+                    "When your mind wanders, gently return to your breath"
+                ])
+            ),
+            CoursePage(
+                title: "Common Challenges and Solutions",
+                content: "Many people worry that they're not meditating 'correctly' because their mind wanders. This is completely normal and expected. The practice is not about having a perfectly quiet mind, but about noticing when your mind wanders and gently bringing it back.\n\nOther common challenges include feeling restless or bored. If this happens, try to observe these feelings without judgment. They will pass, just like all thoughts and feelings do.",
+                visualElement: .comparison("Myth: 'I need a perfectly quiet mind'", "Reality: 'It's normal for the mind to wander'")
+            ),
+            CoursePage(
+                title: "Building a Regular Practice",
+                content: "Consistency is more important than duration when it comes to meditation. Even just 5 minutes a day can make a difference. Try to meditate at the same time each day to build a habit.\n\nBe patient with yourself and your practice. Meditation is a skill that develops over time. Celebrate small victories, like noticing when your mind wanders or completing a session, no matter how short.",
+                visualElement: .tipBox("Start small and be consistent. Five minutes of daily meditation is better than an hour once a week.", .green),
+                isLastPage: true
+            )
+        ],
+        category: "Mindfulness",
+        isPremium: true
+    ),
+    
+    // Self-Compassion Course (Premium)
+    CourseContent(
+        courseId: "self_compassion",
+        title: "Self-Compassion",
+        icon: "heart.fill",
+        duration: "4 min",
+        pages: [
+            CoursePage(
+                title: "What is Self-Compassion?",
+                content: "Self-compassion is treating yourself with the same kindness, care, and understanding that you would offer to a good friend. It involves recognizing that everyone makes mistakes, experiences difficulties, and has flaws - including you.\n\nSelf-compassion is not about feeling sorry for yourself or making excuses. It's about acknowledging your humanity and responding to your struggles with warmth and understanding rather than harsh self-criticism.",
+                visualElement: .icon("heart.fill", .pink),
+                tips: [
+                    "Self-compassion is a skill you can develop",
+                    "It's not about making excuses",
+                    "Everyone deserves kindness, including you"
+                ]
+            ),
+            CoursePage(
+                title: "The Three Elements of Self-Compassion",
+                content: "Self-compassion has three main components: self-kindness, common humanity, and mindfulness. Self-kindness means being warm and understanding toward yourself. Common humanity recognizes that suffering is part of the human experience. Mindfulness involves observing your thoughts and feelings without judgment.\n\nThese three elements work together to help you respond to difficulties with compassion rather than criticism.",
+                visualElement: .stepList([
+                    "Self-kindness: Be warm toward yourself",
+                    "Common humanity: Recognize we all struggle",
+                    "Mindfulness: Observe without judgment"
+                ])
+            ),
+            CoursePage(
+                title: "Practicing Self-Compassion",
+                content: "When you're struggling, try talking to yourself as you would talk to a friend. Instead of 'I'm such an idiot,' try 'I made a mistake, but that's okay. Everyone makes mistakes.'\n\nPractice placing your hand on your heart or giving yourself a gentle hug when you're feeling down. These physical gestures can help activate your body's natural caregiving system.",
+                visualElement: .comparison("Self-criticism: 'I'm such an idiot'", "Self-compassion: 'I made a mistake, but that's okay'")
+            ),
+            CoursePage(
+                title: "Building Self-Compassion Habits",
+                content: "Make self-compassion a daily practice. Start each day by setting an intention to be kind to yourself. When you notice self-critical thoughts, gently redirect them toward compassion.\n\nRemember that developing self-compassion takes time and practice. Be patient with yourself as you learn this new way of relating to yourself.",
+                visualElement: .tipBox("Self-compassion is a practice, not a destination. Every moment of kindness toward yourself matters.", .green),
+                isLastPage: true
+            )
+        ],
+        category: "Personal Growth",
+        isPremium: true
+    ),
+    
+    // Goal Setting Course (Premium)
+    CourseContent(
+        courseId: "goal_setting",
+        title: "Goal Setting",
+        icon: "target",
+        duration: "3 min",
+        pages: [
+            CoursePage(
+                title: "The Power of Clear Goals",
+                content: "Setting clear, meaningful goals gives your life direction and purpose. Goals help you focus your energy and make decisions that align with what's important to you. They provide motivation and a sense of progress as you work toward them.\n\nGood goals are specific, achievable, and aligned with your values. They should challenge you enough to grow, but not so much that they feel overwhelming.",
+                visualElement: .icon("target", .blue)
+            ),
+            CoursePage(
+                title: "Setting SMART Goals",
+                content: "SMART goals are Specific, Measurable, Achievable, Relevant, and Time-bound. Instead of 'I want to be healthier,' try 'I will walk for 30 minutes three times a week for the next month.'\n\nBreak big goals into smaller, manageable steps. This makes them less overwhelming and helps you track your progress more easily.",
+                visualElement: .stepList([
+                    "Specific: What exactly do you want to achieve?",
+                    "Measurable: How will you know you've succeeded?",
+                    "Achievable: Is this realistic for you?",
+                    "Relevant: Does this align with your values?",
+                    "Time-bound: When will you complete this?"
+                ])
+            ),
+            CoursePage(
+                title: "Staying Motivated",
+                content: "Keep your goals visible and review them regularly. Celebrate small wins along the way. If you encounter obstacles, adjust your approach rather than giving up.\n\nRemember that setbacks are normal and don't mean you've failed. They're opportunities to learn and adjust your strategy.",
+                visualElement: .tipBox("Progress, not perfection. Every step toward your goal is a victory worth celebrating.", .green),
+                isLastPage: true
+            )
+        ],
+        category: "Personal Growth",
+        isPremium: true
+    ),
+    
+    // Building Confidence Course (Premium)
+    CourseContent(
+        courseId: "building_confidence",
+        title: "Building Confidence",
+        icon: "star.fill",
+        duration: "4 min",
+        pages: [
+            CoursePage(
+                title: "Understanding Confidence",
+                content: "Confidence is believing in your ability to handle challenges and achieve your goals. It's not about being perfect or never feeling afraid. It's about trusting yourself to figure things out and bounce back from setbacks.\n\nConfidence is built through experience and practice. Every time you face a challenge and get through it, you're building confidence for the next challenge.",
+                visualElement: .icon("star.fill", .yellow),
+                tips: [
+                    "Confidence is built through experience",
+                    "It's okay to feel afraid and still act",
+                    "Small wins build confidence over time"
+                ]
+            ),
+            CoursePage(
+                title: "Building Confidence Through Action",
+                content: "The best way to build confidence is to take action, even when you're not sure you can succeed. Start with small challenges and gradually work up to bigger ones. Each success, no matter how small, builds your confidence.\n\nFocus on your effort and progress rather than just the outcome. Celebrate the courage it takes to try, regardless of the result.",
+                visualElement: .stepList([
+                    "Start with small challenges",
+                    "Take action despite fear",
+                    "Focus on effort, not just outcome",
+                    "Celebrate your courage",
+                    "Learn from setbacks"
+                ])
+            ),
+            CoursePage(
+                title: "Overcoming Self-Doubt",
+                content: "Self-doubt is normal and doesn't mean you can't succeed. When you hear that inner critic, ask yourself: 'What would I tell a friend who was feeling this way?'\n\nRemember your past successes and the challenges you've already overcome. You have more strength and capability than you might realize.",
+                visualElement: .comparison("Self-doubt: 'I can't do this'", "Confidence: 'I can figure this out'")
+            ),
+            CoursePage(
+                title: "Maintaining Confidence",
+                content: "Confidence is like a muscle - it needs regular exercise to stay strong. Continue challenging yourself and stepping outside your comfort zone. Surround yourself with supportive people who believe in you.\n\nPractice self-compassion when you face setbacks. Remember that everyone experiences failures and doubts. What matters is how you respond to them.",
+                visualElement: .tipBox("Confidence is a journey, not a destination. Keep challenging yourself and celebrating your growth.", .blue),
+                isLastPage: true
+            )
+        ],
+        category: "Personal Growth",
+        isPremium: true
+    ),
+    
+    // Overcoming Fear Course (Premium)
+    CourseContent(
+        courseId: "overcoming_fear",
+        title: "Overcoming Fear",
+        icon: "shield.fill",
+        duration: "3 min",
+        pages: [
+            CoursePage(
+                title: "Understanding Fear",
+                content: "Fear is a natural response designed to protect you from danger. However, sometimes fear can hold you back from things that would actually be good for you. Learning to distinguish between helpful and unhelpful fear is an important skill.\n\nFear often feels bigger than it actually is. When you face your fears, you usually find that they're not as scary as you imagined.",
+                visualElement: .icon("shield.fill", .orange)
+            ),
+            CoursePage(
+                title: "Facing Your Fears",
+                content: "The best way to overcome fear is to face it gradually. Start with small steps that feel manageable. As you become more comfortable, you can take bigger steps.\n\nRemember that feeling afraid doesn't mean you shouldn't do something. Courage is feeling afraid and doing it anyway.",
+                visualElement: .stepList([
+                    "Identify what you're afraid of",
+                    "Start with small, manageable steps",
+                    "Practice regularly",
+                    "Celebrate your progress",
+                    "Be patient with yourself"
+                ])
+            ),
+            CoursePage(
+                title: "Building Courage",
+                content: "Courage is a skill that you can develop through practice. Every time you face a fear, you're building your courage muscle. Remember that everyone feels afraid sometimes - what matters is how you respond to that fear.",
+                visualElement: .tipBox("Courage is not the absence of fear, but the willingness to act despite it.", .green),
+                isLastPage: true
+            )
+        ],
+        category: "Personal Growth",
+        isPremium: true
+    ),
+    
+    // Personal Values Course (Premium)
+    CourseContent(
+        courseId: "personal_values",
+        title: "Personal Values",
+        icon: "diamond.fill",
+        duration: "2 min",
+        pages: [
+            CoursePage(
+                title: "What Are Personal Values?",
+                content: "Personal values are the principles and beliefs that are most important to you. They guide your decisions, shape your behavior, and give your life meaning and direction. When you live according to your values, you feel more authentic and fulfilled.\n\nValues are different from goals - they're ongoing principles rather than specific achievements. Examples include honesty, creativity, family, learning, or helping others.",
+                visualElement: .icon("diamond.fill", .purple)
+            ),
+            CoursePage(
+                title: "Living Your Values",
+                content: "Take time to reflect on what's truly important to you. What principles do you want to guide your life? Once you identify your values, look for ways to express them in your daily actions and decisions.\n\nRemember that living your values is a practice, not a perfect state. Every day offers new opportunities to align your actions with what matters most to you.",
+                visualElement: .tipBox("Your values are your compass. Let them guide your decisions and actions.", .blue),
+                isLastPage: true
+            )
+        ],
+        category: "Personal Growth",
+        isPremium: true
+    ),
+    
+    // Sleep Anxiety Course (Premium)
+    CourseContent(
+        courseId: "sleep_anxiety",
+        title: "Sleep Anxiety",
+        icon: "brain.head.profile",
+        duration: "3 min",
+        pages: [
+            CoursePage(
+                title: "Understanding Sleep Anxiety",
+                content: "Sleep anxiety is when you worry about not being able to sleep, which ironically makes it harder to fall asleep. This creates a cycle where anxiety about sleep leads to more sleep problems, which leads to more anxiety.\n\nSleep anxiety is common and treatable. The key is to break the cycle by changing your relationship with sleep and developing healthier sleep habits.",
+                visualElement: .icon("brain.head.profile", .blue),
+                tips: [
+                    "Sleep anxiety is common and treatable",
+                    "Worrying about sleep makes it harder to sleep",
+                    "Breaking the cycle is possible"
+                ]
+            ),
+            CoursePage(
+                title: "Breaking the Anxiety Cycle",
+                content: "When you can't sleep, try to accept it rather than fighting it. The more you worry about not sleeping, the harder it becomes. Instead, focus on resting your body and mind, even if you're not sleeping.\n\nPractice relaxation techniques like deep breathing or progressive muscle relaxation. These can help calm your mind and body, making sleep more likely.",
+                visualElement: .stepList([
+                    "Accept that you're awake",
+                    "Focus on resting, not sleeping",
+                    "Practice relaxation techniques",
+                    "Get up if you're frustrated",
+                    "Return to bed when sleepy"
+                ])
+            ),
+            CoursePage(
+                title: "Creating a Calm Mindset",
+                content: "Develop a positive relationship with your bed and sleep. Your bed should be associated with rest and relaxation, not anxiety and frustration.\n\nRemember that occasional poor sleep is normal and doesn't mean you have a sleep disorder. Your body is resilient and can handle occasional sleep disturbances.",
+                visualElement: .tipBox("Your bed should be a sanctuary for rest, not a battleground for sleep anxiety.", .green),
+                isLastPage: true
+            )
+        ],
+        category: "Sleep & Rest",
+        isPremium: true
+    ),
+    
+    // Evening Routine Course (Premium)
+    CourseContent(
+        courseId: "evening_routine",
+        title: "Evening Routine",
+        icon: "sunset.fill",
+        duration: "4 min",
+        pages: [
+            CoursePage(
+                title: "The Power of Evening Routines",
+                content: "A consistent evening routine helps signal to your body and mind that it's time to wind down and prepare for sleep. It creates a smooth transition from the busyness of the day to the peace of the night.\n\nEvening routines don't need to be complicated or time-consuming. Simple, consistent actions can make a big difference in how well you sleep and how you feel the next day.",
+                visualElement: .icon("sunset.fill", .orange),
+                tips: [
+                    "Evening routines signal time to wind down",
+                    "Consistency is more important than complexity",
+                    "Start with small, manageable changes"
+                ]
+            ),
+            CoursePage(
+                title: "Building Your Evening Routine",
+                content: "Start your evening routine about an hour before bed. Include activities that help you relax, such as reading, gentle stretching, or listening to calming music. Avoid stimulating activities like work, intense exercise, or screen time.\n\nCreate a routine that feels good to you. It might include journaling, meditation, or simply sitting quietly for a few minutes.",
+                visualElement: .stepList([
+                    "Start 1 hour before bed",
+                    "Avoid screens and work",
+                    "Include relaxing activities",
+                    "Create a consistent schedule",
+                    "Be patient with the process"
+                ])
+            ),
+            CoursePage(
+                title: "Making It Stick",
+                content: "Start with just one or two elements and gradually build your routine. Be consistent, even on weekends. Remember that it takes time to establish new habits.\n\nIf you miss a night or your routine doesn't go as planned, don't give up. Simply return to it the next night. Progress, not perfection, is the goal.",
+                visualElement: .tipBox("Consistency beats perfection. A simple routine done regularly is better than a complex one done occasionally.", .blue),
+                isLastPage: true
+            )
+        ],
+        category: "Sleep & Rest",
+        isPremium: true
+    ),
+    
+    // Emotional Awareness Course (Premium)
+    CourseContent(
+        courseId: "emotional_awareness",
+        title: "Emotional Awareness",
+        icon: "heart.circle.fill",
+        duration: "3 min",
+        pages: [
+            CoursePage(
+                title: "Understanding Your Emotions",
+                content: "Emotional awareness is the ability to recognize, understand, and accept your emotions as they arise. It's about being in touch with how you're feeling and understanding what those feelings are telling you.\n\nEmotions are valuable sources of information about your needs, values, and experiences. When you're more aware of your emotions, you can respond to them more skillfully and make better decisions.",
+                visualElement: .icon("heart.circle.fill", .pink),
+                tips: [
+                    "Emotions are valuable information",
+                    "All emotions are valid",
+                    "Awareness is the first step to change"
+                ]
+            ),
+            CoursePage(
+                title: "Developing Emotional Awareness",
+                content: "Start by regularly checking in with yourself throughout the day. Ask yourself: 'How am I feeling right now?' Notice physical sensations, thoughts, and behaviors that might indicate your emotional state.\n\nPractice naming your emotions. Instead of just feeling 'bad,' try to identify specific emotions like sadness, frustration, anxiety, or disappointment.",
+                visualElement: .stepList([
+                    "Check in with yourself regularly",
+                    "Notice physical sensations",
+                    "Name your emotions specifically",
+                    "Accept your emotions without judgment",
+                    "Understand what your emotions are telling you"
+                ])
+            ),
+            CoursePage(
+                title: "Using Emotional Information",
+                content: "Once you're aware of your emotions, you can use that information to make better decisions and take care of yourself. If you're feeling anxious, you might need to take a break or talk to someone. If you're feeling sad, you might need comfort or support.\n\nRemember that emotions are temporary and will pass. You don't need to act on every emotion, but understanding them helps you respond more skillfully.",
+                visualElement: .tipBox("Your emotions are your inner guidance system. Learning to listen to them helps you take better care of yourself.", .green),
+                isLastPage: true
+            )
+        ],
+        category: "Emotional Health",
+        isPremium: true
+    ),
+    
+    // Managing Anger Course (Premium)
+    CourseContent(
+        courseId: "managing_anger",
+        title: "Managing Anger",
+        icon: "flame.fill",
+        duration: "4 min",
+        pages: [
+            CoursePage(
+                title: "Understanding Anger",
+                content: "Anger is a natural emotion that signals when something is wrong or unfair. It can motivate you to make changes and stand up for yourself. However, when anger becomes overwhelming or is expressed in harmful ways, it can cause problems in relationships and your well-being.\n\nLearning to manage anger doesn't mean never feeling angry. It means learning to recognize anger early and respond to it in healthy, constructive ways.",
+                visualElement: .icon("flame.fill", .red),
+                tips: [
+                    "Anger is a natural emotion",
+                    "It's okay to feel angry",
+                    "How you express anger matters"
+                ]
+            ),
+            CoursePage(
+                title: "Recognizing Anger Early",
+                content: "Anger often builds gradually. Learn to recognize the early warning signs, such as increased heart rate, muscle tension, or racing thoughts. The earlier you notice anger, the easier it is to manage.\n\nPay attention to your triggers - situations, people, or thoughts that tend to make you angry. Understanding your triggers helps you prepare for and manage them better.",
+                visualElement: .stepList([
+                    "Notice physical signs of anger",
+                    "Identify your anger triggers",
+                    "Recognize early warning signs",
+                    "Take a pause before reacting",
+                    "Choose how to respond"
+                ])
+            ),
+            CoursePage(
+                title: "Healthy Ways to Express Anger",
+                content: "When you're angry, take time to calm down before responding. Try deep breathing, counting to ten, or taking a short walk. Once you're calmer, you can express your feelings more constructively.\n\nUse 'I' statements to express your feelings without blaming others. For example, say 'I feel frustrated when...' instead of 'You always...'",
+                visualElement: .comparison("Unhealthy: 'You're so stupid!'", "Healthy: 'I feel frustrated when this happens'")
+            ),
+            CoursePage(
+                title: "Preventing Anger Build-up",
+                content: "Regular stress management and self-care can help prevent anger from building up. Make time for activities that help you relax and recharge.\n\nPractice communication skills to address issues before they become major problems. Learning to express your needs and concerns early can prevent anger from escalating.",
+                visualElement: .tipBox("Prevention is better than cure. Regular self-care and good communication can prevent many anger issues.", .blue),
+                isLastPage: true
+            )
+        ],
+        category: "Emotional Health",
+        isPremium: true
+    ),
+    
+    // Dealing with Sadness Course (Premium)
+    CourseContent(
+        courseId: "dealing_with_sadness",
+        title: "Dealing with Sadness",
+        icon: "cloud.rain.fill",
+        duration: "3 min",
+        pages: [
+            CoursePage(
+                title: "Understanding Sadness",
+                content: "Sadness is a natural response to loss, disappointment, or difficult circumstances. It's a normal part of the human experience and serves an important purpose in helping you process difficult emotions and experiences.\n\nSadness is different from depression, which is a more persistent and severe condition. Normal sadness comes and goes, while depression tends to be more constant and overwhelming.",
+                visualElement: .icon("cloud.rain.fill", .blue)
+            ),
+            CoursePage(
+                title: "Allowing Yourself to Feel Sad",
+                content: "It's okay to feel sad. Trying to suppress or ignore sadness often makes it worse. Instead, allow yourself to feel your emotions and give yourself permission to grieve or process what you're going through.\n\nPractice self-compassion when you're sad. Treat yourself with the same kindness you would offer to a friend who was struggling.",
+                visualElement: .stepList([
+                    "Allow yourself to feel sad",
+                    "Practice self-compassion",
+                    "Express your feelings",
+                    "Take care of yourself",
+                    "Seek support when needed"
+                ])
+            ),
+            CoursePage(
+                title: "Moving Through Sadness",
+                content: "While it's important to allow yourself to feel sad, you can also take steps to help yourself feel better. Engage in activities that bring you comfort or joy, even if you don't feel like it initially.\n\nRemember that sadness is temporary and will pass. Be patient with yourself and trust that you have the strength to get through difficult times.",
+                visualElement: .tipBox("Sadness is like a wave - it rises, peaks, and then recedes. You have the strength to ride it out.", .green),
+                isLastPage: true
+            )
+        ],
+        category: "Emotional Health",
+        isPremium: true
+    ),
+    
+    // Joy & Happiness Course (Premium)
+    CourseContent(
+        courseId: "joy_happiness",
+        title: "Joy & Happiness",
+        icon: "sun.max.fill",
+        duration: "2 min",
+        pages: [
+            CoursePage(
+                title: "Cultivating Joy",
+                content: "Joy and happiness are not just emotions that happen to you - they're also skills you can develop. While you can't control everything that happens to you, you can influence how you respond to life's experiences.\n\nHappiness often comes from simple things: meaningful connections, engaging activities, and a sense of purpose. It's about finding joy in the everyday moments of life.",
+                visualElement: .icon("sun.max.fill", .yellow)
+            ),
+            CoursePage(
+                title: "Finding Joy in Daily Life",
+                content: "Look for opportunities to experience joy in your daily routine. This might be savoring a good meal, appreciating nature, or connecting with loved ones. Practice gratitude for the good things in your life.\n\nRemember that happiness doesn't mean being happy all the time. It's about having more positive than negative experiences and being able to bounce back from difficulties.",
+                visualElement: .tipBox("Happiness is not a destination, but a way of traveling through life.", .orange),
+                isLastPage: true
+            )
+        ],
+        category: "Emotional Health",
+        isPremium: true
+    ),
+    
+    // Emotional Balance Course (Premium)
+    CourseContent(
+        courseId: "emotional_balance",
+        title: "Emotional Balance",
+        icon: "scalemass.fill",
+        duration: "4 min",
+        pages: [
+            CoursePage(
+                title: "What is Emotional Balance?",
+                content: "Emotional balance is the ability to experience and express emotions appropriately without being overwhelmed by them. It's about having emotional flexibility - being able to feel your emotions while still making thoughtful decisions.\n\nEmotional balance doesn't mean being calm all the time. It means being able to experience the full range of human emotions while maintaining your ability to function and make good choices.",
+                visualElement: .icon("scalemass.fill", .green),
+                tips: [
+                    "Emotional balance is a skill you can develop",
+                    "It's not about suppressing emotions",
+                    "Balance allows for emotional flexibility"
+                ]
+            ),
+            CoursePage(
+                title: "Developing Emotional Balance",
+                content: "Practice mindfulness to become more aware of your emotions without being controlled by them. Learn to observe your emotions as they arise, peak, and pass, like waves in the ocean.\n\nDevelop emotional regulation skills, such as deep breathing, self-soothing techniques, and cognitive reframing. These tools help you respond to emotions more skillfully.",
+                visualElement: .stepList([
+                    "Practice mindfulness",
+                    "Observe emotions without judgment",
+                    "Develop regulation skills",
+                    "Maintain perspective",
+                    "Practice self-compassion"
+                ])
+            ),
+            CoursePage(
+                title: "Maintaining Balance in Difficult Times",
+                content: "During challenging periods, it's especially important to practice self-care and maintain routines that support your emotional well-being. Don't be afraid to seek support from others when you need it.\n\nRemember that emotional balance is a journey, not a destination. You'll have ups and downs, and that's normal. What matters is your overall ability to navigate life's challenges with resilience.",
+                visualElement: .tipBox("Emotional balance is like riding a bike - you may wobble, but you can always find your center again.", .blue),
+                isLastPage: true
+            )
+        ],
+        category: "Emotional Health",
+        isPremium: true
+    ),
+    
+    // Work-Life Balance Course (Premium)
+    CourseContent(
+        courseId: "work_life_balance",
+        title: "Work-Life Balance",
+        icon: "briefcase.fill",
+        duration: "4 min",
+        pages: [
+            CoursePage(
+                title: "Understanding Work-Life Balance",
+                content: "Work-life balance is about creating harmony between your professional responsibilities and your personal life. It's not about spending equal time on work and life, but about feeling satisfied and fulfilled in both areas.\n\nGood work-life balance helps prevent burnout, improves your relationships, and allows you to pursue activities that bring you joy and meaning outside of work.",
+                visualElement: .icon("briefcase.fill", .teal),
+                tips: [
+                    "Balance is personal - what works for you may differ",
+                    "It's about quality, not just quantity of time",
+                    "Regular check-ins help maintain balance"
+                ]
+            ),
+            CoursePage(
+                title: "Setting Boundaries",
+                content: "Clear boundaries are essential for work-life balance. This might mean setting specific work hours, not checking email after a certain time, or learning to say no to additional responsibilities when you're already stretched thin.\n\nCommunicate your boundaries clearly to colleagues and family members. Remember that setting boundaries is not selfish - it's necessary for your well-being and effectiveness.",
+                visualElement: .stepList([
+                    "Define your work hours",
+                    "Set technology boundaries",
+                    "Learn to say no",
+                    "Communicate your boundaries",
+                    "Stick to your limits"
+                ])
+            ),
+            CoursePage(
+                title: "Making Time for What Matters",
+                content: "Identify what's most important to you outside of work - relationships, hobbies, health, or personal growth. Schedule time for these activities and treat them as non-negotiable appointments.\n\nRemember that taking care of yourself is not a luxury - it's essential for your long-term success and happiness.",
+                visualElement: .comparison("Imbalanced: 'I'll exercise when I have time'", "Balanced: 'I exercise three times a week'")
+            ),
+            CoursePage(
+                title: "Maintaining Your Balance",
+                content: "Work-life balance requires ongoing attention and adjustment. Regularly assess how you're feeling and make changes as needed. Be flexible - some weeks may require more work focus, while others may allow more personal time.\n\nRemember that perfect balance is a myth. Aim for a sustainable rhythm that works for you and your circumstances.",
+                visualElement: .tipBox("Work-life balance is a journey, not a destination. Regular check-ins and adjustments keep you on track.", .green),
+                isLastPage: true
+            )
+        ],
+        category: "Work & Career",
+        isPremium: true
+    ),
+    
+    // Dealing with Burnout Course (Premium)
+    CourseContent(
+        courseId: "dealing_with_burnout",
+        title: "Dealing with Burnout",
+        icon: "exclamationmark.triangle.fill",
+        duration: "3 min",
+        pages: [
+            CoursePage(
+                title: "Understanding Burnout",
+                content: "Burnout is a state of emotional, physical, and mental exhaustion caused by prolonged stress. It's more than just feeling tired - it's a feeling of being overwhelmed, emotionally drained, and unable to meet constant demands.\n\nBurnout can affect anyone, regardless of their job or lifestyle. Recognizing the signs early is crucial for preventing it from becoming severe.",
+                visualElement: .icon("exclamationmark.triangle.fill", .orange)
+            ),
+            CoursePage(
+                title: "Recognizing Burnout Signs",
+                content: "Common signs of burnout include feeling exhausted all the time, becoming cynical or detached from your work, feeling ineffective or like you're not accomplishing anything, and experiencing physical symptoms like headaches or stomach problems.\n\nIf you're experiencing these symptoms, it's important to take them seriously and take steps to address them.",
+                visualElement: .stepList([
+                    "Constant exhaustion",
+                    "Cynicism or detachment",
+                    "Feeling ineffective",
+                    "Physical symptoms",
+                    "Difficulty concentrating"
+                ])
+            ),
+            CoursePage(
+                title: "Recovering from Burnout",
+                content: "Recovery from burnout starts with acknowledging the problem and giving yourself permission to rest. Take time off if possible, and focus on activities that help you recharge.\n\nSeek support from friends, family, or a mental health professional. Remember that recovery takes time - be patient with yourself.",
+                visualElement: .tipBox("Recovery from burnout is not a sign of weakness - it's a necessary step toward sustainable well-being.", .green),
+                isLastPage: true
+            )
+        ],
+        category: "Work & Career",
+        isPremium: true
+    ),
+    
+    // Productivity Tips Course (Premium)
+    CourseContent(
+        courseId: "productivity_tips",
+        title: "Productivity Tips",
+        icon: "bolt.fill",
+        duration: "3 min",
+        pages: [
+            CoursePage(
+                title: "Working Smarter, Not Harder",
+                content: "Productivity is not about working longer hours - it's about working more effectively. By understanding how you work best and using proven strategies, you can accomplish more in less time while feeling less stressed.\n\nGood productivity habits can help you feel more in control of your time and reduce the feeling of being constantly behind.",
+                visualElement: .icon("bolt.fill", .yellow)
+            ),
+            CoursePage(
+                title: "Key Productivity Strategies",
+                content: "Start with the most important tasks first, when your energy is highest. Break large projects into smaller, manageable steps. Eliminate distractions and create a focused work environment.\n\nTake regular breaks to maintain your energy and focus. Remember that productivity is about sustainable performance, not pushing yourself to exhaustion.",
+                visualElement: .stepList([
+                    "Prioritize important tasks",
+                    "Break projects into steps",
+                    "Eliminate distractions",
+                    "Take regular breaks",
+                    "Review and adjust regularly"
+                ])
+            ),
+            CoursePage(
+                title: "Building Productive Habits",
+                content: "Consistency is key to productivity. Start with one or two strategies and practice them regularly until they become habits. Be patient with yourself - building new habits takes time.\n\nRemember that productivity is personal. What works for one person may not work for another. Experiment to find what works best for you.",
+                visualElement: .tipBox("Productivity is about progress, not perfection. Small improvements add up over time.", .blue),
+                isLastPage: true
+            )
+        ],
+        category: "Work & Career",
+        isPremium: true
+    ),
+    
+    // Workplace Stress Course (Premium)
+    CourseContent(
+        courseId: "workplace_stress",
+        title: "Workplace Stress",
+        icon: "building.2.fill",
+        duration: "4 min",
+        pages: [
+            CoursePage(
+                title: "Understanding Workplace Stress",
+                content: "Workplace stress is a common experience that can come from high demands, lack of control, poor relationships, or unclear expectations. While some stress can be motivating, chronic workplace stress can harm your health and well-being.\n\nRecognizing the sources of your workplace stress is the first step in managing it effectively.",
+                visualElement: .icon("building.2.fill", .gray),
+                tips: [
+                    "Some stress is normal and motivating",
+                    "Chronic stress needs attention",
+                    "You have more control than you think"
+                ]
+            ),
+            CoursePage(
+                title: "Identifying Stress Sources",
+                content: "Common sources of workplace stress include unrealistic deadlines, unclear expectations, poor communication, lack of support, and feeling undervalued. Take time to identify what's causing your stress.\n\nOnce you understand the sources, you can develop strategies to address them or cope with them more effectively.",
+                visualElement: .stepList([
+                    "Unrealistic deadlines",
+                    "Unclear expectations",
+                    "Poor communication",
+                    "Lack of support",
+                    "Feeling undervalued"
+                ])
+            ),
+            CoursePage(
+                title: "Managing Workplace Stress",
+                content: "Develop healthy coping strategies like taking regular breaks, practicing stress management techniques, and maintaining clear boundaries between work and personal life.\n\nDon't be afraid to communicate with your supervisor about workload or other concerns. Many workplace stress issues can be resolved through open communication.",
+                visualElement: .comparison("Unhealthy: Working through lunch every day", "Healthy: Taking regular breaks and setting boundaries")
+            ),
+            CoursePage(
+                title: "Creating a Healthier Work Environment",
+                content: "While you can't control everything about your workplace, you can influence your own experience. Focus on what you can control, such as your attitude, work habits, and stress management strategies.\n\nBuild supportive relationships with colleagues and seek out opportunities for growth and development that align with your interests and strengths.",
+                visualElement: .tipBox("You have more influence over your workplace experience than you might think. Focus on what you can control.", .green),
+                isLastPage: true
+            )
+        ],
+        category: "Work & Career",
+        isPremium: true
+    ),
+    
+    // Career Growth Course (Premium)
+    CourseContent(
+        courseId: "career_growth",
+        title: "Career Growth",
+        icon: "chart.line.uptrend.xyaxis",
+        duration: "3 min",
+        pages: [
+            CoursePage(
+                title: "Planning Your Career Path",
+                content: "Career growth is about intentionally developing your skills, knowledge, and experience to advance in your chosen field. It requires self-reflection, goal setting, and continuous learning.\n\nYour career path doesn't have to follow a straight line. Many successful careers involve twists, turns, and unexpected opportunities.",
+                visualElement: .icon("chart.line.uptrend.xyaxis", .blue)
+            ),
+            CoursePage(
+                title: "Building Your Skills",
+                content: "Identify the skills that are most valuable in your field and focus on developing them. This might involve formal education, on-the-job learning, or self-directed study.\n\nDon't forget about soft skills like communication, leadership, and problem-solving. These are often just as important as technical skills for career advancement.",
+                visualElement: .stepList([
+                    "Identify valuable skills",
+                    "Seek learning opportunities",
+                    "Practice regularly",
+                    "Get feedback",
+                    "Stay current in your field"
+                ])
+            ),
+            CoursePage(
+                title: "Navigating Career Transitions",
+                content: "Career growth often involves transitions - new roles, new companies, or even new industries. Approach these transitions with curiosity and openness to learning.\n\nRemember that career growth is a marathon, not a sprint. Focus on building a sustainable career that aligns with your values and interests.",
+                visualElement: .tipBox("Career growth is about continuous learning and adaptation. Stay curious and open to new opportunities.", .green),
+                isLastPage: true
+            )
+        ],
+        category: "Work & Career",
+        isPremium: true
+    ),
+    
+    // Social Anxiety Course (Premium)
+    CourseContent(
+        courseId: "social_anxiety",
+        title: "Social Anxiety",
+        icon: "person.3.fill",
+        duration: "4 min",
+        pages: [
+            CoursePage(
+                title: "Understanding Social Anxiety",
+                content: "Social anxiety is the fear of being judged, embarrassed, or humiliated in social situations. It's more than just shyness - it's an intense fear that can interfere with daily life and relationships.\n\nSocial anxiety is common and treatable. Many people experience it to some degree, and there are effective strategies for managing it.",
+                visualElement: .icon("person.3.fill", .purple),
+                tips: [
+                    "Social anxiety is common and treatable",
+                    "It's more than just shyness",
+                    "Small steps can lead to big improvements"
+                ]
+            ),
+            CoursePage(
+                title: "Recognizing Social Anxiety",
+                content: "Common symptoms include intense fear of social situations, physical symptoms like sweating or rapid heartbeat, avoiding social situations, and excessive worry about what others think.\n\nUnderstanding your specific triggers and symptoms is the first step in managing social anxiety effectively.",
+                visualElement: .stepList([
+                    "Fear of judgment",
+                    "Physical symptoms",
+                    "Avoiding social situations",
+                    "Excessive worry",
+                    "Difficulty speaking"
+                ])
+            ),
+            CoursePage(
+                title: "Managing Social Anxiety",
+                content: "Start with small, manageable social situations and gradually work up to more challenging ones. Practice relaxation techniques before social events. Focus on the present moment rather than worrying about what might happen.\n\nRemember that most people are focused on themselves, not on judging you. Challenge negative thoughts about how others perceive you.",
+                visualElement: .comparison("Anxious: 'Everyone is judging me'", "Balanced: 'Most people are focused on themselves'")
+            ),
+            CoursePage(
+                title: "Building Social Confidence",
+                content: "Practice social skills in low-pressure situations. Join groups or activities that interest you, where you can meet people with similar interests. Remember that social skills improve with practice.\n\nBe patient with yourself. Overcoming social anxiety takes time and practice. Celebrate small victories and don't be discouraged by setbacks.",
+                visualElement: .tipBox("Social confidence is built through practice. Start small and be patient with your progress.", .green),
+                isLastPage: true
+            )
+        ],
+        category: "Social Skills",
+        isPremium: true
+    ),
+    
+    // Making Friends Course (Premium)
+    CourseContent(
+        courseId: "making_friends",
+        title: "Making Friends",
+        icon: "person.badge.plus.fill",
+        duration: "3 min",
+        pages: [
+            CoursePage(
+                title: "The Art of Making Friends",
+                content: "Making friends as an adult can feel challenging, but it's a skill that can be learned and practiced. Friendships provide support, connection, and joy, making them essential for our well-being.\n\nGood friendships are built on mutual interest, shared experiences, and genuine care for each other. They take time to develop and require ongoing effort to maintain.",
+                visualElement: .icon("person.badge.plus.fill", .blue)
+            ),
+            CoursePage(
+                title: "Finding Opportunities to Connect",
+                content: "Look for opportunities to meet people with similar interests. Join clubs, take classes, volunteer, or participate in community events. Be open to meeting people in unexpected places.\n\nRemember that most people are also looking for connection. Don't be afraid to initiate conversations or suggest getting together.",
+                visualElement: .stepList([
+                    "Join clubs or groups",
+                    "Take classes or workshops",
+                    "Volunteer in your community",
+                    "Attend local events",
+                    "Be open to new experiences"
+                ])
+            ),
+            CoursePage(
+                title: "Building and Maintaining Friendships",
+                content: "Show genuine interest in others by asking questions and listening actively. Be reliable and follow through on plans. Share your own experiences and be vulnerable when appropriate.\n\nRemember that friendships require effort from both people. Be patient and don't take it personally if some connections don't develop into close friendships.",
+                visualElement: .tipBox("Friendships are built on genuine interest, reliability, and mutual care. Be patient with the process.", .green),
+                isLastPage: true
+            )
+        ],
+        category: "Social Skills",
+        isPremium: true
+    ),
+    
+    // Public Speaking Course (Premium)
+    CourseContent(
+        courseId: "public_speaking",
+        title: "Public Speaking",
+        icon: "megaphone.fill",
+        duration: "5 min",
+        pages: [
+            CoursePage(
+                title: "Overcoming Public Speaking Fear",
+                content: "Fear of public speaking is one of the most common fears, affecting many people. However, public speaking is a skill that can be learned and improved with practice.\n\nThe key is to start small and gradually build your confidence. Remember that most people in your audience want you to succeed.",
+                visualElement: .icon("megaphone.fill", .red),
+                tips: [
+                    "Public speaking is a learnable skill",
+                    "Most people want you to succeed",
+                    "Practice makes progress"
+                ]
+            ),
+            CoursePage(
+                title: "Preparing for Success",
+                content: "Know your material well - this builds confidence. Practice your presentation multiple times, preferably in front of a mirror or with a friend. Prepare for potential questions or challenges.\n\nFocus on your message and your audience, not on yourself. Remember that you're sharing valuable information or insights with people who want to hear it.",
+                visualElement: .stepList([
+                    "Know your material thoroughly",
+                    "Practice multiple times",
+                    "Prepare for questions",
+                    "Focus on your message",
+                    "Visualize success"
+                ])
+            ),
+            CoursePage(
+                title: "Managing Nervousness",
+                content: "Some nervousness is normal and can actually improve your performance. Practice deep breathing and relaxation techniques before speaking. Remember that your audience can't see your nervousness as much as you think they can.\n\nStart with smaller groups and gradually work up to larger audiences. Each successful experience builds your confidence for the next one.",
+                visualElement: .comparison("Fearful: 'I'm going to mess up'", "Confident: 'I'm prepared and ready to share'")
+            ),
+            CoursePage(
+                title: "Delivering with Impact",
+                content: "Speak clearly and at a good pace. Make eye contact with your audience and use gestures naturally. Vary your voice tone and volume to keep people engaged.\n\nRemember that public speaking is about connecting with your audience and sharing your message effectively. Focus on the value you're providing rather than on your performance.",
+                visualElement: .tipBox("Great public speaking is about connecting with your audience and sharing your message effectively.", .blue),
+                isLastPage: true
+            )
+        ],
+        category: "Social Skills",
+        isPremium: true
+    ),
+    
+    // Social Confidence Course (Premium)
+    CourseContent(
+        courseId: "social_confidence",
+        title: "Social Confidence",
+        icon: "person.fill.checkmark",
+        duration: "3 min",
+        pages: [
+            CoursePage(
+                title: "Building Social Confidence",
+                content: "Social confidence is the ability to feel comfortable and authentic in social situations. It's not about being the most outgoing person in the room - it's about being comfortable with who you are and how you interact with others.\n\nSocial confidence is built through experience and practice. Every social interaction is an opportunity to develop this skill.",
+                visualElement: .icon("person.fill.checkmark", .green)
+            ),
+            CoursePage(
+                title: "Developing Authentic Confidence",
+                content: "Focus on being genuine rather than trying to impress others. Share your interests and experiences authentically. Remember that you don't need to be perfect to be likable.\n\nPractice active listening and show genuine interest in others. This not only helps you connect with people but also takes the focus off your own nervousness.",
+                visualElement: .stepList([
+                    "Be genuine and authentic",
+                    "Share your interests",
+                    "Practice active listening",
+                    "Show interest in others",
+                    "Accept that you don't need to be perfect"
+                ])
+            ),
+            CoursePage(
+                title: "Maintaining Your Confidence",
+                content: "Remember that everyone has moments of social awkwardness or uncertainty. Don't let one bad experience define your social confidence. Learn from each interaction and keep practicing.\n\nSurround yourself with supportive people who appreciate you for who you are. Their positive feedback can help reinforce your social confidence.",
+                visualElement: .tipBox("Social confidence grows with practice. Every interaction is an opportunity to develop this skill.", .green),
+                isLastPage: true
+            )
+        ],
+        category: "Social Skills",
+        isPremium: true
+    ),
+    
+    // Group Dynamics Course (Premium)
+    CourseContent(
+        courseId: "group_dynamics",
+        title: "Group Dynamics",
+        icon: "person.2.circle.fill",
+        duration: "4 min",
+        pages: [
+            CoursePage(
+                title: "Understanding Group Dynamics",
+                content: "Group dynamics are the patterns of behavior and interaction that occur when people work or socialize together. Understanding these dynamics can help you navigate group situations more effectively.\n\nEvery group has its own culture, roles, and communication patterns. Learning to read and work with these dynamics can improve your group experiences.",
+                visualElement: .icon("person.2.circle.fill", .cyan),
+                tips: [
+                    "Every group has its own dynamics",
+                    "Understanding dynamics improves participation",
+                    "You can influence group dynamics positively"
+                ]
+            ),
+            CoursePage(
+                title: "Navigating Group Roles",
+                content: "Groups often have informal roles like leaders, mediators, supporters, and challengers. Understanding these roles can help you contribute effectively to the group.\n\nBe flexible about the role you play. Sometimes you might need to lead, other times to support. The key is to contribute in a way that helps the group achieve its goals.",
+                visualElement: .stepList([
+                    "Observe group roles",
+                    "Be flexible in your role",
+                    "Support group goals",
+                    "Contribute constructively",
+                    "Respect different perspectives"
+                ])
+            ),
+            CoursePage(
+                title: "Building Positive Group Dynamics",
+                content: "Encourage open communication and respect for different viewpoints. Help create an environment where everyone feels heard and valued. Address conflicts constructively when they arise.\n\nRemember that you have the power to influence group dynamics positively through your own behavior and communication.",
+                visualElement: .comparison("Negative: Dominating conversations", "Positive: Encouraging others to participate")
+            ),
+            CoursePage(
+                title: "Thriving in Group Settings",
+                content: "Focus on contributing value to the group while also learning from others. Be open to different perspectives and approaches. Remember that group success often depends on collaboration and mutual support.\n\nPractice active listening and show appreciation for others' contributions. This creates a positive environment where everyone can thrive.",
+                visualElement: .tipBox("Positive group dynamics benefit everyone. Your contributions can make a difference.", .blue),
+                isLastPage: true
+            )
+        ],
+        category: "Social Skills",
+        isPremium: true
+    ),
+    
+    // Building Good Habits Course (Premium)
+    CourseContent(
+        courseId: "building_good_habits",
+        title: "Building Good Habits",
+        icon: "checkmark.circle.fill",
+        duration: "4 min",
+        pages: [
+            CoursePage(
+                title: "The Power of Habits",
+                content: "Habits are automatic behaviors that shape your daily life. Good habits can improve your health, productivity, and well-being, while bad habits can hold you back. Understanding how habits work is the first step to building better ones.\n\nHabits are formed through repetition and reinforcement. The more you practice a behavior, the more automatic it becomes.",
+                visualElement: .icon("checkmark.circle.fill", .green),
+                tips: [
+                    "Habits are formed through repetition",
+                    "Start small and build gradually",
+                    "Consistency is more important than perfection"
+                ]
+            ),
+            CoursePage(
+                title: "The Habit Loop",
+                content: "Every habit has three parts: a cue (trigger), a routine (behavior), and a reward. Understanding this loop helps you build good habits and break bad ones.\n\nTo build a good habit, identify a clear cue, make the routine easy to do, and ensure there's a satisfying reward. To break a bad habit, disrupt the loop by changing the cue, routine, or reward.",
+                visualElement: .stepList([
+                    "Cue: What triggers the habit?",
+                    "Routine: What is the behavior?",
+                    "Reward: What is the benefit?",
+                    "Identify your habit loops",
+                    "Modify the loop intentionally"
+                ])
+            ),
+            CoursePage(
+                title: "Building New Habits",
+                content: "Start with small, manageable changes. Make your new habit easy to do by reducing friction. Stack your new habit onto an existing one. For example, if you want to meditate, do it right after brushing your teeth.\n\nTrack your progress and celebrate small wins. Remember that building habits takes time - be patient and consistent.",
+                visualElement: .comparison("Overwhelming: 'I'll exercise for an hour every day'", "Manageable: 'I'll do 10 push-ups every morning'")
+            ),
+            CoursePage(
+                title: "Maintaining Your Habits",
+                content: "Habits are most vulnerable when you're stressed, tired, or busy. Plan for these challenging times by having backup strategies. Don't let one missed day derail your progress.\n\nRemember that building good habits is a lifelong process. Focus on progress, not perfection, and be kind to yourself when you slip up.",
+                visualElement: .tipBox("Habits are like compound interest - small daily actions add up to significant long-term results.", .blue),
+                isLastPage: true
+            )
+        ],
+        category: "Habits & Routines",
+        isPremium: true
+    ),
+    
+    // Breaking Bad Habits Course (Premium)
+    CourseContent(
+        courseId: "breaking_bad_habits",
+        title: "Breaking Bad Habits",
+        icon: "xmark.circle.fill",
+        duration: "3 min",
+        pages: [
+            CoursePage(
+                title: "Understanding Bad Habits",
+                content: "Bad habits are behaviors that don't serve your long-term goals or well-being. They often provide short-term relief or pleasure but have negative long-term consequences.\n\nBreaking bad habits is challenging but possible. The key is to understand why the habit exists and develop strategies to replace it with healthier alternatives.",
+                visualElement: .icon("xmark.circle.fill", .red)
+            ),
+            CoursePage(
+                title: "Identifying Your Triggers",
+                content: "Bad habits are often triggered by specific situations, emotions, or people. Understanding your triggers helps you prepare for and avoid them.\n\nKeep a habit journal to track when and why you engage in the habit. This information helps you develop targeted strategies for change.",
+                visualElement: .stepList([
+                    "Identify trigger situations",
+                    "Notice emotional triggers",
+                    "Track your habit patterns",
+                    "Understand the reward",
+                    "Plan alternative responses"
+                ])
+            ),
+            CoursePage(
+                title: "Replacing Bad Habits",
+                content: "Instead of just trying to stop a bad habit, replace it with a healthier alternative that provides similar benefits. For example, if you stress-eat, try stress-walking instead.\n\nBe patient with yourself. Breaking habits takes time and you may slip up occasionally. Focus on progress over perfection.",
+                visualElement: .tipBox("Replace bad habits with good ones rather than just trying to eliminate them.", .green),
+                isLastPage: true
+            )
+        ],
+        category: "Habits & Routines",
+        isPremium: true
+    ),
+    
+    // Habit Tracking Course (Premium)
+    CourseContent(
+        courseId: "habit_tracking",
+        title: "Habit Tracking",
+        icon: "chart.bar.fill",
+        duration: "2 min",
+        pages: [
+            CoursePage(
+                title: "Why Track Your Habits?",
+                content: "Habit tracking provides visual feedback on your progress and helps you stay motivated. It makes your habits more visible and helps you identify patterns in your behavior.\n\nTracking can be as simple as marking a calendar or using a habit tracking app. The key is finding a method that works for you and that you'll actually use consistently.",
+                visualElement: .icon("chart.bar.fill", .blue)
+            ),
+            CoursePage(
+                title: "Effective Tracking Methods",
+                content: "Choose a tracking method that's simple and sustainable. This might be a physical calendar, a digital app, or a simple checklist. Focus on tracking the habits that matter most to you.\n\nReview your tracking data regularly to identify patterns and adjust your strategies as needed.",
+                visualElement: .tipBox("The best tracking method is the one you'll actually use consistently.", .green),
+                isLastPage: true
+            )
+        ],
+        category: "Habits & Routines",
+        isPremium: true
+    ),
+    
+    // Morning Routines Course (Premium)
+    CourseContent(
+        courseId: "morning_routines",
+        title: "Morning Routines",
+        icon: "sunrise.fill",
+        duration: "3 min",
+        pages: [
+            CoursePage(
+                title: "The Power of Morning Routines",
+                content: "How you start your day sets the tone for everything that follows. A good morning routine can improve your mood, energy, and productivity throughout the day.\n\nMorning routines don't need to be elaborate or time-consuming. Simple, consistent actions can make a big difference in how you feel and perform.",
+                visualElement: .icon("sunrise.fill", .orange)
+            ),
+            CoursePage(
+                title: "Building Your Morning Routine",
+                content: "Start with activities that energize and ground you. This might include exercise, meditation, reading, or simply enjoying a quiet cup of coffee. Avoid checking email or social media first thing.\n\nKeep your routine simple and realistic. It's better to have a short routine you can stick to than an elaborate one you'll abandon.",
+                visualElement: .stepList([
+                    "Start with energizing activities",
+                    "Avoid screens first thing",
+                    "Include movement or exercise",
+                    "Practice mindfulness or meditation",
+                    "Eat a nourishing breakfast"
+                ])
+            ),
+            CoursePage(
+                title: "Making It Stick",
+                content: "Prepare for your morning routine the night before. Lay out your clothes, prepare your breakfast, or set up your meditation space. This reduces friction and makes it easier to follow through.\n\nBe flexible and adjust your routine as needed. What works for you may change over time, and that's okay.",
+                visualElement: .tipBox("A good morning routine is one that you look forward to and can maintain consistently.", .blue),
+                isLastPage: true
+            )
+        ],
+        category: "Habits & Routines",
+        isPremium: true
+    ),
+    
+    // Consistency Course (Premium)
+    CourseContent(
+        courseId: "consistency",
+        title: "Consistency",
+        icon: "repeat.circle.fill",
+        duration: "4 min",
+        pages: [
+            CoursePage(
+                title: "The Power of Consistency",
+                content: "Consistency is the key to achieving long-term goals and building lasting change. Small actions repeated consistently over time create much better results than occasional bursts of intense effort.\n\nConsistency builds momentum and creates positive feedback loops. The more consistent you are, the easier it becomes to maintain your habits and achieve your goals.",
+                visualElement: .icon("repeat.circle.fill", .purple),
+                tips: [
+                    "Consistency beats intensity",
+                    "Small daily actions add up",
+                    "Momentum builds over time"
+                ]
+            ),
+            CoursePage(
+                title: "Building Consistency",
+                content: "Start with small, manageable commitments that you can realistically maintain. Focus on showing up every day, even if it's just for a few minutes. Consistency is more important than duration.\n\nCreate systems and routines that support your consistency. Remove obstacles and make it as easy as possible to follow through on your commitments.",
+                visualElement: .stepList([
+                    "Start with small commitments",
+                    "Focus on daily consistency",
+                    "Create supportive systems",
+                    "Remove obstacles",
+                    "Track your progress"
+                ])
+            ),
+            CoursePage(
+                title: "Maintaining Consistency",
+                content: "Expect setbacks and plan for them. Don't let one missed day derail your progress. Instead, focus on getting back on track as quickly as possible.\n\nRemember that consistency is a skill that improves with practice. The more you practice being consistent, the easier it becomes.",
+                visualElement: .comparison("Inconsistent: 'I'll start again next week'", "Consistent: 'I'll get back on track today'")
+            ),
+            CoursePage(
+                title: "The Compound Effect",
+                content: "Consistency creates a compound effect - small improvements build on each other over time, leading to significant results. Trust the process and focus on the long-term benefits of your consistent efforts.\n\nCelebrate your consistency, not just your results. The discipline and commitment you're building are valuable skills that will serve you in all areas of life.",
+                visualElement: .tipBox("Consistency is the bridge between goals and accomplishments. Trust the process.", .green),
+                isLastPage: true
+            )
+        ],
+        category: "Habits & Routines",
+        isPremium: true
+    ),
+    
+    // Self-Care Basics Course (Premium)
+    CourseContent(
+        courseId: "self_care_basics",
+        title: "Self-Care Basics",
+        icon: "heart.fill",
+        duration: "3 min",
+        pages: [
+            CoursePage(
+                title: "What is Self-Care?",
+                content: "Self-care is the practice of taking care of your physical, mental, and emotional well-being. It's not selfish or indulgent - it's essential for your health and ability to care for others.\n\nSelf-care includes activities that nourish your body, mind, and spirit. It's about creating a sustainable lifestyle that supports your overall well-being.",
+                visualElement: .icon("heart.fill", .pink),
+                tips: [
+                    "Self-care is essential, not selfish",
+                    "It includes physical, mental, and emotional care",
+                    "Self-care looks different for everyone"
+                ]
+            ),
+            CoursePage(
+                title: "Types of Self-Care",
+                content: "Physical self-care includes exercise, nutrition, sleep, and medical care. Mental self-care involves activities that challenge and stimulate your mind. Emotional self-care includes practices that help you process and express your feelings.\n\nSpiritual self-care might involve meditation, prayer, or connecting with nature. Social self-care includes maintaining healthy relationships and boundaries.",
+                visualElement: .stepList([
+                    "Physical: exercise, nutrition, sleep",
+                    "Mental: learning, creativity, problem-solving",
+                    "Emotional: expression, processing, validation",
+                    "Spiritual: meditation, nature, reflection",
+                    "Social: relationships, boundaries, connection"
+                ])
+            ),
+            CoursePage(
+                title: "Making Self-Care a Priority",
+                content: "Schedule self-care activities just like you would any other important appointment. Start with small, manageable practices and gradually build your self-care routine.\n\nRemember that self-care is not a luxury - it's a necessity. Taking care of yourself enables you to be your best self and care for others effectively.",
+                visualElement: .tipBox("Self-care is not a one-time event, but a daily practice of honoring your needs.", .green),
+                isLastPage: true
+            )
+        ],
+        category: "Self-Care",
+        isPremium: true
+    ),
+    
+    // Physical Wellness Course (Premium)
+    CourseContent(
+        courseId: "physical_wellness",
+        title: "Physical Wellness",
+        icon: "figure.walk",
+        duration: "4 min",
+        pages: [
+            CoursePage(
+                title: "Understanding Physical Wellness",
+                content: "Physical wellness is about taking care of your body through movement, nutrition, rest, and preventive care. It's the foundation for overall health and well-being.\n\nPhysical wellness is not about achieving a perfect body or following strict diets. It's about creating sustainable habits that support your health and energy levels.",
+                visualElement: .icon("figure.walk", .green),
+                tips: [
+                    "Physical wellness supports overall health",
+                    "It's about sustainable habits",
+                    "Small changes make big differences"
+                ]
+            ),
+            CoursePage(
+                title: "Movement and Exercise",
+                content: "Regular movement is essential for physical wellness. This doesn't mean you need to run marathons - walking, dancing, gardening, or playing with children all count as physical activity.\n\nFind activities you enjoy and can maintain consistently. The best exercise is the one you'll actually do regularly.",
+                visualElement: .stepList([
+                    "Find activities you enjoy",
+                    "Start with small amounts",
+                    "Build gradually",
+                    "Be consistent",
+                    "Listen to your body"
+                ])
+            ),
+            CoursePage(
+                title: "Nutrition and Hydration",
+                content: "Eat a variety of whole foods that nourish your body. Stay hydrated by drinking water throughout the day. Pay attention to how different foods make you feel.\n\nRemember that nutrition is personal - what works for one person may not work for another. Focus on what makes you feel good and energized.",
+                visualElement: .comparison("Restrictive: 'I can't eat that'", "Nourishing: 'This food makes me feel good'")
+            ),
+            CoursePage(
+                title: "Rest and Recovery",
+                content: "Rest is just as important as activity for physical wellness. Get adequate sleep, take breaks when needed, and listen to your body's signals for rest.\n\nRemember that physical wellness is a journey, not a destination. Focus on progress and sustainability rather than perfection.",
+                visualElement: .tipBox("Physical wellness is about honoring your body's needs for movement, nourishment, and rest.", .blue),
+                isLastPage: true
+            )
+        ],
+        category: "Self-Care",
+        isPremium: true
+    ),
+    
+    // Mental Health Course (Premium)
+    CourseContent(
+        courseId: "mental_health",
+        title: "Mental Health",
+        icon: "brain.head.profile",
+        duration: "3 min",
+        pages: [
+            CoursePage(
+                title: "Understanding Mental Health",
+                content: "Mental health is just as important as physical health. It includes your emotional, psychological, and social well-being. Good mental health helps you cope with stress, relate to others, and make choices.\n\nMental health exists on a spectrum, and everyone experiences ups and downs. Taking care of your mental health is a sign of strength, not weakness.",
+                visualElement: .icon("brain.head.profile", .blue)
+            ),
+            CoursePage(
+                title: "Supporting Your Mental Health",
+                content: "Practice stress management techniques, maintain healthy relationships, and engage in activities that bring you joy and meaning. Don't hesitate to seek professional help when needed.\n\nRemember that mental health is an ongoing process. Regular self-care and awareness help maintain good mental health.",
+                visualElement: .stepList([
+                    "Practice stress management",
+                    "Maintain healthy relationships",
+                    "Engage in meaningful activities",
+                    "Seek help when needed",
+                    "Practice self-compassion"
+                ])
+            ),
+            CoursePage(
+                title: "Breaking the Stigma",
+                content: "Mental health challenges are common and treatable. Talking openly about mental health helps reduce stigma and encourages others to seek help when needed.\n\nRemember that seeking help for mental health is a sign of strength and self-awareness.",
+                visualElement: .tipBox("Mental health is health. Taking care of it is essential for your overall well-being.", .green),
+                isLastPage: true
+            )
+        ],
+        category: "Self-Care",
+        isPremium: true
+    ),
+    
+    // Spiritual Growth Course (Premium)
+    CourseContent(
+        courseId: "spiritual_growth",
+        title: "Spiritual Growth",
+        icon: "sparkles",
+        duration: "4 min",
+        pages: [
+            CoursePage(
+                title: "What is Spiritual Growth?",
+                content: "Spiritual growth is about developing a deeper understanding of yourself, your purpose, and your connection to something larger than yourself. It's not necessarily about religion - it can involve meditation, nature, art, or personal reflection.\n\nSpiritual growth helps you find meaning, purpose, and inner peace. It can provide comfort during difficult times and enhance your appreciation for life.",
+                visualElement: .icon("sparkles", .purple),
+                tips: [
+                    "Spiritual growth is personal and individual",
+                    "It's not necessarily religious",
+                    "It helps find meaning and purpose"
+                ]
+            ),
+            CoursePage(
+                title: "Exploring Your Spirituality",
+                content: "Spiritual growth can take many forms: meditation, prayer, spending time in nature, reading inspiring books, or engaging in creative activities. Explore different practices to find what resonates with you.\n\nRemember that spiritual growth is a personal journey. What works for one person may not work for another. Trust your intuition and follow what feels meaningful to you.",
+                visualElement: .stepList([
+                    "Explore different practices",
+                    "Spend time in nature",
+                    "Read inspiring materials",
+                    "Practice meditation or prayer",
+                    "Engage in creative activities"
+                ])
+            ),
+            CoursePage(
+                title: "Integrating Spirituality into Daily Life",
+                content: "Look for ways to bring spiritual practices into your daily routine. This might be a morning meditation, gratitude practice, or simply taking moments to appreciate the beauty around you.\n\nRemember that spiritual growth is a lifelong journey. Be patient with yourself and trust the process.",
+                visualElement: .tipBox("Spiritual growth is about finding your own path to meaning and connection.", .blue),
+                isLastPage: true
+            )
+        ],
+        category: "Self-Care",
+        isPremium: true
+    ),
+    
+    // Creative Expression Course (Premium)
+    CourseContent(
+        courseId: "creative_expression",
+        title: "Creative Expression",
+        icon: "paintbrush.fill",
+        duration: "3 min",
+        pages: [
+            CoursePage(
+                title: "The Power of Creative Expression",
+                content: "Creative expression is a powerful way to process emotions, reduce stress, and connect with your authentic self. It doesn't require artistic talent - it's about expressing yourself in whatever way feels natural to you.\n\nCreative activities can include writing, drawing, music, dance, cooking, gardening, or any activity that allows you to express yourself and create something meaningful.",
+                visualElement: .icon("paintbrush.fill", .orange)
+            ),
+            CoursePage(
+                title: "Finding Your Creative Outlet",
+                content: "Explore different forms of creative expression to find what resonates with you. Don't worry about being 'good' at it - focus on the process and how it makes you feel.\n\nRemember that creativity is a skill that can be developed with practice. Start with simple activities and gradually explore more complex forms of expression.",
+                visualElement: .stepList([
+                    "Explore different activities",
+                    "Focus on the process, not the product",
+                    "Practice regularly",
+                    "Don't judge your creativity",
+                    "Share your creations when comfortable"
+                ])
+            ),
+            CoursePage(
+                title: "Making Creativity a Habit",
+                content: "Set aside regular time for creative activities, even if it's just a few minutes each day. Create a space that inspires you and remove obstacles that might prevent you from creating.\n\nRemember that creative expression is a form of self-care. It helps you process emotions, reduce stress, and connect with your authentic self.",
+                visualElement: .tipBox("Creativity is not about talent - it's about courage to express yourself authentically.", .green),
+                isLastPage: true
+            )
+        ],
+        category: "Self-Care",
+        isPremium: true
     )
 ]
 
