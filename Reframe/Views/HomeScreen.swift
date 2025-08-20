@@ -39,6 +39,10 @@ struct HomeScreen: View {
                             .padding(.horizontal)
                     }
 
+                    // Weekly Mood View
+                    WeeklyMoodView()
+                        .padding(.horizontal)
+
                     // Option Buttons
                     HStack(spacing: 16) {
                         HomeOptionButton(
@@ -115,6 +119,10 @@ struct HomeScreen: View {
                         }
                         .padding(.horizontal)
                     }
+
+                    // Today's Plan Section
+                    TodaysPlanView()
+                        .padding(.horizontal)
 
                     // Latest Reframe
                     if let latestReframe = viewModel.reframes.first(where: { $0.category != "Reflection" }) {

@@ -2064,4 +2064,48 @@ func getAllCourses() -> [CourseContent] {
 
 func getCoursesByCategory(_ category: String) -> [CourseContent] {
     return courseContentData.filter { $0.category == category }
+}
+
+// MARK: - Course Favorites Service
+
+class CourseFavoritesService: ObservableObject {
+    static let shared = CourseFavoritesService()
+    
+    @Published var favoriteCourseIds: Set<String> = []
+    
+    private let favoritesKey = "favoriteCourseIds"
+    
+    private init() {
+        loadFavorites()
+    }
+    
+    func toggleFavorite(courseId: String) {
+        if favoriteCourseIds.contains(courseId) {
+            favoriteCourseIds.remove(courseId)
+        } else {
+            favoriteCourseIds.insert(courseId)
+        }
+        saveFavorites()
+    }
+    
+    func isFavorite(courseId: String) -> Bool {
+        return favoriteCourseIds.contains(courseId)
+    }
+    
+    func getFavoriteCourses() -> [CourseContent] {
+        return courseContentData.filter { favoriteCourseIds.contains($0.courseId) }
+    }
+    
+    private func loadFavorites() {
+        if let data = UserDefaults.standard.data(forKey: favoritesKey),
+           let favorites = try? JSONDecoder().decode(Set<String>.self, from: data) {
+            favoriteCourseIds = favorites
+        }
+    }
+    
+    private func saveFavorites() {
+        if let data = try? JSONEncoder().encode(favoriteCourseIds) {
+            UserDefaults.standard.set(data, forKey: favoritesKey)
+        }
+    }
 } 

@@ -9,6 +9,9 @@ struct DiscoverScreen: View {
     @State private var showDailyBoost = false
     @State private var showCourses = false
     @State private var animateCards = false
+    @StateObject private var favoritesService = CourseFavoritesService.shared
+    @State private var showCourseViewer = false
+    @State private var selectedCourse: Course?
     
     var body: some View {
         ZStack {
@@ -96,6 +99,63 @@ struct DiscoverScreen: View {
                         }
                         .padding(.horizontal)
                     }
+                    
+                    // Favorites Section
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Favorites")
+                            .font(.system(size: 22, weight: .semibold, design: .default))
+                            .foregroundColor(themeManager.colors.text)
+                            .padding(.horizontal)
+                        
+                        let favoriteCourses = favoritesService.getFavoriteCourses()
+                        if favoriteCourses.isEmpty {
+                            // Empty state
+                            VStack(spacing: 16) {
+                                Image(systemName: "heart")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(themeManager.colors.textLight)
+                                
+                                Text("No favorite courses yet")
+                                    .font(.system(size: 18, weight: .medium, design: .default))
+                                    .foregroundColor(themeManager.colors.text)
+                                
+                                Text("Complete courses and tap the heart to add them to your favorites")
+                                    .font(.system(size: 14, weight: .regular, design: .default))
+                                    .foregroundColor(themeManager.colors.textLight)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 40)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 40)
+                            .background(themeManager.colors.surface)
+                            .cornerRadius(16)
+                            .padding(.horizontal)
+                        } else {
+                            // Favorites list
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 16) {
+                                    ForEach(favoriteCourses) { courseContent in
+                                        let course = Course(
+                                            id: courseContent.courseId,
+                                            title: courseContent.title,
+                                            duration: courseContent.duration,
+                                            icon: courseContent.icon
+                                        )
+                                        
+                                        CourseCard(
+                                            course: course,
+                                            categoryColor: .orange, // Default color for favorites
+                                            isPremium: courseContent.isPremium
+                                        ) {
+                                            selectedCourse = course
+                                            showCourseViewer = true
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
+                        }
+                    }
                 }
                 .padding(.vertical, 24)
             }
@@ -120,6 +180,11 @@ struct DiscoverScreen: View {
         }
         .sheet(isPresented: $showCourses) {
             CoursesScreen()
+        }
+        .sheet(isPresented: $showCourseViewer) {
+            if let course = selectedCourse {
+                CourseViewerScreen(course: course)
+            }
         }
         .fullScreenCover(isPresented: $showDailyBoost) {
             // Deterministic shuffle based on month/year, then pick for the day

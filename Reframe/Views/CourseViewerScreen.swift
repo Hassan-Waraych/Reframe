@@ -6,7 +6,7 @@ struct CourseViewerScreen: View {
     @EnvironmentObject var themeManager: ThemeManager
     @State private var currentPageIndex = 0
     @State private var showPaywall = false
-    @State private var isFavorite = false
+    @StateObject private var favoritesService = CourseFavoritesService.shared
     
     private var courseContent: CourseContent? {
         getCourseContent(for: course.id)
@@ -34,6 +34,7 @@ struct CourseViewerScreen: View {
             }
             .navigationTitle(courseContent?.title ?? "Course")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(themeManager.selectedTheme == .dark || themeManager.selectedTheme == .midnightGold ? .dark : .light, for: .navigationBar)
             .toolbarBackground(themeManager.colors.surface, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
@@ -49,6 +50,11 @@ struct CourseViewerScreen: View {
         .fullScreenCover(isPresented: $showPaywall) {
             PremiumModalScreen()
         }
+        .onAppear {
+            // Reset to first page when course changes
+            currentPageIndex = 0
+        }
+        .id(course.id) // Force view recreation when course changes
     }
     
     @ViewBuilder
@@ -210,15 +216,14 @@ struct CourseViewerScreen: View {
                                         
                                         // Favorite button
                                         Button(action: {
-                                            isFavorite.toggle()
-                                            // TODO: Save to user preferences
+                                            favoritesService.toggleFavorite(courseId: course.id)
                                         }) {
                                             HStack(spacing: 8) {
-                                                Image(systemName: isFavorite ? "heart.fill" : "heart")
-                                                    .foregroundColor(isFavorite ? .red : themeManager.colors.textLight)
+                                                Image(systemName: favoritesService.isFavorite(courseId: course.id) ? "heart.fill" : "heart")
+                                                    .foregroundColor(favoritesService.isFavorite(courseId: course.id) ? .red : themeManager.colors.textLight)
                                                     .font(.system(size: 18))
                                                 
-                                                Text(isFavorite ? "Favorited" : "Add to Favorites")
+                                                Text(favoritesService.isFavorite(courseId: course.id) ? "Favorited" : "Add to Favorites")
                                                     .font(.system(size: 16, weight: .medium, design: .default))
                                                     .foregroundColor(themeManager.colors.text)
                                             }

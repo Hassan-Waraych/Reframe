@@ -75,21 +75,16 @@ struct CoursesScreen: View {
             .background(themeManager.colors.background)
             .navigationTitle("Courses")
             .navigationBarTitleDisplayMode(.large)
-                               .toolbar {
-                                               ToolbarItem(placement: .navigationBarLeading) {
-                            Button("Test") {
-                                selectedCourse = Course(id: "understanding_stress", title: "Understanding Stress", duration: "3 min", icon: "brain.head.profile")
-                                showCourseViewer = true
-                            }
-                        }
-                       ToolbarItem(placement: .navigationBarTrailing) {
-                           Button(action: { dismiss() }) {
-                               Image(systemName: "xmark.circle.fill")
-                                   .foregroundColor(themeManager.colors.text.opacity(0.7))
-                                   .font(.system(size: 24))
-                           }
-                       }
-                   }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(themeManager.colors.text.opacity(0.7))
+                            .font(.system(size: 24))
+                    }
+                }
+            }
+            .preferredColorScheme(themeManager.selectedTheme == .dark || themeManager.selectedTheme == .midnightGold ? .dark : .light)
         }
         .fullScreenCover(isPresented: $showPaywall) {
             PremiumModalScreen()
