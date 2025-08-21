@@ -14,6 +14,7 @@ struct HomeScreen: View {
     @State private var showQuote = false
     @State private var showReframeResult = false
     @State private var showPremiumModal = false
+    @StateObject private var moodCheckInCoordinator = MoodCheckInCoordinator()
     
     var body: some View {
         ZStack {
@@ -40,7 +41,9 @@ struct HomeScreen: View {
                     }
 
                     // Weekly Mood View
-                    WeeklyMoodView()
+                    WeeklyMoodView(onTodayTapped: {
+                        moodCheckInCoordinator.startCheckIn()
+                    })
                         .padding(.horizontal)
 
                     // Option Buttons
@@ -121,7 +124,9 @@ struct HomeScreen: View {
                     }
 
                     // Today's Plan Section
-                    TodaysPlanView()
+                    TodaysPlanView(onMoodCheckInTapped: {
+                        moodCheckInCoordinator.startCheckIn()
+                    })
                         .padding(.horizontal)
 
                     // Latest Reframe
@@ -189,6 +194,9 @@ struct HomeScreen: View {
         }
         .fullScreenCover(isPresented: $showPremiumModal) {
             PremiumModalScreen()
+        }
+        .fullScreenCover(isPresented: $moodCheckInCoordinator.isActive) {
+            MoodCheckInView(coordinator: moodCheckInCoordinator)
         }
     }
     

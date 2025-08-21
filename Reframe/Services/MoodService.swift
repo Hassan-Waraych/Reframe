@@ -22,6 +22,14 @@ class MoodService: ObservableObject {
         }
     }
     
+    func saveMoodEntry(_ moodEntry: MoodEntry) async {
+        // Placeholder - will be implemented with actual Firestore functionality
+        DispatchQueue.main.async {
+            self.currentMood = moodEntry.mood
+            self.weeklyMoods[moodEntry.date] = moodEntry.mood
+        }
+    }
+    
     func getMood(for date: Date) -> MoodType {
         return weeklyMoods[date] ?? .none
     }

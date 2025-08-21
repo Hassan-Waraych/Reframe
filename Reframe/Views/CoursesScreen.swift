@@ -221,11 +221,19 @@ struct CourseCard: View {
 
 // MARK: - Data Models
 
-struct Course: Identifiable {
+struct Course: Identifiable, Hashable {
     let id: String
     let title: String
     let duration: String
     let icon: String
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    static func == (lhs: Course, rhs: Course) -> Bool {
+        return lhs.id == rhs.id
+    }
 }
 
 struct CourseCategory {
@@ -316,6 +324,14 @@ let habitCourses: [Course] = [
     Course(id: "habit_tracking", title: "Habit Tracking", duration: "2 min", icon: "chart.bar.fill"),
     Course(id: "morning_routines", title: "Morning Routines", duration: "3 min", icon: "sunrise.fill"),
     Course(id: "consistency", title: "Consistency", duration: "4 min", icon: "repeat.circle.fill")
+]
+
+let wellnessCourses: [Course] = [
+    Course(id: "daily_wellness", title: "Daily Wellness", duration: "3 min", icon: "heart.fill"),
+    Course(id: "mindful_living", title: "Mindful Living", duration: "4 min", icon: "leaf.fill"),
+    Course(id: "self_care_basics", title: "Self-Care Basics", duration: "3 min", icon: "sparkles"),
+    Course(id: "positive_mindset", title: "Positive Mindset", duration: "2 min", icon: "sun.max.fill"),
+    Course(id: "gratitude_practice", title: "Gratitude Practice", duration: "3 min", icon: "hand.raised.fill")
 ]
 
 let selfCareCourses: [Course] = [

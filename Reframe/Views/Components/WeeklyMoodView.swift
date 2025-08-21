@@ -4,6 +4,7 @@ struct WeeklyMoodView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @State private var selectedDay: Date?
     @State private var showMoodPicker = false
+    let onTodayTapped: (() -> Void)?
     
     private let weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
     
@@ -31,8 +32,7 @@ struct WeeklyMoodView: View {
                         Button(action: {
                             // Only allow selection for today
                             if isToday {
-                                selectedDay = dayDate
-                                showMoodPicker = true
+                                onTodayTapped?()
                             }
                         }) {
                             ZStack {
@@ -152,9 +152,7 @@ struct WeeklyMoodView: View {
         )
         .cornerRadius(20)
         .shadow(color: themeManager.selectedTheme == .sunsetSerenity ? Color(hex: "FF6B35").opacity(0.15) : Color.black.opacity(0.08), radius: 15, x: 0, y: 8)
-        .sheet(isPresented: $showMoodPicker) {
-            MoodPickerView(selectedMood: .constant(.none)) // Placeholder - will be connected to service later
-        }
+        // New mood check-in flow will be triggered here
     }
     
     private func getDateForWeekDay(_ weekDayIndex: Int) -> Date {
@@ -244,6 +242,6 @@ struct MoodPickerView: View {
 }
 
 #Preview {
-    WeeklyMoodView()
+    WeeklyMoodView(onTodayTapped: nil)
         .environmentObject(ThemeManager())
 }
